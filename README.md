@@ -292,14 +292,38 @@
                         <label class="form-label">AKOMODASI HOTEL</label>
                         <select id="hotelSelect" class="form-select" onchange="hitung()">
                                     <option value="0|0">-- Tanpa Hotel / Pilih Nanti --</option>
-                <optgroup label="BANDUNG">
-                    <option value="450000|650000">Ibis Trans Studio (B3)</option>
-                    <option value="600000|900000">Sensa Hotel (B4)</option>
+
+                <optgroup label="BANTEN">
+                    <option value="200000|300000">THE WEST COVE HOTEL (B3)</option>
+                    <option value="200000|300000">PATRA ANYER HOTEL(B3)</option>
+                    <option value="300000|400000">MARBELLA PLACE ANYER (B4) </option>
+                    <option value="300000|400000">LE DIAN HOTEL(B4) </option>
+                </optgroup>
+
+                <optgroup label="BANDUNG - BINTANG 3">
+                    <option value="450000|650000">Ibis Trans Studio</option>
+                    <option value="200000|300000">V HOTEL & RESIDENT</option>
+                    <option value="200000|300000">GRAND SOVIA HOTEL</option>
+                    <option value="200000|300000">GRAND PASIFIC HOTEL</option>
+                    <option value="200000|300000">FAVEHOTEL BRAGA</option>
                     <option value="150000|150000">Villa</option>
                     <option value="200000|200000">Cottage</option>
                     <option value="200000|200000">Glamping</option>
                     <option value="150000|150000">Camp</option>
                 </optgroup>
+
+                <optgroup label="BANDUNG - BINTANG 4">
+                    <option value="350000|450000">EL HOTEL</option>
+                    <option value="600000|900000">Sensa Hotel</option>
+                </optgroup>
+
+                <optgroup label="KUNINGAN - JAWA BARAT">
+                    <option value="200000|300000">GRAND CORDELA AS PUTRA </option>
+                    <option value="200000|300000">DE JEHAN'S HOTEL</option>
+                    <option value="300000|400000">THE ICON HOTEL KUNINGAN (B4) </option>
+                    <option value="300000|400000">HOTEL SANTIKA PREMIERE LINGGARJATI (B4) </option>
+                </optgroup>
+
 
                 <optgroup label="YOGYAKARTA - BINTANG 3">
                     <option value="170000|225900">Front One</option>
@@ -312,6 +336,7 @@
                     <option value="170000|225900">Whiz Malioboro</option>
                 </optgroup>
 
+
                 <optgroup label="YOGYAKARTA - BINTANG 4">
                     <option value="300000|375000">Merapi Merbabu</option>
                     <option value="300000|375000">SM Tower</option>
@@ -322,7 +347,44 @@
                     <option value="300000|375000">Royal Malioboro</option>
                     <option value="300000|375000">Grand Zuri</option>
                     <option value="300000|375000">éL Hotel Yogyakarta</option>
+                    <option value="300000|375000">CAVINTON HOTEL</option>
+                    <option value="300000|375000">GALLERY PRAWIROTAMAN</option>
+                    <option value="300000|375000">THE VICTORIA</option>
                 </optgroup>
+
+                <optgroup label="DIENG, JAWA TENGAH">
+                    <option value="150000|200000">BOSCO DIENG VILLA</option>
+                    <option value="150000|200000">QUEEN VILLA SIKUNIR</option>
+                    <option value="150000|200000">TANI HOUSE CABIN</option>
+                    <option value="150000|200000">HOMESTAY ARJUNA DIENG</option>
+                </optgroup>
+
+                <optgroup label="MALANG, JAWA TIMUR - BINTANG 3">
+                    <option value="200000|300000">HOTEL CRYSTAL INN</option>
+                    <option value="200000|300000">LAVA VIEW LODGE HOTEL</option>
+                    <option value="200000|300000">TRIPLETREE CIPTANINGATI CULTURE </option>
+                </optgroup>
+
+                <optgroup label="MALANG, JAWA TIMUR - BINTANG 4">
+                    <option value="200000|300000">KUSUMA AGROWISATA RESORT & CONVENTION</option>
+                    <option value="200000|300000">THE BATU HOTEL</option>
+                    <option value="200000|300000">THE KALLEA VILLA</option>
+                </optgroup>
+
+                <optgroup label="BALI - BINTANG 3">
+                    <option value="200000|300000">PRIMEBIZ HOTEL KUTA</option>
+                    <option value="200000|300000">MAXONE HOTEL BUKIT JIMBARAN</option>
+                    <option value="200000|300000">PURI PADMA HOTEL</option>
+                    <option value="200000|300000">SERELA LEGIAN HOTEL</option>
+                </optgroup>
+
+                <optgroup label="BALI - BINTANG 4">
+                    <option value="300000|400000">ASTON CANGGU BEACH RESORT</option>
+                    <option value="300000|400000">HOTEL SANTIKA SILIGITA NUSA DUA JIMBARAN</option>
+                    <option value="300000|400000">GRAND ISTANA RAMA HOTEL</option>
+                    <option value="300000|400000">PADMASARI RESORT HOTEL</option>
+                </optgroup>
+
             </select>
                     </div>
                 </div>
@@ -592,12 +654,25 @@ function hitung() {
     const isWeekend = tgl && (new Date(tgl).getDay() === 0 || new Date(tgl).getDay() === 6);
     const hotelRate = isWeekend ? parseFloat(hotelData[1]) : parseFloat(hotelData[0]);
 
-    // LOGIKA PERHITUNGAN (Sama dengan kode asli)
-    const costTransport = transportRate * (malam + 1);
+    // === HITUNG JUMLAH BUS ===
+    let kapasitasBus = 45;
+    const transportText = document.getElementById('transportSelect').selectedOptions[0].text;
+
+    if (transportText.includes("ELF")) kapasitasBus = 15;
+    else if (transportText.includes("HIACE")) kapasitasBus = 14;
+    else if (transportText.includes("MEDIUM")) kapasitasBus = 33;
+    else if (transportText.includes("BIG BUS")) kapasitasBus = 45;
+
+    const jumlahBus = Math.ceil(p / kapasitasBus);
+    const totalHari = malam + 1;
+
+    const costTransport = transportRate * jumlahBus * totalHari;
+
+    // === BIAYA LAIN ===
     const costMakan = (mFreq * mPrice) * p;
-    const costHotel = (malam > 0) ? (hotelRate * malam * Math.ceil(p/share)) : 0;
+    const costHotel = (malam > 0) ? (hotelRate * malam * Math.ceil(p / share)) : 0;
     const costKaos = kaosRate * p;
-    
+
     let costWisata = 0;
     document.querySelectorAll('.dest:checked').forEach(d => {
         costWisata += (parseFloat(d.getAttribute('data-price')) * p);
@@ -605,36 +680,36 @@ function hitung() {
     });
 
     document.querySelectorAll('.city-box').forEach(box => {
-        if (box.querySelectorAll('.dest:checked').length === 0) box.classList.remove('has-checked');
+        if (box.querySelectorAll('.dest:checked').length === 0) {
+            box.classList.remove('has-checked');
+        }
     });
 
     const totalModal = costTransport + costMakan + costHotel + costWisata + costKaos;
-    const totalMarkup = totalModal * 1.20; // Markup 20%
+    const totalMarkup = totalModal * 1.20; // markup 20%
 
     const jmlFreePax = Math.floor(p / 10); // FOC 1:10
     const focPilihan = Math.min(jmlFreePax, 25);
-    const subsidiFOC = focPilihan * (p > 0 ? totalMarkup/p : 0);
+    const subsidiFOC = focPilihan * (p > 0 ? totalMarkup / p : 0);
 
     const totalJualGrup = totalMarkup - subsidiFOC;
     const hargaPerPax = p > 0 ? Math.ceil((totalJualGrup / p) / 1000) * 1000 : 0;
-    const komisiSales = totalJualGrup * 0.05; // Sales 5%
+    const komisiSales = totalJualGrup * 0.05;
 
-    // Update UI
+    // === UPDATE UI ===
     document.getElementById('perOrang').innerText = "Rp " + hargaPerPax.toLocaleString('id-ID');
     document.getElementById('focInfo').innerText = focPilihan + " Pax";
     document.getElementById('salesInfo').innerText = "Rp " + Math.round(komisiSales).toLocaleString('id-ID');
-    document.getElementById('durasiInfo').innerText = (malam + 1) + " Hari " + malam + " Malam";
-    
+    document.getElementById('durasiInfo').innerText = totalHari + " Hari " + malam + " Malam";
+
     const kaosStatus = kaosRate > 0 ? "Include Merchandise" : "No Merchandise";
     document.getElementById('summaryText').innerHTML = `
         <strong>Group Size:</strong> ${p} Pax<br>
+        <strong>Transport:</strong> ${jumlahBus} Unit (${transportText})<br>
         <strong>Catering:</strong> ${mFreq}x Meal Service<br>
-        <strong>Add-ons:</strong> ${kaosStatus}<br>
-        <strong>Fleet:</strong> ${document.getElementById('transportSelect').selectedOptions[0].text}
+        <strong>Add-ons:</strong> ${kaosStatus}
     `;
 }
 
 window.onload = hitung;
 </script>
-</body>
-</html>
