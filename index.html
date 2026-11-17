@@ -3378,6 +3378,12 @@ function uploadUmumFile(input,target,name){
   };
   r.readAsDataURL(f);
 }
+function uploadUmumTestiFoto(input){
+  const f=input.files&&input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{const el=document.getElementById('ut_foto');if(el)el.value=r.result;toast('Foto testimoni siap, klik + Tambah');};
+  r.readAsDataURL(f);
+}
 function addUmumTesti(){
   const name=(document.getElementById('ut_name').value||'').trim();
   const sumber=(document.getElementById('ut_src').value||'').trim()||'WhatsApp';
@@ -3516,23 +3522,24 @@ function vSetting(){
       </div></div>
     </div>
   </div>
-  <div class="panel fade" style="margin-top:22px"><div class="panel-h"><h3>Foto Landing Page, Thumbnail &amp; Testimoni</h3><span style="font-size:12px;color:var(--muted)">Bisa isi path GitHub (mis. assets/foto/ciletuh.jpg), URL, atau upload langsung</span></div>
+  <div class="panel fade" style="margin-top:22px"><div class="panel-h"><h3>Foto Landing Page, Thumbnail &amp; Testimoni</h3><span style="font-size:12px;color:var(--muted)">⚠ Pakai tombol <b>Upload Foto</b> — foto dari alamat/URL luar (https://...) tidak akan tampil di halaman ini karena kebijakan keamanan Claude</span></div>
     <div style="padding:16px 19px">
       <label class="flbl">Foto Banner Hero Utama</label>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
-        <input id="up_hero" class="finput" style="margin:0;flex:1" value="${esc(umumPhotos().hero||'')}" placeholder="assets/hero.jpg atau https://..." onchange="saveUmumHero(this.value)">
+        <input id="up_hero" class="finput" style="margin:0;flex:1" value="${esc(umumPhotos().hero||'')}" placeholder="Klik Upload Foto di samping →" onchange="saveUmumHero(this.value)">
         <label class="btn-acc ok" style="cursor:pointer;white-space:nowrap">Upload Foto<input type="file" accept="image/*" style="display:none" onchange="uploadUmumFile(this,'hero')"></label>
       </div>
       <label class="flbl">Thumbnail Destinasi Populer</label>
-      <table style="margin-bottom:14px"><thead><tr><th>Destinasi</th><th>URL / Path GitHub / Upload</th></tr></thead><tbody>
-        ${umumFeatured().map(d=>{const val=(umumPhotos().dest||{})[d.name]||'';return `<tr><td style="font-weight:600">${esc(d.name)} <span style="font-size:11px;color:var(--muted)">(${esc(d.city)})</span></td><td><div style="display:flex;gap:6px;align-items:center"><input class="finput" style="margin:0;padding:6px 9px;font-size:12px;flex:1" value="${esc(val)}" placeholder="assets/${esc(d.name.toLowerCase().replace(/[^a-z0-9]+/g,'-'))}.jpg" onchange="saveUmumDestPhoto('${esc(d.name)}',this.value)"><label class="btn-acc no" style="cursor:pointer;font-size:11px;padding:5px 9px;white-space:nowrap">Upload<input type="file" accept="image/*" style="display:none" onchange="uploadUmumFile(this,'dest','${esc(d.name)}')"></label></div></td></tr>`;}).join('')}
+      <table style="margin-bottom:14px"><thead><tr><th>Destinasi</th><th>Upload</th></tr></thead><tbody>
+        ${umumFeatured().map(d=>{const val=(umumPhotos().dest||{})[d.name]||'';return `<tr><td style="font-weight:600">${esc(d.name)} <span style="font-size:11px;color:var(--muted)">(${esc(d.city)})</span></td><td><div style="display:flex;gap:6px;align-items:center"><input class="finput" style="margin:0;padding:6px 9px;font-size:12px;flex:1" value="${esc(val)}" placeholder="Klik Upload →" onchange="saveUmumDestPhoto('${esc(d.name)}',this.value)"><label class="btn-acc no" style="cursor:pointer;font-size:11px;padding:5px 9px;white-space:nowrap">Upload<input type="file" accept="image/*" style="display:none" onchange="uploadUmumFile(this,'dest','${esc(d.name)}')"></label></div></td></tr>`;}).join('')}
       </tbody></table>
       <label class="flbl">Tambah Testimoni Asli (Instagram / WhatsApp / Sekolah)</label>
-      <div class="frow" style="grid-template-columns:1fr 1fr 1.6fr 1fr auto;gap:8px;align-items:end">
+      <div class="frow" style="grid-template-columns:1fr 1fr 1.6fr 1fr auto auto;gap:8px;align-items:end">
         <div><input id="ut_name" class="finput" style="margin:0" placeholder="Nama / Instansi"></div>
         <div><input id="ut_src" class="finput" style="margin:0" placeholder="Sumber (IG/WA)"></div>
         <div><input id="ut_quote" class="finput" style="margin:0" placeholder="Isi testimoni..."></div>
-        <div><input id="ut_foto" class="finput" style="margin:0" placeholder="URL foto (opsional)"></div>
+        <div><input id="ut_foto" class="finput" style="margin:0" placeholder="(opsional) klik Upload →" readonly></div>
+        <label class="btn-acc no" style="cursor:pointer;white-space:nowrap;margin:0">Upload<input type="file" accept="image/*" style="display:none" onchange="uploadUmumTestiFoto(this)"></label>
         <button class="btn-save" style="margin:0;white-space:nowrap" onclick="addUmumTesti()">+ Tambah</button>
       </div>
       ${(umumPhotos().testi||[]).length?`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${(umumPhotos().testi||[]).map((t,i)=>`<span class="pill lunas" style="gap:6px">${esc(t.name)}: “${esc(t.quote.slice(0,28))}…” <button class="pay-del" onclick="delUmumTesti(${i})">✕</button></span>`).join('')}</div>`:''}
