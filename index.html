@@ -3401,9 +3401,7 @@ function exportAllJSON(){
   const txt=buildJsonDump();
   try{
     const blob=new Blob([txt],{type:'application/json'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download='havist-traveller-backup-'+new Date().toISOString().slice(0,10)+'.json';
-    document.body.appendChild(a);a.click();a.remove();
+    saveFileToViewer('havist-traveller-backup-'+new Date().toISOString().slice(0,10)+'.json',blob);
   }catch(e){}
   const old=document.getElementById('jsonOv');if(old)old.remove();
   const ov=document.createElement('div');ov.className='pv-overlay';ov.id='jsonOv';

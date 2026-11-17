@@ -25,7 +25,7 @@ setTimeout(()=>{
   w.eval(`addClientPayment('${pid}','DP 1',10000000,'2026-11-16')`);
   ok(w.eval(`clientPaid(allPiutang().find(p=>p.id==='${pid}'))`)===10000000,'payment recorded');
   const tl=w.eval('crewList().find(c=>c.peran==="Tour Leader").id');w.assignCrew(pid,'tl',tl);
-  ok(w.eval(`(assignMap()['${pid}']||{}).tl==='${tl}'`),'crew assigned to new trip');
+  ok(w.eval(`(assignMap()['${pid}']||{tls:[]}).tls.some(x=>x.id==='${tl}')`),'crew assigned to new trip');
   console.log('  -- window errors:',(w.__errs&&w.__errs.length)?w.__errs.join(' | '):'none');
   console.log(fail?('\n'+fail+' FAILURES'):'\n✓ FULL REGRESSION CLEAN');
 },400);

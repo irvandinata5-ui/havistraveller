@@ -34,26 +34,24 @@ ok('tripRange menghasilkan rentang',E(`!!tripRange(allTrips().find(x=>x.id===${J
 ok('overlap: rentang sama = bentrok',E(`overlap([new Date('2026-12-01'),new Date('2026-12-03')],[new Date('2026-12-02'),new Date('2026-12-05')])`)===true);
 ok('overlap: rentang terpisah = aman',E(`overlap([new Date('2026-12-01'),new Date('2026-12-03')],[new Date('2026-12-10'),new Date('2026-12-12')])`)===false);
 
-// --- assign pertama: tidak ada bentrok, tidak ada konfirmasi ---
-confirmMsg='';confirmAns=true;
+// --- assign pertama: tidak ada bentrok, tidak ada peringatan ---
+// (API multi-crew: assignMap()[tripId] = {tls:[{id,tarif}],medias:[{id,tarif}]})
+d.getElementById('toast').textContent='';
 E(`assignCrew(${J(t1.id)},'tl',${J(tl)})`);
-ok('assign pertama tanpa peringatan',confirmMsg==='',confirmMsg.slice(0,60));
-ok('crew tertugaskan',E(`(assignMap()[${J(t1.id)}]||{}).tl`)===tl);
+ok('assign pertama tanpa peringatan',!d.getElementById('toast').textContent.includes('bentrok'),d.getElementById('toast').textContent.slice(0,60));
+ok('crew tertugaskan',E(`(assignMap()[${J(t1.id)}]||{tls:[]}).tls.some(x=>x.id===${J(tl)})`)===true);
 ok('crewTrips mencatat 1 trip',E(`crewTrips(${J(tl)}).length`)===1);
 
-// --- assign ke trip bentrok: harus minta konfirmasi ---
+// --- assign ke trip bentrok: tetap ditugaskan, tapi muncul peringatan toast ---
 if(t2){
   console.log('  trip bentrok:',t2.brk,'vs',t1.brk);
   ok('crewSibuk mendeteksi bentrok',E(`crewSibuk(${J(tl)},${J(t2.id)})`)===true);
-  confirmMsg='';confirmAns=false;
+  d.getElementById('toast').textContent='';
   E(`assignCrew(${J(t2.id)},'tl',${J(tl)})`);
-  ok('muncul konfirmasi bentrok',confirmMsg.includes('sudah bertugas'),confirmMsg.slice(0,70));
-  ok('konfirmasi sebut nama crew',confirmMsg.includes(tlName));
-  ok('konfirmasi sebut trip bentrok',confirmMsg.includes(t1.inst));
-  ok('tolak konfirmasi = tidak jadi ditugaskan',E(`(assignMap()[${J(t2.id)}]||{}).tl`)===undefined,E(`JSON.stringify(assignMap()[${J(t2.id)}])`));
-  confirmAns=true;
-  E(`assignCrew(${J(t2.id)},'tl',${J(tl)})`);
-  ok('terima konfirmasi = tetap ditugaskan',E(`(assignMap()[${J(t2.id)}]||{}).tl`)===tl);
+  const msg=d.getElementById('toast').textContent;
+  ok('muncul peringatan bentrok',msg.includes('bentrok'),msg.slice(0,70));
+  ok('peringatan sebut nama crew',msg.includes(tlName));
+  ok('tetap ditugaskan walau bentrok',E(`(assignMap()[${J(t2.id)}]||{tls:[]}).tls.some(x=>x.id===${J(tl)})`)===true);
   // bersihkan supaya tes berikutnya bersih
   E(`const s=assignMap();delete s[${J(t2.id)}];save('assign',s)`);
 }else{console.log('  (tidak ada trip bentrok di data, lewati)');}
@@ -113,7 +111,7 @@ if(t2){
 
 // --- lepas penugasan ---
 E(`assignCrew(${J(t1.id)},'tl','')`);
-ok('lepas penugasan berhasil',E(`(assignMap()[${J(t1.id)}]||{}).tl`)===undefined);
+ok('lepas penugasan berhasil',E(`(assignMap()[${J(t1.id)}]||{tls:[]}).tls.some(x=>x.id===${J(tl)})`)===false);
 
 console.log('\nwindow errors:',(w.__errs||[]).length?w.__errs.join(' | '):'none');
 console.log(`\n${fail===0?'✓ CREW TESTS CLEAN':'✗ '+fail+' GAGAL'} — ${pass} pass, ${fail} fail`);

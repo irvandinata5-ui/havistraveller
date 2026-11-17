@@ -3,7 +3,11 @@ const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{runScripts:'dangerousl
   beforeParse(w){const s={};w.localStorage={getItem:k=>k in s?s[k]:null,setItem:(k,v)=>s[k]=''+v,removeItem:k=>delete s[k]};w.scrollTo=()=>{};w.history.replaceState=()=>{};w.onerror=m=>console.log('ERR',m);}});
 const w=dom.window,d=w.document;const bugs=[];
 // reference formula from original quotation system
-function kap(name){name=name.toUpperCase();if(name.includes('ELF'))return 15;if(name.includes('HIACE'))return 14;if(name.includes('MEDIUM'))return 33;if(name.includes('LEGRES'))return 32;return 45;}
+function kap(name){
+  const m=String(name||'').match(/(\d+)(?:\s*[–-]\s*(\d+))?\s*SEAT/i);
+  if(m)return +(m[2]||m[1]);
+  const u=String(name||'').toUpperCase();if(u.includes('ELF'))return 15;if(u.includes('HIACE'))return 14;if(u.includes('MEDIUM'))return 33;if(u.includes('LEGRES'))return 32;return 45;
+}
 function ref({pax,malam,armRate,armName,share,mFreq,mPrice,kaosRate,hWd,hWe,isWknd,markupPct,dests}){
   const cap=kap(armName);const hotelRate=isWknd?hWe:hWd;const bus=Math.ceil(pax/cap)||0;const hari=malam+1;
   const cT=armRate*bus*hari, cM=mFreq*mPrice*pax, cH=malam>0?hotelRate*malam*Math.ceil(pax/share):0, cK=kaosRate*pax;

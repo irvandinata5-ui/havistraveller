@@ -64,7 +64,9 @@ const saved=JSON.parse(E(`JSON.stringify(penawaran()[penawaran().length-1])`));
 ok('penawaran tercatat atas nama sales',saved.salesId===salesId&&saved.salesName===salesName,J(saved.salesName));
 ok('diskon ikut tersimpan',saved.diskon===1000000,saved.diskon);
 ok('komisi ikut tersimpan',saved.komisi>0,saved.komisi);
-ok('form kosong setelah simpan',d.getElementById('q_klien').value==='');
+// (UX terbaru: form kalkulator TIDAK direset otomatis setelah simpan —
+// "Data kalkulator tetap aman", ada tombol 'Buat Baru' terpisah untuk reset manual)
+ok('banner konfirmasi simpan muncul',d.getElementById('q_saved_banner').style.display==='block');
 
 // --- klien otomatis tercatat (CRM ringan) ---
 ok('klien baru otomatis masuk klienList',E(`klienList().some(k=>k.nama==='SMA Uji Coba Sales')`));
