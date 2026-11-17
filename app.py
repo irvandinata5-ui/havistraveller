@@ -1,0 +1,2511 @@
+import json
+logo = open('logo_b64.txt').read().strip()
+data = open('data.json').read()
+catalog = open('catalog.json').read()
+
+html = r'''<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Havist Traveller — Dashboard Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--blue:#275BB5;--blue-700:#1E4E9C;--navy:#0E244A;--navy-2:#163A6B;--gold:#F8C000;--gold-ink:#7A5E00;
+--bg:#EEF1F6;--card:#FFF;--line:#E4E8EF;--ink:#141B2D;--muted:#6B7685;--muted-2:#9AA3B2;
+--red:#E0564B;--red-bg:#FDECEA;--green:#2B9D6E;--green-bg:#E7F5EF;--teal:#1AA6B7;--purple:#8E63D6;--orange:#E08A1E;--radius:18px;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:256px 1fr;min-height:100vh}
+/* sidebar */
+.sidebar{background:linear-gradient(185deg,var(--navy),var(--navy-2));color:#fff;padding:26px 18px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{padding:4px 8px 22px}.brand img{width:100%;max-width:168px;display:block}
+.nav{display:flex;flex-direction:column;gap:3px;flex:1;overflow-y:auto}
+.nav-label{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.4);padding:14px 12px 7px;font-weight:600}
+.nav a{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:12px;color:rgba(255,255,255,.72);text-decoration:none;font-size:14px;font-weight:500;cursor:pointer;transition:.15s}
+.nav a svg{width:19px;height:19px;flex-shrink:0;stroke-width:1.9}
+.nav a:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav a.active{background:var(--gold);color:var(--navy);font-weight:700;box-shadow:0 6px 16px rgba(248,192,0,.28)}
+.side-foot{margin-top:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:11px}
+.side-foot .ava{width:38px;height:38px;border-radius:10px;background:var(--gold);color:var(--navy);display:grid;place-items:center;font-weight:800}
+.side-foot .nm{font-size:13px;font-weight:700;line-height:1.2}.side-foot .rl{font-size:11px;color:rgba(255,255,255,.55)}
+/* main */
+.main{padding:22px 28px 40px;min-width:0}
+.topbar{display:flex;align-items:center;gap:18px;margin-bottom:22px}
+.search{flex:1;max-width:460px;position:relative}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted-2)}
+.search input{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 14px 11px 42px;font-size:14px;font-family:inherit;color:var(--ink)}
+.top-actions{display:flex;align-items:center;gap:12px;margin-left:auto}
+.icon-btn{width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;position:relative;color:var(--ink)}
+.icon-btn .dot{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid #fff}
+.me{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:5px 14px 5px 6px;cursor:pointer}
+.me .ava{width:34px;height:34px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800}
+.me .nm{font-size:13px;font-weight:700;line-height:1.15}.me .rl{font-size:11px;color:var(--muted)}
+.hello{margin-bottom:20px}.hello h1{font-size:23px;font-weight:800;letter-spacing:-.01em}.hello p{color:var(--muted);font-size:14px;margin-top:3px}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.scard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 17px}
+.scard .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:13px}.scard .ic svg{width:20px;height:20px}
+.scard .lbl{font-size:12.5px;color:var(--muted);font-weight:600}.scard .val{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:3px}
+.scard .sub{font-size:11.5px;margin-top:6px;font-weight:600}
+.ic.b{background:rgba(39,91,181,.1);color:var(--blue)}.ic.g{background:rgba(248,192,0,.16);color:var(--gold-ink)}
+.ic.r{background:var(--red-bg);color:var(--red)}.ic.gr{background:var(--green-bg);color:var(--green)}
+.up{color:var(--green)}.down{color:var(--red)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:22px}
+.panel-h{display:flex;align-items:center;justify-content:space-between;padding:17px 19px 0}
+.panel-h h3{font-size:15.5px;font-weight:800}.panel-h a,.panel-h .lnk{font-size:12.5px;color:var(--blue);text-decoration:none;font-weight:700;cursor:pointer;background:none;border:none;font-family:inherit}
+.tabs{display:flex;gap:4px;padding:14px 19px 0;flex-wrap:wrap}
+.tab{padding:7px 15px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:inherit}
+.tab.active{background:var(--blue);color:#fff}
+.chartwrap{padding:16px 19px 20px}
+.chart{display:flex;align-items:flex-end;gap:14px;height:150px;padding-top:10px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;cursor:pointer}
+.bar .col{width:70%;max-width:34px;border-radius:7px 7px 3px 3px;background:linear-gradient(var(--blue),#4C83D8);transition:.2s;position:relative}
+.bar.hl .col{background:linear-gradient(var(--gold),#FFD63D)}
+.bar:hover .col{filter:brightness(1.08)}.bar span{font-size:11px;color:var(--muted);font-weight:600}
+.bar .tip{position:absolute;bottom:105%;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s}
+.bar:hover .tip{opacity:1}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted-2);font-weight:700;padding:11px 19px;border-bottom:1px solid var(--line)}
+tbody td{padding:13px 19px;font-size:13.5px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}tbody tr.clk{cursor:pointer}tbody tr.clk:hover{background:#F7F9FC}
+.trip{display:flex;align-items:center;gap:11px}
+.trip .th{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.trip .nm{font-weight:700;font-size:13.5px}.trip .loc{font-size:11.5px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:20px}
+.pill.lunas{background:var(--green-bg);color:var(--green)}.pill.dp{background:rgba(248,192,0,.18);color:var(--gold-ink)}.pill.piutang{background:var(--red-bg);color:var(--red)}.pill.jadwal{background:rgba(39,91,181,.1);color:var(--blue)}
+.price{font-weight:800;font-size:13.5px}
+.btn-acc{font-size:12px;font-weight:700;padding:6px 13px;border-radius:9px;border:none;cursor:pointer;font-family:inherit}
+.btn-acc.ok{background:var(--blue);color:#fff}.btn-acc.no{background:#fff;border:1px solid var(--line);color:var(--muted);margin-left:6px}
+.btn-acc:active{transform:scale(.96)}
+.side-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:22px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.cal-h .mo{font-size:14px;font-weight:800}
+.cal-nav{display:flex;gap:6px}.cal-nav button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--muted)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.cal .dow{font-size:10.5px;color:var(--muted-2);font-weight:700;padding:5px 0}
+.cal .d{font-size:12.5px;padding:7px 0;border-radius:9px;font-weight:600;color:var(--ink);cursor:default}
+.cal .d.mut{color:transparent}.cal .d.go{background:var(--gold);color:var(--navy);font-weight:800;cursor:pointer}
+.cal .d.today{background:var(--blue);color:#fff}.cal .d.go:hover{filter:brightness(1.05)}
+.legend{display:flex;gap:14px;margin-top:13px;font-size:11px;color:var(--muted);font-weight:600}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
+.bk{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.bk:last-child{border-bottom:none}
+.bk .th{width:48px;height:48px;border-radius:11px;display:grid;place-items:center;font-weight:800;color:#fff;flex-shrink:0}
+.bk .nm{font-weight:700;font-size:13.5px}.bk .dt{font-size:11.5px;color:var(--muted);margin-top:2px}
+.remind{background:linear-gradient(135deg,var(--blue),var(--blue-700));border-radius:var(--radius);padding:18px;color:#fff}
+.remind h4{font-size:14.5px;font-weight:800;margin-bottom:4px}.remind p{font-size:12.5px;color:rgba(255,255,255,.82);line-height:1.5}
+.remind .r-item{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.1);border-radius:11px;padding:10px 12px;margin-top:10px;font-size:12.5px;font-weight:600}
+.remind .r-item .n{margin-left:auto;background:var(--gold);color:var(--navy);font-weight:800;border-radius:7px;padding:1px 8px;font-size:12px}
+.catrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}.catnm{font-size:12px;font-weight:600;width:118px;flex-shrink:0}
+.catbar{flex:1;height:8px;background:#EEF1F6;border-radius:6px;overflow:hidden}.catfill{height:100%;border-radius:6px}
+.catval{font-size:11.5px;font-weight:700;color:var(--muted);width:66px;text-align:right;flex-shrink:0}
+.kat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.kat-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s}
+.kat-card:hover{border-color:var(--blue);box-shadow:0 8px 20px rgba(39,91,181,.08);transform:translateY(-2px)}
+.kat-card .dn{font-size:11px;color:var(--gold-ink);background:rgba(248,192,0,.16);display:inline-block;padding:2px 9px;border-radius:7px;font-weight:700;margin-bottom:9px}
+.kat-card h4{font-size:14.5px;font-weight:800;margin-bottom:5px}.kat-card .meta{font-size:12px;color:var(--muted);line-height:1.6}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);padding:50px 24px;text-align:center;color:var(--muted)}
+.empty svg{width:40px;height:40px;color:var(--muted-2);margin-bottom:14px}.empty h3{font-size:16px;color:var(--ink);margin-bottom:6px}.empty p{font-size:13px;max-width:380px;margin:0 auto}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--navy);color:#fff;padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.25);transition:.3s;z-index:99;display:flex;align-items:center;gap:9px}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast svg{width:18px;height:18px;color:var(--gold)}
+.fade{animation:fade .25s ease}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.mono{font-variant-numeric:tabular-nums}
+.finput{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--ink);margin:5px 0 14px}
+.finput:focus{outline:none;border-color:var(--blue)}
+.flbl{font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:0}
+.btn-save{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer;width:100%;margin-top:6px}
+.btn-save:active{transform:scale(.98)}
+.chk{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500;padding:9px 0;cursor:pointer}
+.chk input{width:17px;height:17px;accent-color:var(--blue);cursor:pointer}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.calc-wrap{display:grid;grid-template-columns:1fr 360px;gap:22px;align-items:start}
+.result-card{background:linear-gradient(160deg,var(--navy),var(--navy-2));color:#fff;border-radius:var(--radius);padding:22px;position:sticky;top:20px}
+.rc-label{font-size:12.5px;color:rgba(255,255,255,.65);font-weight:600}
+.rc-price{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:4px 0 6px;color:var(--gold)}
+.rc-dur{font-size:12px;color:rgba(255,255,255,.7);line-height:1.5;font-weight:600}
+.rc-toggle{margin-top:16px;background:rgba(255,255,255,.12);border:none;color:#fff;font-family:inherit;font-size:12px;font-weight:700;padding:7px 13px;border-radius:9px;cursor:pointer}
+.rc-secret{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14)}
+.rc-secret.show{display:block}
+.rc-row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;color:rgba(255,255,255,.8)}
+.rc-row b{color:#fff;font-variant-numeric:tabular-nums}.rc-row.warn b{color:var(--gold)}.rc-row.tot{border-top:1px solid rgba(255,255,255,.16);margin-top:5px;padding-top:7px;font-weight:700}
+.rc-break{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14)}
+.bk-h{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:700;margin-bottom:6px}
+.note-card{background:rgba(248,192,0,.12);border:1px solid rgba(248,192,0,.3);border-radius:14px;padding:13px 15px;font-size:12px;color:var(--gold-ink);margin-top:16px;font-weight:600;line-height:1.5}
+.save-box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 17px;margin-top:16px}
+.save-box .sb-h{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.btn-wa{display:inline-block;background:#25D366;color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:9px;text-decoration:none;margin-right:6px}
+.pv-overlay{position:fixed;inset:0;background:rgba(10,20,40,.55);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow:auto}
+.pv-modal{background:var(--bg);border-radius:16px;max-width:720px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.pv-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--navy);color:#fff}
+.pv-bar b{font-size:15px}.pv-bar .btn-acc{margin-left:6px}
+.pv-paper{background:#fff;margin:18px;border-radius:8px;padding:34px 38px;font-size:13px;color:#222;line-height:1.6}
+.pv-letterhead{border-bottom:2px solid var(--navy);padding-bottom:12px;margin-bottom:16px}
+.pv-brand{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:.02em}
+.pv-tag{font-size:11px;font-style:italic;color:var(--gold-ink);font-weight:600}
+.pv-contact{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.pv-title{text-align:center;font-size:16px;color:var(--navy);margin:14px 0 10px;letter-spacing:.03em}
+.pv-meta{font-size:11.5px;color:var(--muted);margin-bottom:12px}.pv-meta td{padding-right:10px}
+.pv-to{margin:10px 0}.pv-sum{margin:10px 0;font-size:12.5px}.pv-sum td{padding:2px 0;vertical-align:top}.pv-sum td:first-child{width:150px;color:var(--muted)}
+.pv-price{display:flex;justify-content:space-between;align-items:center;background:#F5F7FA;border-radius:8px;padding:10px 14px;margin:6px 0;font-size:13px}
+.pv-price b{font-size:18px;color:var(--navy)}.pv-price.sub{padding:7px 14px;font-size:12px}.pv-price.sub b{font-size:13px;color:var(--muted)}
+.pv-h3{font-size:13px;color:var(--navy);margin:16px 0 7px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.pv-fasil{margin:0 0 4px 18px;font-size:12.5px}.pv-fasil li{margin:3px 0}
+.pv-itin{display:flex;flex-direction:column;gap:8px}
+.pv-day{background:#F7F9FC;border-left:3px solid var(--gold);border-radius:6px;padding:9px 13px}
+.pv-day-h{font-weight:800;color:var(--gold-ink);font-size:12.5px;margin-bottom:3px}
+.pv-day ul{margin:0 0 0 16px;font-size:12px}.pv-day li{margin:2px 0}
+.pv-close{margin-top:14px}.pv-sign{margin-top:16px;font-size:12.5px}
+.pay-sum{display:flex;justify-content:space-between;gap:10px;margin-bottom:12px}
+.pay-sum div{flex:1;background:#F5F7FA;border-radius:9px;padding:9px 11px;text-align:center}
+.pay-sum span{display:block;font-size:10.5px;color:var(--muted);font-weight:600}.pay-sum b{font-size:14px}
+.pay-hist{max-height:150px;overflow:auto}
+.pay-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)}
+.pay-row:last-child{border-bottom:none}.pay-row span{color:var(--muted)}
+.pay-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;margin-left:8px;padding:0 4px}
+.jgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.jcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;transition:.15s}
+.jcard:hover{border-color:var(--blue);box-shadow:0 8px 22px rgba(39,91,181,.1);transform:translateY(-2px)}
+.jcard-top{display:flex;gap:6px;margin-bottom:10px}
+.jcard h4{font-size:15px;font-weight:800;margin-bottom:2px;line-height:1.25}
+.jcard-dest{font-size:12.5px;color:var(--muted);margin-bottom:11px}
+.jcard-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--ink);font-weight:600;margin-bottom:11px}
+.jcard-crew{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
+.crew-chip{font-size:11px;font-weight:700;color:#fff;padding:3px 9px;border-radius:7px}
+.crew-chip.empty{background:#EEF1F6;color:var(--muted-2)}
+.jcard-foot{border-top:1px solid var(--line);padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.td-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 15px;margin-bottom:12px}
+.td-card h5{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-2);font-weight:700;margin-bottom:9px}
+/* ===== Area Umum — Landing Page ===== */
+.umhero{background:linear-gradient(145deg,var(--navy),var(--navy-2) 55%,var(--teal));border-radius:24px;padding:48px 40px;color:#fff;position:relative;overflow:hidden;margin-bottom:28px}
+.umhero::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 85% 20%,rgba(248,192,0,.18),transparent 55%);pointer-events:none}
+.umhero-tag{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:30px;padding:6px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:18px;position:relative;z-index:1}
+.umhero h1{font-size:38px;font-weight:800;line-height:1.14;letter-spacing:-.02em;margin-bottom:14px;max-width:640px;position:relative;z-index:1}
+.umhero h1 em{font-style:normal;color:var(--gold)}
+.umhero p{font-size:14.5px;color:rgba(255,255,255,.78);max-width:520px;margin-bottom:24px;line-height:1.6;position:relative;z-index:1}
+.umhero-search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:5px 5px 5px 14px;max-width:460px;margin-bottom:16px;position:relative;z-index:1}
+.umhero-search svg{width:17px;height:17px;color:rgba(255,255,255,.6);flex-shrink:0}
+.umhero-search input{flex:1;background:transparent;border:none;color:#fff;font-size:13.5px;font-family:inherit;min-width:0}
+.umhero-search input::placeholder{color:rgba(255,255,255,.55)}
+.umhero-search input:focus{outline:none}
+.umhero-search button{background:var(--gold);color:var(--navy);font-weight:800;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.umhero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px;position:relative;z-index:1}
+.btn-um-primary{background:var(--gold);color:var(--navy);font-weight:800;padding:13px 22px;border-radius:12px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-size:13.5px}
+.btn-um-ghost{background:rgba(255,255,255,.08);color:#fff;font-weight:700;padding:13px 22px;border-radius:12px;border:1px solid rgba(255,255,255,.28);cursor:pointer;font-size:13.5px}
+.umstats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative;z-index:1}
+.umstat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:15px}
+.umstat .n{font-size:22px;font-weight:800}
+.umstat .l{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px}
+.umsec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}
+.umsec-head .tag{color:var(--blue);font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:3px}
+.umsec-head h2{font-size:19px;font-weight:800}
+.umwhy{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:30px}
+.umwhy-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.umtrust{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:30px;text-align:center;flex-wrap:wrap}
+.umtrust svg{width:22px;height:22px;color:var(--blue);flex-shrink:0}
+.umtrust p{font-size:13.5px;color:var(--ink)}
+.umtrust b{color:var(--blue)}
+.umfaq{margin-bottom:30px;max-width:780px}
+.umfaq-item{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.umfaq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;background:none;border:none;cursor:pointer;text-align:left;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink)}
+.umfaq-q svg{width:18px;height:18px;flex-shrink:0;color:var(--muted);transition:transform .18s}
+.umfaq-item.open .umfaq-q svg{transform:rotate(180deg);color:var(--blue)}
+.umfaq-a{max-height:0;overflow:hidden;transition:max-height .22s ease}
+.umfaq-a p{padding:0 18px 16px;font-size:13px;color:var(--muted);line-height:1.6}
+.umfaq-item.open .umfaq-a{max-height:220px}
+.umwhy-card .ic{width:44px;height:44px;border-radius:12px;background:var(--blue);color:#fff;display:grid;place-items:center;margin-bottom:14px}
+.umwhy-card .ic svg{width:21px;height:21px}
+.umwhy-card h4{font-size:14.5px;margin-bottom:6px}
+.umwhy-card p{font-size:12.5px;color:var(--muted);line-height:1.55}
+.umfeat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:30px}
+.umfeat-card{border-radius:16px;overflow:hidden;position:relative;height:148px;display:flex;align-items:flex-end;padding:14px;color:#fff;background-size:cover;background-position:center}
+.umfeat-card .ov{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.55),rgba(0,0,0,.05))}
+.umfeat-card .cnt{position:relative;z-index:1}
+.umfeat-card .cnt b{display:block;font-size:13.5px;font-weight:800}
+.umfeat-card .cnt span{font-size:11px;opacity:.85}
+.umcta{background:linear-gradient(125deg,var(--navy),var(--navy-2));border-radius:20px;padding:28px 30px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+/* pencarian destinasi (Area Umum) */
+.um-searchbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.um-search{position:relative;flex:1;min-width:240px;max-width:460px}
+.um-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted-2)}
+.um-search input{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 14px 11px 42px;font-size:14px;font-family:inherit;color:var(--ink)}
+.um-search input:focus{outline:2px solid var(--blue);outline-offset:1px}
+.um-search-count{font-size:13px;font-weight:700;color:var(--blue);white-space:nowrap}
+@media(max-width:600px){.um-searchbar{flex-direction:column;align-items:stretch}.um-search{max-width:none}.um-search-count{text-align:left}}
+/* ===== Testimoni — gaya "Blaze" (3 kolom: stat/CTA, foto+kutipan, marquee) ===== */
+.umt-wrap{margin-bottom:30px}
+.umt-head{display:flex;flex-direction:column;gap:14px;justify-content:space-between;align-items:flex-start;margin-bottom:26px}
+.umt-tagrow{display:flex;align-items:center;gap:7px;margin-bottom:14px}
+.umt-badge{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;background:#fff;flex-shrink:0}
+.umt-badge svg{width:15px;height:15px;color:var(--blue);animation:um-spin 6s linear infinite}
+.umt-pill{padding:8px 15px;border-radius:30px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;color:var(--ink)}
+.umt-head h2{font-size:26px;font-weight:800;line-height:1.18;letter-spacing:-.01em;max-width:480px;color:var(--ink)}
+.umt-head h2 span{color:var(--blue)}
+.umt-sub{max-width:280px;font-size:12.5px;color:var(--muted);line-height:1.6}
+.umt-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:stretch}
+.umt-card-stat{display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);border-radius:26px;padding:26px;min-height:360px}
+.umt-rating-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px}
+.umt-rating-n{font-size:32px;font-weight:800;color:var(--ink);line-height:1}
+.umt-rating-txt{font-size:12px;color:var(--muted);line-height:1.3;padding-top:4px}
+.umt-feat{display:flex;flex-direction:column;gap:11px;margin-bottom:22px}
+.umt-feat-row{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink);font-weight:600}
+.umt-feat-row svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}
+.umt-cta-block{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+.umt-cta-block .lbl1{font-size:12px;color:var(--muted);margin-bottom:2px}
+.umt-cta-block .lbl2{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:13px}
+.umt-cta-row{display:flex;align-items:center;gap:8px}
+.umt-cta-btn{padding:11px 20px;background:var(--navy);color:#fff;font-weight:700;font-size:13px;border-radius:30px;border:none;cursor:pointer;white-space:nowrap}
+.umt-cta-arrow{width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;border:none;cursor:pointer;flex-shrink:0}
+.umt-cta-arrow svg{width:17px;height:17px}
+.umt-card-photo{position:relative;border-radius:26px;overflow:hidden;min-height:360px;background-size:cover;background-position:center}
+.umt-card-photo .ov{position:absolute;left:0;right:0;bottom:0;height:62%;background:linear-gradient(0deg,rgba(14,36,74,.92),rgba(14,36,74,.15) 70%,transparent)}
+.umt-card-photo .cap{position:absolute;left:22px;right:22px;bottom:22px;color:#fff}
+.umt-card-photo .cap .q{font-size:14.5px;font-weight:600;line-height:1.45;margin-bottom:9px}
+.umt-card-photo .cap .a{font-size:11.5px;color:rgba(255,255,255,.75)}
+.umt-marquee{position:relative;overflow:hidden;border-radius:26px;border:1px solid var(--line);background:var(--bg);min-height:360px;max-height:360px}
+.umt-track{display:flex;flex-direction:column;gap:10px;padding:10px;animation:um-marquee 26s linear infinite}
+.umt-marquee:hover .umt-track{animation-play-state:paused}
+.umt-mcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;flex-shrink:0}
+.umt-mcard .plat{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:7px}
+.umt-mcard .q{font-size:12px;color:var(--ink);line-height:1.5;margin-bottom:10px}
+.umt-mcard .who{display:flex;align-items:center;gap:8px}
+.umt-mcard .ava{width:26px;height:26px;border-radius:50%;background:var(--line);color:var(--muted);display:grid;place-items:center;font-size:10.5px;font-weight:700;background-size:cover;background-position:center;flex-shrink:0}
+.umt-mcard .who b{font-size:11.5px;color:var(--ink);display:block}
+.umt-mcard .who span{font-size:11px;color:var(--muted-2)}
+@keyframes um-spin{to{transform:rotate(360deg)}}
+@keyframes um-marquee{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+@media(min-width:900px){.umt-head{flex-direction:row;align-items:flex-end}.umt-sub{text-align:right}.umt-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1180px){.umt-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1100px){.umstats{grid-template-columns:repeat(2,1fr)}.umwhy{grid-template-columns:1fr}.umfeat-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.umhero{padding:30px 22px}.umhero h1{font-size:26px}.umstats{grid-template-columns:repeat(2,1fr)}.umcta{flex-direction:column;align-items:flex-start}.umhero-search{flex-wrap:wrap;padding:10px 12px}.umhero-search input{flex-basis:100%;order:1;margin:4px 0}.umhero-search button{margin-left:auto;order:2}}
+.td-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.td-row span{color:var(--muted)}.td-row b{text-align:right}
+.ds-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.ds-row:last-child{border-bottom:none}.ds-row span{color:var(--muted)}.ds-row b{font-variant-numeric:tabular-nums}
+.ds-row:hover span{color:var(--blue)}
+.tl{position:relative;padding-left:4px}
+.tl-item{display:flex;gap:11px;padding:7px 0;position:relative}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:5px;top:22px;bottom:-4px;width:2px;background:var(--line)}
+.tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:4px;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--line)}
+.tl-body{flex:1;min-width:0}
+.tl-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px}
+.tl-date{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.tl-body p{font-size:11.5px;color:var(--muted);margin-top:1px;line-height:1.4}
+.tl-item.done .tl-body b{color:var(--muted-2)}
+.pp-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.pp-row:last-child{border-bottom:none}
+.pp-main{flex:1;min-width:0}
+.pp-nm{font-weight:700;font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.pp-num{text-align:right;white-space:nowrap}
+.pp-num b{display:block;font-size:13px;font-variant-numeric:tabular-nums}
+.pp-num span{font-size:10.5px}
+.pp-act{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.cat-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:10px 0}
+.cat-bar .btn-save{display:inline-block}
+.destwrap{display:flex;flex-direction:column;gap:8px;margin-top:5px}
+.citybox{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.citybox.has{border-color:var(--blue)}
+.cityhd{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;cursor:pointer;font-weight:700;font-size:13.5px;background:#F7F9FC}
+.citybox.has .cityhd{background:rgba(39,91,181,.08);color:var(--blue)}
+.cityhd .cnt{background:var(--muted-2);color:#fff;font-size:11px;border-radius:20px;padding:1px 8px;font-weight:700}
+.citybox.has .cityhd .cnt{background:var(--blue)}
+.citygrid{display:none;grid-template-columns:1fr 1fr;gap:2px 16px;padding:10px 14px}
+.citybox.open .citygrid{display:grid}
+.dest-item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;font-size:12.5px;cursor:pointer;border-bottom:1px solid #F0F3F7}
+.dest-item input{margin-top:2px;width:16px;height:16px;accent-color:var(--blue);flex-shrink:0;cursor:pointer}
+.dest-item span{line-height:1.35}.dest-item em{color:var(--blue);font-style:normal;font-weight:700;font-size:11.5px;margin-left:4px}
+.dest-item .opt{display:block;color:var(--muted-2);font-size:11px;font-weight:500}
+@media(max-width:1100px){.calc-wrap{grid-template-columns:1fr}.result-card{position:static}.citygrid{grid-template-columns:1fr}}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}.kat{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.app{grid-template-columns:1fr}.sidebar{display:none}.cards{grid-template-columns:1fr 1fr}.kat{grid-template-columns:1fr}.main{padding-bottom:90px}}
+/* bottom nav (mobile) */
+.bottomnav{display:none}
+@media(max-width:720px){
+  .bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:150;background:linear-gradient(185deg,var(--navy),var(--navy-2));
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgba(0,0,0,.18)}
+  .bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;border-radius:12px;color:rgba(255,255,255,.62);text-decoration:none;font-size:10.5px;font-weight:600;cursor:pointer}
+  .bottomnav a svg{width:21px;height:21px;stroke-width:1.9}
+  .bottomnav a.active{color:var(--gold)}
+  .bottomnav a.more svg{width:21px;height:21px}
+}
+.sheet-overlay{position:fixed;inset:0;background:rgba(10,20,40,.55);z-index:220;display:flex;align-items:flex-end;justify-content:center}
+.sheet-modal{background:var(--bg);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:10px 10px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 40px rgba(0,0,0,.35);max-height:80vh;overflow:auto}
+.sheet-handle{width:40px;height:4px;background:var(--line);border-radius:4px;margin:4px auto 10px}
+.sheet-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);font-weight:700;padding:4px 12px 8px}
+.sheet-modal a{display:flex;align-items:center;gap:13px;padding:13px 12px;border-radius:12px;color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:600;cursor:pointer}
+.sheet-modal a:active{background:var(--line)}
+.sheet-modal a svg{width:20px;height:20px;stroke-width:1.9;color:var(--blue);flex-shrink:0}
+/* pagination */
+.pager{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.pg-info{font-size:12px;color:var(--muted)}
+.pg-nav{display:flex;align-items:center;gap:4px}
+.pg-btn{min-width:32px;height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer}
+.pg-btn:hover{background:var(--bg)}
+.pg-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pg-btn:disabled{opacity:.4;cursor:not-allowed}
+.pg-dots{padding:0 4px;color:var(--muted-2);font-size:12.5px}
+@media(max-width:480px){.pg-nav .pg-num{display:none}.pg-info{width:100%;text-align:center;order:3}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><img src="__LOGO__" alt="Havist Traveller"></div>
+    <nav class="nav" id="nav">
+      <a data-view="umum"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9z"/></svg>Umum (Halaman Publik)</a>
+      <a data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</a>
+      <span class="nav-label">Operasional</span>
+      <a data-view="keuangan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10h18M7 15h4M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Keuangan</a>
+      <a data-view="katalog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.6 8.4 12 3 3.4 8.4v7.2L12 21l8.6-5.4z"/><path d="M12 12 3.4 8.4M12 12v9M12 12l8.6-3.6"/></svg>Harga &amp; Katalog</a>
+      <a data-view="acc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>ACC Klien</a>
+      <a data-view="jadwal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Jadwal Trip</a>
+      <a data-view="crew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 3.5a3.2 3.2 0 0 1 0 6M21 20a6 6 0 0 0-5-5.9"/></svg>Crew</a>
+      <a data-view="tl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 2h6v4H9z"/><path d="m8 13 2 2 4-4"/></svg>Tour Leader &amp; Media</a>
+      <span class="nav-label">Sistem</span>
+      <a data-view="sales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Sales</a>
+      <a data-view="laporan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v5h5M8 13h8M8 17h5"/></svg>Laporan</a>
+      <a data-view="setting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.8 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.6H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7L4.5 7a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.4V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>Setting Web</a>
+    </nav>
+    <div class="side-foot"><div class="ava">H</div><div><div class="nm">Havist Pusat</div><div class="rl">Curug, Tangerang</div></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="globalSearch" placeholder="Cari trip, instansi, atau vendor..."></div>
+      <div class="top-actions">
+        <button class="icon-btn" onclick="toast('Tidak ada notifikasi baru')"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+        <div class="me" onclick="toast('Login sebagai Management')"><div class="ava">M</div><div><div class="nm">Management</div><div class="rl">Admin Pusat</div></div></div>
+      </div>
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+<nav class="bottomnav" id="bottomnav">
+  <a data-view="umum"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9z"/></svg>Umum</a>
+  <a data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</a>
+  <a data-view="jadwal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Jadwal</a>
+  <a data-view="tl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 2h6v4H9z"/><path d="m8 13 2 2 4-4"/></svg>TL &amp; Media</a>
+  <a class="more" onclick="openMoreSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Lainnya</a>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = __DATA__;
+const CATALOG = __CATALOG__;
+const today = new Date('2026-11-15');
+// --- mini Excel (.xlsx / OOXML) writer, tanpa CDN — dibangun sendiri (zip+XML) supaya tidak bergantung jaringan luar ---
+window.XLSX=(function(){
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function colName(n){n++;let s='';while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26);}return s;}
+  function sheetXML(rows){
+    let rowsXML='';
+    rows.forEach(function(row,ri){
+      let cellsXML='';
+      row.forEach(function(val,ci){
+        if(val===null||val===undefined||val==='')return;
+        const ref=colName(ci)+(ri+1);
+        if(typeof val==='number'&&isFinite(val))cellsXML+='<c r="'+ref+'"><v>'+val+'</v></c>';
+        else cellsXML+='<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+esc(val)+'</t></is></c>';
+      });
+      rowsXML+='<row r="'+(ri+1)+'">'+cellsXML+'</row>';
+    });
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+rowsXML+'</sheetData></worksheet>';
+  }
+  function contentTypesXML(n){
+    let ov='';for(let i=1;i<=n;i++)ov+='<Override PartName="/xl/worksheets/sheet'+i+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+ov+'</Types>';
+  }
+  function relsXML(){
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  }
+  function workbookXML(sheets){
+    let sx='';sheets.forEach(function(sh,i){sx+='<sheet name="'+esc(sh.name)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>';});
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+sx+'</sheets></workbook>';
+  }
+  function workbookRelsXML(n){
+    let r='';for(let i=1;i<=n;i++)r+='<Relationship Id="rId'+i+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+i+'.xml"/>';
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+r+'</Relationships>';
+  }
+  // --- zip (store, no compression) ---
+  const CRC_TABLE=(function(){const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+  function crc32(bytes){let c=0xFFFFFFFF;for(let i=0;i<bytes.length;i++)c=CRC_TABLE[(c^bytes[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+  function buildZip(files){
+    let offset=0;const localParts=[],centralParts=[];
+    files.forEach(function(f){
+      const nameBytes=new TextEncoder().encode(f.name);
+      const crc=crc32(f.data),size=f.data.length;
+      const lh=new Uint8Array(30+nameBytes.length);const ldv=new DataView(lh.buffer);
+      ldv.setUint32(0,0x04034b50,true);ldv.setUint16(4,20,true);ldv.setUint16(6,0,true);ldv.setUint16(8,0,true);
+      ldv.setUint16(10,0,true);ldv.setUint16(12,0,true);ldv.setUint32(14,crc,true);ldv.setUint32(18,size,true);ldv.setUint32(22,size,true);
+      ldv.setUint16(26,nameBytes.length,true);ldv.setUint16(28,0,true);lh.set(nameBytes,30);
+      localParts.push(lh,f.data);
+      const ch=new Uint8Array(46+nameBytes.length);const cdv=new DataView(ch.buffer);
+      cdv.setUint32(0,0x02014b50,true);cdv.setUint16(4,20,true);cdv.setUint16(6,20,true);cdv.setUint16(8,0,true);cdv.setUint16(10,0,true);
+      cdv.setUint16(12,0,true);cdv.setUint16(14,0,true);cdv.setUint32(16,crc,true);cdv.setUint32(20,size,true);cdv.setUint32(24,size,true);
+      cdv.setUint16(28,nameBytes.length,true);cdv.setUint16(30,0,true);cdv.setUint16(32,0,true);cdv.setUint16(34,0,true);cdv.setUint16(36,0,true);
+      cdv.setUint32(38,0,true);cdv.setUint32(42,offset,true);ch.set(nameBytes,46);
+      centralParts.push(ch);
+      offset+=lh.length+f.data.length;
+    });
+    const centralStart=offset;let centralSize=0;centralParts.forEach(function(c){centralSize+=c.length;});
+    const eocd=new Uint8Array(22);const edv=new DataView(eocd.buffer);
+    edv.setUint32(0,0x06054b50,true);edv.setUint16(4,0,true);edv.setUint16(6,0,true);edv.setUint16(8,files.length,true);
+    edv.setUint16(10,files.length,true);edv.setUint32(12,centralSize,true);edv.setUint32(16,centralStart,true);edv.setUint16(20,0,true);
+    const all=localParts.concat(centralParts,[eocd]);
+    let total=0;all.forEach(function(p){total+=p.length;});
+    const out=new Uint8Array(total);let pos=0;all.forEach(function(p){out.set(p,pos);pos+=p.length;});
+    return out;
+  }
+  return{
+    utils:{
+      book_new:function(){return{sheets:[]};},
+      aoa_to_sheet:function(rows){return{rows:rows};},
+      book_append_sheet:function(wb,ws,name){wb.sheets.push({name:String(name).slice(0,31).replace(/[\\\/\?\*\[\]:]/g,' '),rows:ws.rows});}
+    },
+    writeFile:function(wb,filename){
+      const n=wb.sheets.length;
+      const enc=function(s){return new TextEncoder().encode(s);};
+      const files=[
+        {name:'[Content_Types].xml',data:enc(contentTypesXML(n))},
+        {name:'_rels/.rels',data:enc(relsXML())},
+        {name:'xl/workbook.xml',data:enc(workbookXML(wb.sheets))},
+        {name:'xl/_rels/workbook.xml.rels',data:enc(workbookRelsXML(n))}
+      ];
+      wb.sheets.forEach(function(sh,i){files.push({name:'xl/worksheets/sheet'+(i+1)+'.xml',data:enc(sheetXML(sh.rows))});});
+      const zipBytes=buildZip(files);
+      const blob=new Blob([zipBytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      saveFileToViewer(filename,blob);
+    }
+  };
+})();
+async function saveFileToViewer(filename,blob){
+  try{
+    const downloads=window.claude&&typeof window.claude.use==='function'?await window.claude.use('downloads'):null;
+    if(!downloads){toast('Unduh file tidak didukung di tampilan ini');return;}
+    await downloads.save({filename:filename,data:blob});
+    toast(filename+' diunduh');
+  }catch(e){
+    const code=e&&e.code;
+    if(code==='declined')return;
+    if(code==='rejected_extension'||code==='extension_not_enabled')toast('Format file ini tidak didukung untuk diunduh di sini');
+    else toast('Gagal mengunduh file, coba lagi');
+  }
+}
+const MONTHS=['2026-07 Juli','2026-08 Agustus','2026-09 September','2026-10 Oktober','2026-11 November','2026-12 Desember','2027-01 Januari','2027-02 Februari','2027-03 Maret','2027-04 April','2027-05 Mei','2027-06 Juni'];
+const MLBL={'2026-07 Juli':'Jul','2026-08 Agustus':'Agu','2026-09 September':'Sep','2026-10 Oktober':'Okt','2026-11 November':'Nov','2026-12 Desember':'Des','2027-01 Januari':'Jan','2027-02 Februari':'Feb','2027-03 Maret':'Mar','2027-04 April':'Apr','2027-05 Mei':'Mei','2027-06 Juni':'Jun'};
+const COLORS=['#275BB5','#E08A1E','#1AA6B7','#8E63D6','#2B9D6E','#F8C000'];
+function jt(n){return 'Rp '+(n/1e6).toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})+' jt';}
+function rp(n){return 'Rp '+Math.round(n).toLocaleString('id-ID');}
+function ab(s){s=(s||'').replace(/^(SDN|SMPN|SMAN|SMP|SMA|SMK|PT|SDIT)\s*/i,'');return (s.trim().slice(0,2)||'TR').toUpperCase();}
+function col(i){return COLORS[i%COLORS.length];}
+function dateID(s){if(!s)return '-';const d=new Date(s);return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'});}
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// aggregates
+function monthAgg(){const m={};MONTHS.forEach(k=>m[k]={n:0,pax:0,bus:0,laba:0});DATA.trips.forEach(t=>{if(m[t.per]){m[t.per].n++;m[t.per].pax+=t.pax;m[t.per].bus+=t.bus;m[t.per].laba+=t.laba;}});return m;}
+// ===== MODEL PEMBAYARAN TERPADU (satu sumber data, semua tab baca dari sini) =====
+function payClientList(id){return (store('payClient',{})[id])||[];}
+function clientPaid(p){return (p.dp||0)+payClientList(p.id).reduce((a,x)=>a+(+x.amount||0),0);}
+function clientSisa(p){return Math.max(0,(p.tagih||0)-clientPaid(p));}
+function clientStatus(p){const paid=clientPaid(p);if(p.tagih>0&&paid>=p.tagih)return['lunas','Lunas'];if(paid>0)return['dp','DP sebagian'];return['piutang','Belum bayar'];}
+function addClientPayment(id,termin,amount,date){const s=store('payClient',{});(s[id]=s[id]||[]).push({termin,amount:+amount,date:date||new Date().toISOString().slice(0,10)});save('payClient',s);}
+function delClientPayment(id,idx){const s=store('payClient',{});if(s[id]){s[id].splice(idx,1);save('payClient',s);}}
+function payVendorList(no){return (store('payVendor',{})[no])||[];}
+function vendorBasePaid(d){return (d.status||'').toUpperCase()==='DONE'?(d.nom||0):0;}
+function vendorPaid(d){const ui=payVendorList(d.no).reduce((a,x)=>a+(+x.amount||0),0);return Math.min(d.nom||0,vendorBasePaid(d)+ui);}
+function vendorSisa(d){return Math.max(0,(d.nom||0)-vendorPaid(d));}
+function vendorStatusArr(d){const paid=vendorPaid(d);if(d.nom>0&&paid>=d.nom)return['lunas','Lunas'];if(paid>0)return['dp','Sebagian'];return['piutang','Belum bayar'];}
+function addVendorPayment(no,amount,date,ket){const s=store('payVendor',{});(s[no]=s[no]||[]).push({amount:+amount,date:date||new Date().toISOString().slice(0,10),ket:ket||''});save('payVendor',s);}
+function delVendorPayment(no,idx){const s=store('payVendor',{});if(s[no]){s[no].splice(idx,1);save('payVendor',s);}}
+// ===== PERSIAPAN VENDOR PER TRIP (pengadaan: armada, hotel, makan, kaos, tiket) =====
+const PREPKAT=[['Transport / Bus','armada'],['Hotel / Villa','hotels'],['Konsumsi / Katering',''],['Kaos & Merchandise','kaos'],['Wisata / Tiket','dests'],['Operasional / Lainnya','']];
+const PREPDUE={'Transport / Bus':14,'Hotel / Villa':14,'Konsumsi / Katering':7,'Kaos & Merchandise':7,'Wisata / Tiket':7,'Operasional / Lainnya':3};
+const PREPTL=[[30,'Hubungi vendor & booking','Konfirmasi ketersediaan armada, hotel, dan tiket wisata.'],[14,'DP armada & hotel','Bayar DP supaya slot terjamin.'],[7,'Pelunasan & konfirmasi final','Lunasi vendor, konfirmasi jumlah peserta final.'],[1,'Checklist akhir','Pastikan armada, konsumsi, kaos, dan dokumen siap.']];
+function prepStore(){return store('prep',{});}
+function prepTrip(id){return prepStore()[id]||[];}
+function savePrep(id,arr){const s=prepStore();s[id]=arr;save('prep',s);}
+function dminus(brk,n){if(!brk)return '';const d=new Date(brk);d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);}
+function prepAdd(tripId,kat,vendor,ket,qty,unit,due){
+  const arr=prepTrip(tripId);const q=+qty||1,u=+unit||0;
+  arr.push({id:'P'+tripId+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),kat,vendor:vendor||kat,ket:ket||'',qty:q,unit:u,nom:Math.round(q*u),due:due||'',trip:tripId});
+  savePrep(tripId,arr);return arr[arr.length-1];
+}
+function prepDel(tripId,pid){savePrep(tripId,prepTrip(tripId).filter(x=>x.id!==pid));}
+// tiap kebutuhan persiapan jadi entri vendor virtual, supaya ikut terbaca di Keuangan & Arus Kas
+function prepAsVendor(){const s=prepStore();const out=[];Object.keys(s).forEach(tid=>{(s[tid]||[]).forEach(x=>out.push({no:x.id,tgl:x.due||'-',kat:x.kat,vendor:x.vendor,ket:x.ket||'Persiapan trip',nom:x.nom,status:'',trip:tid,qty:x.qty,unit:x.unit,_prep:true}));});return out;}
+function allVendor(){return DATA.dpvendor.concat(prepAsVendor());}
+function prepTotal(tripId){return prepTrip(tripId).reduce((a,x)=>a+x.nom,0);}
+function prepPaid(tripId){return prepTrip(tripId).reduce((a,x)=>a+vendorPaid({no:x.id,nom:x.nom,status:''}),0);}
+function prepSisa(tripId){return Math.max(0,prepTotal(tripId)-prepPaid(tripId));}
+function tripsNoPrep(){return upcoming().filter(t=>!prepTrip(t.id).length);}
+// uang masuk/keluar aktual (cash flow nyata)
+function totalMasuk(){return allPiutang().reduce((a,p)=>a+clientPaid(p),0);}
+function totalKeluar(){return allVendor().reduce((a,d)=>a+vendorPaid(d),0);}
+function piutangTot(){let tag=0,dp=0,sisa=0;allPiutang().forEach(p=>{tag+=p.tagih;dp+=clientPaid(p);sisa+=clientSisa(p);});return{tag,dp,sisa};}
+function dpCat(){const c={};allVendor().forEach(d=>{c[d.kat]=(c[d.kat]||0)+d.nom;});return c;}
+// --- penawaran (new trips from calculator) merge into live data ---
+let lastQuote=null;
+function penawaran(){try{const v=localStorage.getItem('havist_penawaran');return v?JSON.parse(v):[];}catch(e){return [];}}
+function allTrips(){const pnw=penawaran().filter(p=>p.status==='approved').map(p=>({id:p.id,inst:p.klien,dest:p.dest,pax:p.pax,bus:p.bus||0,brk:p.tgl,pul:'',laba:p.laba||0,jenis:'Paket Wisata',status:'Baru',_new:true}));return DATA.trips.concat(pnw);}
+function allPiutang(){const pnw=penawaran().filter(p=>p.status==='approved').map(p=>({id:p.id,tgl:p.tgl,inst:p.klien,inv:'(dari penawaran)',pax:p.pax,tagih:p.total||0,dp:0,_new:true}));return DATA.piutang.concat(pnw);}
+function upcoming(){return allTrips().filter(t=>t.brk && new Date(t.brk)>=today).sort((a,b)=>a.brk<b.brk?-1:1);}
+function piutMap(){const m={};allPiutang().forEach(p=>m[p.id]=p);return m;}
+function payStatus(t){const p=piutMap()[t.id];if(!p)return ['jadwal','Terjadwal'];if(p.tagih>0)return clientStatus(p);return['jadwal','Terjadwal'];}
+
+function toast(msg){const t=document.getElementById('toast');t.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>'+msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),2200);}
+
+// ---------- VIEWS ----------
+function vDashboard(){
+  const m=monthAgg(),pt=piutangTot(),up=upcoming();
+  const masuk=totalMasuk(),keluar=totalKeluar(),saldo=masuk-keluar;
+  const nov=m['2026-11 November'],okt=m['2026-10 Oktober'];
+  const target=store('target',100000000);const pctTarget=target>0?Math.round(nov.laba/target*100):0;
+  const day=86400000;
+  const invOverdue=allPiutang().filter(p=>{if(p.tagih<=0||clientStatus(p)[0]==='lunas')return false;const due=p.tgl?new Date(new Date(p.tgl)-7*day):null;return due&&today>due;});
+  const vendOverdue=allVendor().filter(d=>{const[sc]=vendorStatusArr(d);if(sc==='lunas')return false;const due=(d.tgl&&d.tgl!=='-')?new Date(d.tgl):null;return due&&today>due;});
+  const pnwPending=penawaran().filter(p=>p.status==='pending').length;
+  const noCrew=up.filter(t=>{const a=assignMap()[t.id]||{};return !a.tl&&!a.media;}).length;
+  const unpaid=allPiutang().filter(p=>p.tagih>0&&clientSisa(p)>0).sort((a,b)=>clientSisa(b)-clientSisa(a)).slice(0,5);
+  const rec=['2026-07 Juli','2026-08 Agustus','2026-09 September','2026-10 Oktober','2026-11 November'];
+  const mx=Math.max(...rec.map(k=>m[k].laba))*1.08;
+  const bars=rec.map(k=>{const v=m[k].laba,h=v/mx*100,hl=k.includes('November')?' hl':'';return `<div class="bar${hl}" onclick="toast('${MLBL[k]}: ${m[k].n} trip, laba ${jt(v)}')"><div class="col" style="height:${h}%"><span class="tip">${jt(v)}</span></div><span>${MLBL[k]}</span></div>`;}).join('');
+  const tripRows=up.slice(0,6).map(t=>{const[pc,pl]=payStatus(t),i=DATA.trips.indexOf(t);const p=piutMap()[t.id];const val=p?(clientPaid(p)>0?jt(clientPaid(p)):(p.tagih>0?jt(p.tagih):'—')):'—';const a=assignMap()[t.id]||{};const tl=crewById(a.tl);
+    return `<tr class="clk" onclick="openTripDetail('${t.id}')"><td><div class="trip"><div class="th" style="background:${i>=0?col(i):'var(--gold)'};color:${i>=0?'#fff':'var(--navy)'}">${ab(t.inst)}</div><div><div class="nm">${esc(t.inst)}</div><div class="loc">${esc((t.dest||'').split('(')[0])}${tl?' · TL '+esc(tl.nama.split(' ')[0]):''}</div></div></div></td><td>${dateID(t.brk)}</td><td>${t.pax} pax</td><td class="price">${val}</td><td><span class="pill ${pc}">${pl}</span></td></tr>`;}).join('');
+  const alerts=[
+    {n:invOverdue.length,txt:'Piutang lewat jatuh tempo',go:"go('keuangan');setTimeout(()=>setKeuTab('aging'),40)",ic:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'},
+    {n:vendOverdue.length,txt:'Vendor lewat jatuh tempo',go:"go('keuangan');setTimeout(()=>setKeuTab('vendor'),40)",ic:'<path d="M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'},
+    {n:pnwPending,txt:'Penawaran menunggu ACC',go:"go('acc')",ic:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
+    {n:noCrew,txt:'Trip belum ada crew',go:"go('crew');setTimeout(()=>setCrewTab('penugasan'),40)",ic:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/>'},
+    {n:tripsNoPrep().length,txt:'Trip belum diatur vendornya',go:"go('keuangan');setTimeout(()=>setKeuTab('vendor'),40)",ic:'<path d="M3 7h18M3 12h18M3 17h10"/>'},
+  ].filter(a=>a.n>0);
+  const alertHTML=alerts.length?alerts.map(a=>`<div class="r-item" style="cursor:pointer" onclick="${a.go}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${a.ic}</svg>${a.txt}<span class="n">${a.n}</span></div>`).join(''):'<div style="font-size:12.5px;color:rgba(255,255,255,.8);padding:6px 0">Semua beres, tidak ada yang mendesak 🎉</div>';
+  return `<div class="hello fade"><h1>Halo, Management 👋</h1><p>${up.length} trip akan datang · saldo kas ${jt(saldo)} · ${alerts.reduce((s,a)=>s+a.n,0)} hal perlu tindak lanjut</p></div>
+  <div class="cards fade">
+    <div class="scard" onclick="go('keuangan');setTimeout(()=>setKeuTab('aruskas'),40)" style="cursor:pointer;border-color:${saldo<0?'var(--red)':'var(--line)'}"><div class="ic ${saldo<0?'r':'gr'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="lbl">Saldo Kas</div><div class="val mono" style="color:${saldo<0?'var(--red)':'var(--ink)'}">${saldo<0?'- ':''}${jt(Math.abs(saldo))}</div><div class="sub" style="color:var(--muted)">masuk ${jt(masuk)} · keluar ${jt(keluar)}</div></div>
+    <div class="scard" onclick="go('keuangan');setTimeout(()=>setKeuTab('pelunasan'),40)" style="cursor:pointer"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Sisa Piutang</div><div class="val mono">${jt(pt.sisa)}</div><div class="sub down">${invOverdue.length} lewat jatuh tempo</div></div>
+    <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M7 15h4"/></svg></div><div class="lbl">Laba Bulan Ini (Nov)</div><div class="val mono">${jt(nov.laba)}</div><div class="sub ${nov.laba>=target?'up':'down'}">${pctTarget}% dari target ${jt(target)}</div></div>
+    <div class="scard" onclick="go('jadwal')" style="cursor:pointer"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="lbl">Trip Akan Datang</div><div class="val mono">${up.length} trip</div><div class="sub" style="color:var(--muted)">${noCrew} belum ada crew</div></div>
+  </div>
+  <div class="grid fade">
+    <div>
+      <div class="panel"><div class="panel-h"><h3>Laba per Bulan (tercatat)</h3><button class="lnk" onclick="go('keuangan')">Laporan lengkap →</button></div><div class="tabs" id="chartTabs"><button class="tab active">Laba</button><button class="tab">Pax</button><button class="tab">Bus</button></div><div class="chartwrap"><div class="chart" id="chart">${bars}</div></div></div>
+      <div class="panel"><div class="panel-h"><h3>Trip Terdekat</h3><button class="lnk" onclick="go('jadwal')">Lihat semua →</button></div><table style="margin-top:12px"><thead><tr><th>Destinasi · Crew</th><th>Tanggal</th><th>Peserta</th><th>Dibayar</th><th>Status</th></tr></thead><tbody>${tripRows}</tbody></table></div>
+      <div class="panel" style="margin-bottom:0"><div class="panel-h"><h3>Piutang — Belum Lunas <span style="color:var(--red);font-size:13px">(${unpaid.length})</span></h3><button class="lnk" onclick="go('keuangan');setTimeout(()=>setKeuTab('pelunasan'),40)">Rekap →</button></div><table style="margin-top:12px"><thead><tr><th>Pelanggan</th><th>Sisa</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${unpaid.map(p=>`<tr><td><div class="nm" style="font-weight:700">${esc(p.inst)}</div></td><td class="price mono">${jt(clientSisa(p))}</td><td style="text-align:right"><button class="btn-acc ok" onclick="go('keuangan');setTimeout(()=>{setKeuTab('pelunasan');openBayar('${p.id}')},50)">Bayar</button></td></tr>`).join('')}</tbody></table></div>
+    </div>
+    <div>
+      <div class="remind"><h4>Perlu Tindak Lanjut</h4><p>Klik untuk langsung ke halamannya.</p>${alertHTML}</div>
+      <div class="side-card" style="margin-top:22px"><div class="cal-h"><div class="mo">November 2026</div></div><div class="cal" id="cal"></div><div class="legend"><span><i style="background:var(--gold)"></i>Berangkat</span><span><i style="background:var(--blue)"></i>Hari ini</span></div></div>
+      <div class="side-card"><div class="panel-h" style="padding:0 0 12px"><h3 style="font-size:14.5px">Ringkasan Operasional</h3></div>
+        <div class="ds-row" onclick="go('crew')"><span>Gaji crew ditugaskan</span><b>${jt(totalGajiCrew())}</b></div>
+        <div class="ds-row" onclick="go('keuangan');setTimeout(()=>setKeuTab('vendor'),40)"><span>Vendor belum dibayar</span><b>${jt(allVendor().reduce((a,d)=>a+vendorSisa(d),0))}</b></div>
+        <div class="ds-row" onclick="go('keuangan')"><span>Laba tercatat (Jul–Nov)</span><b>${jt(Object.values(m).reduce((a,b)=>a+b.laba,0))}</b></div>
+        <div class="ds-row" onclick="go('acc')"><span>Penawaran menunggu ACC</span><b>${pnwPending}</b></div>
+      </div>
+    </div>
+  </div>`;
+}
+function buildCal(){
+  const cal=document.getElementById('cal');if(!cal)return;
+  const dows=['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+  const go={};DATA.trips.forEach(t=>{if(t.brk&&t.brk.startsWith('2026-11')){const d=+t.brk.slice(8);(go[d]=go[d]||[]).push(t);}});
+  let h=dows.map(d=>`<div class="dow">${d}</div>`).join('');
+  for(let i=0;i<6;i++)h+='<div class="d mut"></div>';
+  for(let d=1;d<=30;d++){let c='d';if(d===15)c+=' today';else if(go[d])c+=' go';
+    const oc=go[d]?`onclick="dayTrips(${d})"`:'';h+=`<div class="${c}" ${oc}>${d}</div>`;}
+  cal.innerHTML=h;
+}
+function dayTrips(d){const ts=DATA.trips.filter(t=>t.brk===`2026-11-${String(d).padStart(2,'0')}`);toast(`${d} Nov: ${ts.map(t=>t.inst.slice(0,20)).join(', ')}`);}
+
+let keuTab='ringkasan';
+function setKeuTab(k){keuTab=k;const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.kt===k));renderKeu();}
+function renderKeu(){const b=document.getElementById('keuBody');if(!b)return;b.innerHTML=keuTab==='aruskas'?keuAruskas():keuTab==='aging'?keuAging():keuTab==='pelunasan'?keuPelunasan():keuTab==='vendor'?keuJadwalVendor():keuTab==='profit'?keuProfit():keuTab==='reimburse'?keuReimburse():keuRingkasan();}
+function vKeuangan(){
+  const tabs=[['ringkasan','Ringkasan'],['aruskas','Arus Kas'],['aging','Aging Piutang'],['pelunasan','Pelunasan Klien'],['vendor','Jadwal Vendor'],['profit','Profitabilitas'],['reimburse','Reimburse Lapangan']];
+  const nav=tabs.map(([k,l])=>`<button class="tab ${keuTab===k?'active':''}" data-kt="${k}" onclick="setKeuTab('${k}')">${l}</button>`).join('');
+  return `<div class="hello fade" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px"><div><h1>Keuangan</h1><p>Laba, arus kas, piutang, dan pengeluaran DP vendor dari Master Data Trip</p></div><button class="btn-acc ok" style="margin-bottom:18px" onclick="exportAllKeuanganExcel()">⬇ Export Semua Laporan (Excel)</button></div>
+  <div class="tabs" style="padding:0 0 16px">${nav}</div><div id="keuBody"></div>`;
+}
+function keuRingkasan(){
+  const m=monthAgg(),pt=piutangTot(),cat=dpCat();
+  const rows=MONTHS.map(k=>`<tr><td style="font-weight:700">${esc(k.slice(8))}</td><td>${m[k].n}</td><td class="mono">${m[k].pax.toLocaleString('id-ID')}</td><td class="mono">${m[k].bus}</td><td class="price mono">${m[k].laba?jt(m[k].laba):'<span style=color:var(--muted-2)>—</span>'}</td></tr>`).join('');
+  const totLaba=Object.values(m).reduce((a,b)=>a+b.laba,0);
+  const piutRows=allPiutang().filter(p=>p.tagih>0).map(p=>{const paid=clientPaid(p),sisa=clientSisa(p);const st=clientStatus(p);
+    return `<tr><td><div class="nm" style="font-weight:700">${esc(p.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(p.inv)||'—'}</div></td><td class="mono">${jt(p.tagih)}</td><td class="mono" style="color:var(--green)">${paid?jt(paid):'—'}</td><td class="price mono">${sisa>0?jt(sisa):'<span style=color:var(--green)>Lunas</span>'}</td><td><span class="pill ${st[0]}">${st[1]}</span></td></tr>`;}).join('');
+  const catMax=Math.max(...Object.values(cat));
+  const catRows=Object.entries(cat).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>`<div class="catrow"><div class="catnm" style="width:150px">${esc(k)}</div><div class="catbar"><div class="catfill" style="width:${v/catMax*100}%;background:${col(i)}"></div></div><div class="catval">${jt(v)}</div></div>`).join('');
+  return `<div class="cards fade">
+    <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="lbl">Total Laba Tercatat</div><div class="val mono">${jt(totLaba)}</div><div class="sub" style="color:var(--muted)">Jul–Nov 2026</div></div>
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg></div><div class="lbl">Total DP Masuk</div><div class="val mono">${jt(pt.dp)}</div><div class="sub up">dari pelanggan</div></div>
+    <div class="scard"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Sisa Piutang</div><div class="val mono">${jt(pt.sisa)}</div><div class="sub down">belum tertagih</div></div>
+    <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><div class="lbl">Pengeluaran DP Vendor</div><div class="val mono">${jt(Object.values(cat).reduce((a,b)=>a+b,0))}</div><div class="sub" style="color:var(--muted)">${allVendor().length} transaksi</div></div>
+  </div>
+  <div class="panel fade"><div class="panel-h"><h3>Kinerja per Bulan</h3><button class="btn-acc ok" onclick="exportRingkasanExcel()">⬇ Export Excel</button></div><table style="margin-top:12px"><thead><tr><th>Bulan</th><th>Jml Trip</th><th>Pax</th><th>Bus</th><th>Laba Persiapan</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="grid fade" style="grid-template-columns:1fr 1fr">
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Rekap Piutang (Invoice)</h3></div><table style="margin-top:12px"><thead><tr><th>Pelanggan</th><th>Tagihan</th><th>DP Masuk</th><th>Sisa</th><th>Status</th></tr></thead><tbody>${piutRows}</tbody></table></div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>DP Vendor per Kategori</h3></div><div style="padding:18px 19px">${catRows}</div></div>
+  </div>`;
+}
+function keuAruskas(){
+  const masuk=totalMasuk();const keluar=totalKeluar();const saldo=masuk-keluar;
+  const komitmen=allVendor().reduce((a,d)=>a+vendorSisa(d),0);
+  const inRows=allPiutang().map(p=>({p,paid:clientPaid(p)})).filter(x=>x.paid>0).sort((a,b)=>b.paid-a.paid).slice(0,10).map(x=>`<tr><td><div class="nm" style="font-weight:700">${esc(x.p.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${x.p.tgl?dateID(x.p.tgl):'—'}</div></td><td class="price mono" style="color:var(--green)">+ ${jt(x.paid)}</td></tr>`).join('');
+  const vpaid={};allVendor().forEach(d=>{const pd=vendorPaid(d);if(pd>0)vpaid[d.kat]=(vpaid[d.kat]||0)+pd;});
+  const catMax=Math.max(1,...Object.values(vpaid));
+  const outRows=Object.entries(vpaid).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>`<div class="catrow"><div class="catnm" style="width:140px">${esc(k)}</div><div class="catbar"><div class="catfill" style="width:${v/catMax*100}%;background:${col(i)}"></div></div><div class="catval">${jt(v)}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12.5px">Belum ada pembayaran vendor</div>';
+  const mx=Math.max(masuk,keluar,1);
+  return `<div class="cards fade" style="grid-template-columns:repeat(3,1fr)">
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div class="lbl">Uang Masuk (pembayaran klien)</div><div class="val mono" style="color:var(--green)">${jt(masuk)}</div><div class="sub" style="color:var(--muted)">DP + pelunasan</div></div>
+    <div class="scard"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div class="lbl">Uang Keluar (dibayar ke vendor)</div><div class="val mono" style="color:var(--red)">${jt(keluar)}</div><div class="sub" style="color:var(--muted)">komitmen vendor ${jt(komitmen)} · gaji crew ${jt(totalGajiCrew())}</div></div>
+    <div class="scard" style="border-color:${saldo<0?'var(--red)':'var(--green)'}"><div class="ic ${saldo<0?'r':'gr'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="lbl">Saldo Kas</div><div class="val mono" style="color:${saldo<0?'var(--red)':'var(--green)'}">${saldo<0?'- ':''}${jt(Math.abs(saldo))}</div><div class="sub" style="color:var(--muted)">masuk − keluar</div></div>
+  </div>
+  <div class="panel fade"><div class="panel-h"><h3>Masuk vs Keluar (aktual)</h3><button class="btn-acc ok" onclick="exportAruskasExcel()">⬇ Export Excel</button></div><div style="padding:18px 19px">
+    <div class="catrow"><div class="catnm" style="width:120px;color:var(--green)">Uang Masuk</div><div class="catbar" style="height:14px"><div class="catfill" style="width:${masuk/mx*100}%;background:var(--green)"></div></div><div class="catval" style="width:90px">${jt(masuk)}</div></div>
+    <div class="catrow"><div class="catnm" style="width:120px;color:var(--red)">Uang Keluar</div><div class="catbar" style="height:14px"><div class="catfill" style="width:${keluar/mx*100}%;background:var(--red)"></div></div><div class="catval" style="width:90px">${jt(keluar)}</div></div>
+  </div></div>
+  <div class="grid fade" style="grid-template-columns:1fr 1fr">
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Uang Masuk — Pembayaran Klien</h3></div><table style="margin-top:12px"><thead><tr><th>Klien</th><th style="text-align:right">Total Dibayar</th></tr></thead><tbody>${inRows}</tbody></table></div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Uang Keluar — per Kategori (dibayar)</h3></div><div style="padding:18px 19px">${outRows}</div></div>
+  </div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Arus kas = uang yang benar-benar bergerak: uang masuk dari pembayaran klien (Pelunasan), uang keluar dari pembayaran vendor (Jadwal Vendor). Keduanya ikut berubah saat kamu catat pembayaran.</p>`;
+}
+function keuPelunasan(){
+  const day=86400000;const P=allPiutang().filter(p=>p.tagih>0);
+  const rows=P.map(p=>{const[sc,sl]=clientStatus(p);const paid=clientPaid(p);const sisa=clientSisa(p);
+    const due=p.tgl?new Date(new Date(p.tgl)-7*day):null;
+    const overdue=due&&today>due&&sc!=='lunas';
+    const target=due?due.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}):'—';
+    const termN=(p.dp>0?1:0)+payClientList(p.id).length;
+    const btn=`<button class="btn-acc no" style="margin-right:4px" onclick="genInvoicePDF('${p.id}')" title="Unduh invoice PDF">⬇ Invoice</button>`+(sc==='lunas'?`<button class="btn-acc no" onclick="openBayar('${p.id}')">Detail</button>`:`<button class="btn-acc ok" onclick="openBayar('${p.id}')">+ Bayar</button>`);
+    return `<tr class="clk" onclick="openBayar('${p.id}')"><td><div class="nm" style="font-weight:700">${esc(p.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(p.inv)||'—'} · ${termN} termin</div></td><td class="mono">${jt(p.tagih)}</td><td class="mono" style="color:var(--green)">${paid?jt(paid):'—'}</td><td class="price mono">${sisa>0?jt(sisa):'<span style=color:var(--green)>Lunas</span>'}</td><td style="font-size:12.5px;${overdue?'color:var(--red);font-weight:700':'color:var(--muted)'}">${target}${overdue?' ⚠':''}</td><td><span class="pill ${sc}">${sl}</span></td><td style="text-align:right" onclick="event.stopPropagation()">${btn}</td></tr>`;}).join('');
+  const lunasN=P.filter(p=>clientStatus(p)[0]==='lunas').length;
+  const jtN=P.filter(p=>{const due=p.tgl?new Date(new Date(p.tgl)-7*day):null;return due&&today>due&&clientStatus(p)[0]!=='lunas';}).length;
+  const pt=piutangTot();
+  return `<div class="cards fade" style="grid-template-columns:repeat(4,1fr)">
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg></div><div class="lbl">Sudah Lunas</div><div class="val mono">${lunasN} <span style="font-size:14px;color:var(--muted)">/ ${P.length}</span></div></div>
+    <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div class="lbl">Total DP Masuk</div><div class="val mono" style="color:var(--green)">${jt(pt.dp)}</div></div>
+    <div class="scard"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Sisa Piutang</div><div class="val mono">${jt(pt.sisa)}</div></div>
+    <div class="scard" style="${jtN?'border-color:var(--red)':''}"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div><div class="lbl">Lewat Target (H-7)</div><div class="val mono" style="${jtN?'color:var(--red)':''}">${jtN}</div></div>
+  </div>
+  <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Status Pelunasan Klien</h3><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--muted)">klik baris untuk catat DP / termin</span><button class="btn-acc ok" onclick="exportPelunasanExcel()">⬇ Export Excel</button></div></div>
+  <table style="margin-top:12px"><thead><tr><th>Pelanggan</th><th>Tagihan</th><th>Dibayar</th><th>Sisa</th><th>Target</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Catat pembayaran bertahap (DP 1, DP 2, pelunasan). Setiap termin otomatis mengurangi sisa & menambah uang masuk di Arus Kas dan Aging Piutang.</p>`;
+}
+function openBayar(id){
+  const p=allPiutang().find(x=>x.id===id);if(!p)return;
+  const paid=clientPaid(p),sisa=clientSisa(p);const list=payClientList(p.id);
+  const nextTermin='DP '+(list.length+ (p.dp>0?2:1));
+  const hist=[];
+  if(p.dp>0)hist.push(`<div class="pay-row"><span>DP awal (dari data)</span><b style="color:var(--green)">${jt(p.dp)}</b></div>`);
+  list.forEach((x,i)=>hist.push(`<div class="pay-row"><span>${esc(x.termin)} · ${x.date}</span><b style="color:var(--green)">${jt(x.amount)}</b> <button class="pay-del" onclick="delClientPayment('${p.id}',${i});openBayar('${p.id}')">✕</button></div>`));
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='bayarOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:460px"><div class="pv-bar"><b>Pembayaran — ${esc(p.inst)}</b><div><button class="btn-acc ok" style="margin-right:6px" onclick="genInvoicePDF('${p.id}')">⬇ Invoice PDF</button><button class="btn-acc no" onclick="document.getElementById('bayarOv').remove()">Tutup</button></div></div>
+    <div style="background:#fff;margin:16px;border-radius:10px;padding:18px">
+      <div class="pay-sum"><div><span>Tagihan</span><b>${jt(p.tagih)}</b></div><div><span>Dibayar</span><b style="color:var(--green)">${jt(paid)}</b></div><div><span>Sisa</span><b style="color:${sisa>0?'var(--red)':'var(--green)'}">${jt(sisa)}</b></div></div>
+      <div class="pay-hist">${hist.join('')||'<div style="color:var(--muted);font-size:12.5px;text-align:center;padding:8px">Belum ada pembayaran</div>'}</div>
+      ${sisa>0?`<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+        <div class="frow"><div><label class="flbl">Termin</label><input id="b_termin" class="finput" value="${nextTermin}"></div><div><label class="flbl">Tanggal</label><input id="b_tgl" class="finput" type="date" value="${new Date().toISOString().slice(0,10)}"></div></div>
+        <label class="flbl">Jumlah (Rp)</label><input id="b_amount" class="finput" type="number" placeholder="${sisa}" value="${sisa}">
+        <div style="display:flex;gap:8px"><button class="btn-save" style="flex:1" onclick="submitBayar('${p.id}')">Catat Pembayaran</button><button class="btn-save" style="flex:1;background:var(--green)" onclick="document.getElementById('b_amount').value=${sisa};submitBayar('${p.id}')">Lunasi Sisa</button></div>
+      </div>`:'<div style="text-align:center;color:var(--green);font-weight:700;padding:10px">✓ Lunas</div>'}
+    </div></div>`;
+  document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+function submitBayar(id){
+  const amt=parseInt(document.getElementById('b_amount').value)||0;
+  const termin=(document.getElementById('b_termin').value||'DP').trim();
+  const tgl=document.getElementById('b_tgl').value;
+  if(amt<=0){toast('Isi jumlah pembayaran');return;}
+  addClientPayment(id,termin,amt,tgl);toast('Pembayaran dicatat: '+jt(amt));
+  const ov=document.getElementById('bayarOv');if(ov)ov.remove();renderKeu();
+}
+const VCAT={'Transport / Bus':'var(--blue)','Hotel / Villa':'var(--teal)','Operasional / Lainnya':'var(--purple)','Aset & Perlengkapan':'var(--orange)','Kaos & Merchandise':'var(--gold-ink)','Wisata / Tiket':'var(--green)','Konsumsi / Katering':'var(--orange)'};
+function vendDue(d){return (d.tgl&&d.tgl!=='-')?new Date(d.tgl):null;}
+function keuJadwalVendor(){
+  const list=allVendor().map(d=>{const[sc,sl]=vendorStatusArr(d);return{...d,sc,sl,paid:vendorPaid(d),sisa:vendorSisa(d)};});
+  const lunas=list.filter(d=>d.sc==='lunas'),belum=list.filter(d=>d.sc!=='lunas');
+  const totPaid=list.reduce((a,d)=>a+d.paid,0),totSisa=list.reduce((a,d)=>a+d.sisa,0);
+  const order=[...belum.sort((a,b)=>b.sisa-a.sisa),...lunas.sort((a,b)=>b.nom-a.nom)];
+  const rows=order.map(d=>{const isL=d.sc==='lunas';const due=vendDue(d);const overdue=due&&today>due&&!isL;
+    return `<tr class="clk" style="${isL?'opacity:.6':''}" onclick="openBayarVendor('${d.no}')"><td><div class="nm" style="font-weight:700">${esc(d.vendor)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(d.ket).slice(0,38)}</div></td><td><span class="pill jadwal" style="background:${(VCAT[d.kat]||'#888')}1a;color:${VCAT[d.kat]||'#888'};font-size:11px">${esc(d.kat.split(' ')[0])}</span></td><td class="price mono">${jt(d.nom)}</td><td class="mono" style="color:var(--green)">${d.paid?jt(d.paid):'—'}</td><td class="price mono">${d.sisa>0?jt(d.sisa):'<span style=color:var(--green)>0</span>'}</td><td style="font-size:12px;${overdue?'color:var(--red);font-weight:700':'color:var(--muted)'}">${due?dateID(d.tgl):'—'}${overdue?' ⚠':''}</td><td><span class="pill ${d.sc}">${d.sl}</span></td><td style="text-align:right" onclick="event.stopPropagation()"><button class="btn-acc ${isL?'no':'ok'}" onclick="openBayarVendor('${d.no}')">${isL?'Detail':'+ Bayar'}</button></td></tr>`;}).join('');
+  const overdueN=belum.filter(d=>{const due=vendDue(d);return due&&today>due;}).length;
+  const prepRows=upcoming().slice(0,12).map(t=>{const n=prepTrip(t.id).length,tt=prepTotal(t.id),ss=prepSisa(t.id);
+    return `<tr class="clk" onclick="openPrep('${t.id}')"><td><div class="nm" style="font-weight:700">${esc(t.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc((t.dest||'').split('(')[0]).slice(0,34)}</div></td><td style="font-size:12.5px">${dateID(t.brk)}</td><td class="mono">${t.pax}</td><td>${n?`<span class="pill lunas">${n} item</span>`:'<span class="pill piutang">Belum diatur</span>'}</td><td class="mono">${n?rp(tt):'—'}</td><td class="mono" style="color:${ss>0?'var(--red)':'var(--green)'}">${n?(ss>0?rp(ss):'Lunas'):'—'}</td><td style="text-align:right" onclick="event.stopPropagation()"><button class="btn-acc ${n?'no':'ok'}" onclick="openPrep('${t.id}')">${n?'Kelola':'+ Atur'}</button></td></tr>`;}).join('');
+  return `<div class="cards fade" style="grid-template-columns:repeat(4,1fr)">
+    <div class="scard" style="border-color:var(--red)"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Belum Dibayar</div><div class="val mono" style="color:var(--red)">${jt(totSisa)}</div><div class="sub" style="color:var(--muted)">${belum.length} transaksi</div></div>
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg></div><div class="lbl">Sudah Dibayar</div><div class="val mono" style="color:var(--green)">${jt(totPaid)}</div><div class="sub" style="color:var(--muted)">${lunas.length} lunas</div></div>
+    <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><div class="lbl">Total Komitmen</div><div class="val mono">${jt(totPaid+totSisa)}</div><div class="sub" style="color:var(--muted)">${list.length} transaksi</div></div>
+    <div class="scard" style="${overdueN?'border-color:var(--red)':''}"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div><div class="lbl">Lewat Jatuh Tempo</div><div class="val mono" style="${overdueN?'color:var(--red)':''}">${overdueN}</div></div>
+  </div>
+  <div class="panel fade"><div class="panel-h"><h3>Persiapan Vendor per Trip</h3><span style="font-size:12px;color:var(--muted)">pilih armada, hotel, konsumsi, tiket untuk trip yang akan datang</span></div>
+  <table style="margin-top:12px"><thead><tr><th>Trip</th><th>Berangkat</th><th>Pax</th><th>Kebutuhan</th><th>Total Vendor</th><th>Sisa Bayar</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${prepRows||'<tr><td colspan="7" style="color:var(--muted);font-size:12.5px">Tidak ada trip akan datang.</td></tr>'}</tbody></table></div>
+  <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Jadwal Pembayaran Vendor</h3><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--muted)">belum lunas di atas · klik baris untuk bayar</span><button class="btn-acc ok" onclick="exportVendorExcel()">⬇ Export Excel</button></div></div>
+  <table style="margin-top:12px"><thead><tr><th>Vendor / Keperluan</th><th>Kategori</th><th>Nominal</th><th>Dibayar</th><th>Sisa</th><th>Jatuh Tempo</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Catat pembayaran vendor bertahap (bisa dicicil). Status: <b>Belum bayar</b> → <b>Sebagian</b> → <b>Lunas</b>. Jatuh tempo lewat ditandai merah. Tiap pembayaran menambah Uang Keluar di Arus Kas.</p>`;
+}
+function openBayarVendor(no){
+  const d=allVendor().find(x=>x.no===no);if(!d)return;
+  const paid=vendorPaid(d),sisa=vendorSisa(d);const base=vendorBasePaid(d);const list=payVendorList(no);
+  const hist=[];
+  if(base>0)hist.push(`<div class="pay-row"><span>Sudah dibayar (dari data)</span><b style="color:var(--green)">${jt(base)}</b></div>`);
+  list.forEach((x,i)=>hist.push(`<div class="pay-row"><span>${x.date}${x.ket?' · '+esc(x.ket):''}</span><b style="color:var(--green)">${jt(x.amount)}</b> <button class="pay-del" onclick="delVendorPayment('${no}',${i});openBayarVendor('${no}')">✕</button></div>`));
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='bayarOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:460px"><div class="pv-bar"><b>Bayar Vendor — ${esc(d.vendor)}</b><button class="btn-acc no" onclick="document.getElementById('bayarOv').remove()">Tutup</button></div>
+    <div style="background:#fff;margin:16px;border-radius:10px;padding:18px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${esc(d.ket)} · ${esc(d.kat)}</div>
+      <div class="pay-sum"><div><span>Nominal</span><b>${jt(d.nom)}</b></div><div><span>Dibayar</span><b style="color:var(--green)">${jt(paid)}</b></div><div><span>Sisa</span><b style="color:${sisa>0?'var(--red)':'var(--green)'}">${jt(sisa)}</b></div></div>
+      <div class="pay-hist">${hist.join('')||'<div style="color:var(--muted);font-size:12.5px;text-align:center;padding:8px">Belum ada pembayaran</div>'}</div>
+      ${base>0?'<div style="font-size:11px;color:var(--muted);margin-top:8px">Transaksi ini sudah lunas di data awal.</div>':(sisa>0?`<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+        <div class="frow"><div><label class="flbl">Tanggal</label><input id="bv_tgl" class="finput" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div><label class="flbl">Keterangan</label><input id="bv_ket" class="finput" placeholder="mis. transfer"></div></div>
+        <label class="flbl">Jumlah (Rp)</label><input id="bv_amount" class="finput" type="number" value="${sisa}">
+        <div style="display:flex;gap:8px"><button class="btn-save" style="flex:1" onclick="submitBayarVendor('${no}')">Catat Pembayaran</button><button class="btn-save" style="flex:1;background:var(--green)" onclick="document.getElementById('bv_amount').value=${sisa};submitBayarVendor('${no}')">Lunasi Sisa</button></div>
+      </div>`:'<div style="text-align:center;color:var(--green);font-weight:700;padding:10px">✓ Lunas</div>')}
+    </div></div>`;
+  document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+function submitBayarVendor(no){
+  const amt=parseInt(document.getElementById('bv_amount').value)||0;
+  if(amt<=0){toast('Isi jumlah pembayaran');return;}
+  addVendorPayment(no,amt,document.getElementById('bv_tgl').value,document.getElementById('bv_ket').value);
+  toast('Pembayaran vendor dicatat: '+jt(amt));
+  const ov=document.getElementById('bayarOv');if(ov)ov.remove();renderKeu();
+}
+// ---------- MODAL PERSIAPAN VENDOR ----------
+function prepUnitOpts(kat,sel){
+  const src=(PREPKAT.find(k=>k[0]===kat)||[])[1];
+  if(!src)return '';
+  if(src==='hotels'){const regions=[...new Set(CAT.hotels.map(h=>h.region))];
+    return regions.map(r=>`<optgroup label="${esc(r)}">`+CAT.hotels.filter(h=>h.region===r).map(h=>`<option value="${esc(h.name)}|${h.wd}" ${h.name===sel?'selected':''}>${esc(h.name)} (${rp(h.wd)}/kamar)</option>`).join('')+'</optgroup>').join('');}
+  if(src==='dests'){const cities=[...new Set(CAT.dests.map(d=>d.city))];
+    return cities.map(c=>`<optgroup label="${esc(c)}">`+CAT.dests.filter(d=>d.city===c).map(d=>`<option value="${esc(d.name)}|${d.price}" ${d.name===sel?'selected':''}>${esc(d.name)} (${rp(d.price)}/pax)</option>`).join('')+'</optgroup>').join('');}
+  if(src==='armada')return CAT.armada.map(a=>`<option value="${esc(a.name)}|${a.rate}" ${a.name===sel?'selected':''}>${esc(a.name)} (${rp(a.rate)}/bus/hari)</option>`).join('');
+  if(src==='kaos')return CAT.kaos.filter(k=>k.price>0).map(k=>`<option value="${esc(k.name)}|${k.price}" ${k.name===sel?'selected':''}>${esc(k.name)} (${rp(k.price)}/pax)</option>`).join('');
+  return '';
+}
+function prepQtyDefault(kat,t){
+  const hari=tripDays(t),pax=t.pax||0,malam=Math.max(0,hari-1);
+  if(kat==='Transport / Bus')return (t.bus||1)*hari;
+  if(kat==='Hotel / Villa')return Math.max(1,malam)*Math.ceil(pax/4);
+  if(kat==='Konsumsi / Katering')return pax*3;
+  if(kat==='Kaos & Merchandise')return pax;
+  if(kat==='Wisata / Tiket')return pax;
+  return 1;
+}
+function prepQtyLabel(kat){
+  return kat==='Transport / Bus'?'bus × hari':kat==='Hotel / Villa'?'kamar × malam':kat==='Konsumsi / Katering'?'porsi (pax × frekuensi)':kat==='Kaos & Merchandise'?'pcs':kat==='Wisata / Tiket'?'tiket (pax)':'qty';
+}
+function onPrepKat(tripId){
+  const t=allTrips().find(x=>x.id===tripId);if(!t)return;
+  const kat=document.getElementById('pp_kat').value;
+  const opts=prepUnitOpts(kat,'');
+  const vw=document.getElementById('pp_vwrap');
+  vw.innerHTML=opts?`<label class="flbl">Vendor / Pilihan</label><select id="pp_vendor" class="finput" onchange="onPrepVendor()">${opts}</select>`
+    :`<label class="flbl">Vendor / Keperluan</label><input id="pp_vendor" class="finput" placeholder="${kat==='Konsumsi / Katering'?'mis. Katering Bu Ningsih':'mis. Dokumentasi drone'}">`;
+  document.getElementById('pp_qlbl').textContent=prepQtyLabel(kat);
+  document.getElementById('pp_qty').value=prepQtyDefault(kat,t);
+  document.getElementById('pp_due').value=dminus(t.brk,PREPDUE[kat]||7);
+  if(opts)onPrepVendor();else{document.getElementById('pp_unit').value=0;prepCalcTotal();}
+}
+function onPrepVendor(){
+  const v=document.getElementById('pp_vendor');if(!v||!v.value)return;
+  const parts=String(v.value).split('|');
+  if(parts.length>1)document.getElementById('pp_unit').value=parts[1];
+  prepCalcTotal();
+}
+function prepCalcTotal(){
+  const q=+(document.getElementById('pp_qty')||{}).value||0,u=+(document.getElementById('pp_unit')||{}).value||0;
+  const el=document.getElementById('pp_total');if(el)el.textContent=rp(q*u);
+}
+function submitPrep(tripId){
+  const kat=document.getElementById('pp_kat').value;
+  const vEl=document.getElementById('pp_vendor');
+  let vendor=vEl?String(vEl.value||'').split('|')[0]:'';
+  if(!vendor){toast('Pilih / isi vendor dulu');return;}
+  const qty=+document.getElementById('pp_qty').value||0,unit=+document.getElementById('pp_unit').value||0;
+  if(qty<=0||unit<=0){toast('Isi jumlah & harga satuan');return;}
+  prepAdd(tripId,kat,vendor,prepQtyLabel(kat)+': '+qty,qty,unit,document.getElementById('pp_due').value);
+  toast('Kebutuhan ditambah: '+vendor);openPrep(tripId);
+}
+function prepAutoFill(tripId){
+  const t=allTrips().find(x=>x.id===tripId);if(!t)return;
+  if(prepTrip(tripId).length){toast('Sudah ada data persiapan');return;}
+  const hari=tripDays(t),pax=t.pax||0,malam=Math.max(0,hari-1);
+  const isWe=t.brk&&[0,6].includes(new Date(t.brk).getDay());
+  const arm=CAT.armada.find(a=>kapasitas(a.name)>=Math.ceil(pax/Math.max(1,(t.bus||1))))||CAT.armada[CAT.armada.length-1];
+  prepAdd(tripId,'Transport / Bus',arm.name,'bus × hari: '+((t.bus||1)*hari),(t.bus||1)*hari,arm.rate,dminus(t.brk,14));
+  if(malam>0){const ht=CAT.hotels[0];prepAdd(tripId,'Hotel / Villa',ht.name,'kamar × malam: '+(malam*Math.ceil(pax/4)),malam*Math.ceil(pax/4),isWe?ht.we:ht.wd,dminus(t.brk,14));}
+  if(pax>0)prepAdd(tripId,'Konsumsi / Katering','Katering (belum ditentukan)','porsi: '+(pax*3),pax*3,25000,dminus(t.brk,7));
+  if(pax>0)prepAdd(tripId,'Wisata / Tiket','Tiket masuk (belum ditentukan)','tiket: '+pax,pax,30000,dminus(t.brk,7));
+  toast('Draf persiapan dibuat — silakan sesuaikan');openPrep(tripId);
+}
+function prepTimelineHTML(t){
+  return PREPTL.map(([n,ttl,desc])=>{const d=dminus(t.brk,n);const dt=d?new Date(d):null;
+    const lewat=dt&&today>dt,kini=dt&&Math.abs(today-dt)<86400000;
+    return `<div class="tl-item ${lewat?'done':''}"><div class="tl-dot" style="background:${lewat?'var(--green)':kini?'var(--gold)':'var(--line2,#d8d8d8)'}"></div>
+      <div class="tl-body"><div class="tl-top"><b>H-${n} · ${ttl}</b><span class="tl-date" style="${lewat?'color:var(--green)':kini?'color:var(--gold-ink);font-weight:700':''}">${d?dateID(d):'—'}${lewat?' ✓':kini?' ← hari ini':''}</span></div><p>${desc}</p></div></div>`;}).join('');
+}
+function openPrep(tripId){
+  const t=allTrips().find(x=>x.id===tripId);if(!t)return;
+  const items=prepTrip(tripId);const tot=prepTotal(tripId),paid=prepPaid(tripId),sisa=prepSisa(tripId);
+  const rows=items.map(x=>{const vd=vendorPaid({no:x.id,nom:x.nom,status:''});const vs=Math.max(0,x.nom-vd);
+    const due=x.due?new Date(x.due):null;const over=due&&today>due&&vs>0;
+    return `<div class="pp-row"><div class="pp-main"><span class="pill jadwal" style="background:${(VCAT[x.kat]||'#888')}1a;color:${VCAT[x.kat]||'#888'};font-size:10.5px">${esc(x.kat.split(' ')[0])}</span>
+        <div class="pp-nm">${esc(x.vendor)}</div><div class="pp-sub">${esc(x.ket)} · ${rp(x.unit)}/unit${x.due?' · tempo '+dateID(x.due):''}${over?' <b style=color:var(--red)>⚠ lewat</b>':''}</div></div>
+      <div class="pp-num"><b>${rp(x.nom)}</b><span style="color:${vs>0?'var(--red)':'var(--green)'}">${vs>0?'sisa '+rp(vs):'lunas'}</span></div>
+      <div class="pp-act"><button class="btn-acc ${vs>0?'ok':'no'}" onclick="document.getElementById('prepOv').remove();openBayarVendor('${x.id}')">${vs>0?'Bayar':'Detail'}</button><button class="pay-del" onclick="prepDel('${tripId}','${x.id}');openPrep('${tripId}')">✕</button></div></div>`;}).join('');
+  const katOpts=PREPKAT.map(([k])=>`<option value="${esc(k)}">${esc(k)}</option>`).join('');
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='prepOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:640px"><div class="pv-bar"><b>Persiapan Vendor — ${esc(t.inst)}</b><button class="btn-acc no" onclick="document.getElementById('prepOv').remove()">Tutup</button></div>
+    <div style="background:var(--bg);padding:16px;max-height:78vh;overflow:auto">
+      <div class="pay-sum" style="margin-bottom:14px"><div><span>Total Kebutuhan</span><b>${rp(tot)}</b></div><div><span>Sudah Dibayar</span><b style="color:var(--green)">${rp(paid)}</b></div><div><span>Sisa</span><b style="color:${sisa>0?'var(--red)':'var(--green)'}">${rp(sisa)}</b></div></div>
+      <div class="td-card"><h5>Timeline Persiapan · ${t.pax} pax · ${tripDays(t)} hari · berangkat ${dateID(t.brk)}</h5><div class="tl">${prepTimelineHTML(t)}</div></div>
+      <div class="td-card"><h5>Kebutuhan Vendor ${items.length?`(${items.length})`:''}</h5>
+        ${rows||`<div style="font-size:12.5px;color:var(--muted);padding:6px 0">Belum ada kebutuhan. <b>Isi Otomatis</b> membuat draf dari data trip (armada, hotel, konsumsi, tiket), lalu bisa disesuaikan.</div>
+        <button class="btn-save" style="margin-top:6px" onclick="prepAutoFill('${tripId}')">⚡ Isi Otomatis dari Data Trip</button>`}
+      </div>
+      <div class="td-card"><h5>Tambah Kebutuhan</h5>
+        <label class="flbl">Kategori</label><select id="pp_kat" class="finput" style="margin:4px 0 10px" onchange="onPrepKat('${tripId}')">${katOpts}</select>
+        <div id="pp_vwrap"></div>
+        <div class="frow" style="margin-top:10px"><div><label class="flbl">Jumlah <span id="pp_qlbl"></span></label><input id="pp_qty" class="finput" type="number" oninput="prepCalcTotal()"></div>
+          <div><label class="flbl">Harga satuan (Rp)</label><input id="pp_unit" class="finput" type="number" oninput="prepCalcTotal()"></div></div>
+        <div class="frow"><div><label class="flbl">Jatuh tempo bayar</label><input id="pp_due" class="finput" type="date"></div>
+          <div><label class="flbl">Total</label><div class="finput" style="background:#f4f6fa;font-weight:800" id="pp_total">Rp 0</div></div></div>
+        <button class="btn-save" style="margin-top:10px" onclick="submitPrep('${tripId}')">+ Tambah ke Persiapan</button>
+      </div>
+      <p style="font-size:11.5px;color:var(--muted-2);padding:0 2px">Setiap kebutuhan otomatis jadi tagihan vendor di <b>Keuangan → Jadwal Vendor</b> dan ikut terhitung di Arus Kas saat dibayar.</p>
+    </div></div>`;
+  document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+  onPrepKat(tripId);
+}
+function keuProfit(){
+  const trips=DATA.trips.filter(t=>t.id);
+  const totLaba=trips.reduce((a,t)=>a+t.laba,0);
+  const withLaba=trips.filter(t=>t.laba!==0);
+  const rugi=trips.filter(t=>/Rugi|Selisih/i.test(t.status)||t.laba<0);
+  const avg=withLaba.length?totLaba/withLaba.length:0;
+  const rekTrips=trips.filter(t=>t.labaRekap);const totRek=rekTrips.reduce((a,t)=>a+t.labaRekap,0);
+  // per daerah
+  const reg={};trips.forEach(t=>{const d=(t.dest||'').split('(')[0].trim();if(!d||d==='-')return;reg[d]=(reg[d]||0)+t.laba;});
+  const topReg=Object.entries(reg).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const regMax=topReg.length?topReg[0][1]:1;
+  const regRows=topReg.map(([k,v],i)=>`<div class="catrow"><div class="catnm" style="width:150px">${esc(k)}</div><div class="catbar"><div class="catfill" style="width:${v/regMax*100}%;background:${col(i)}"></div></div><div class="catval" style="width:84px">${jt(v)}</div></div>`).join('');
+  // per jenis
+  const jen={};trips.forEach(t=>{const j=t.jenis||'Lainnya';if(!jen[j])jen[j]={laba:0,n:0};jen[j].laba+=t.laba;jen[j].n++;});
+  const jenRows=Object.entries(jen).sort((a,b)=>b[1].laba-a[1].laba).map(([k,v])=>`<tr><td style="font-weight:600">${esc(k)}</td><td class="mono">${v.n}</td><td class="price mono">${jt(v.laba)}</td><td class="mono" style="color:var(--muted)">${jt(v.laba/v.n)}</td></tr>`).join('');
+  // top & rugi trips
+  const top=[...withLaba].sort((a,b)=>b.laba-a.laba).slice(0,5);
+  const topRows=top.map(t=>`<tr><td><div class="nm" style="font-weight:700">${esc(t.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc((t.dest||'').split('(')[0])}</div></td><td class="price mono" style="color:var(--green)">${jt(t.laba)}</td></tr>`).join('');
+  const rugiRows=rugi.length?rugi.map(t=>`<tr><td><div class="nm" style="font-weight:700">${esc(t.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc((t.dest||'').split('(')[0])}</div></td><td class="price mono" style="color:var(--red)">${t.laba<0?jt(t.laba):esc(t.status)}</td></tr>`).join(''):`<tr><td colspan="2" style="text-align:center;color:var(--muted);padding:20px">Tidak ada trip rugi 🎉</td></tr>`;
+  return `<div class="cards fade" style="grid-template-columns:repeat(4,1fr)">
+    <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="lbl">Total Laba (Persiapan)</div><div class="val mono">${jt(totLaba)}</div><div class="sub" style="color:var(--muted)">${withLaba.length} trip</div></div>
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div class="lbl">Rata-rata / Trip</div><div class="val mono">${jt(avg)}</div><div class="sub up">laba rata-rata</div></div>
+    <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg></div><div class="lbl">Laba Rekap Final</div><div class="val mono">${jt(totRek)}</div><div class="sub" style="color:var(--muted)">terisi ${rekTrips.length} trip</div></div>
+    <div class="scard" style="${rugi.length?'border-color:var(--red)':''}"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div><div class="lbl">Trip Rugi / Selisih</div><div class="val mono" style="${rugi.length?'color:var(--red)':''}">${rugi.length} <span style="font-size:14px;color:var(--muted)">trip</span></div></div>
+  </div>
+  <div class="grid fade" style="grid-template-columns:1fr 1fr">
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Laba per Daerah <span style="font-size:12px;color:var(--muted)">(top 8)</span></h3><button class="btn-acc ok" onclick="exportProfitExcel()">⬇ Export Excel</button></div><div style="padding:18px 19px">${regRows}</div></div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Laba per Jenis Layanan</h3></div><table style="margin-top:12px"><thead><tr><th>Jenis</th><th>Trip</th><th>Total Laba</th><th>Rata/Trip</th></tr></thead><tbody>${jenRows}</tbody></table></div>
+  </div>
+  <div class="grid fade" style="grid-template-columns:1fr 1fr">
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>5 Trip Paling Untung</h3></div><table style="margin-top:12px"><thead><tr><th>Trip</th><th style="text-align:right">Laba</th></tr></thead><tbody>${topRows}</tbody></table></div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Trip Rugi / Perlu Dicek</h3></div><table style="margin-top:12px"><thead><tr><th>Trip</th><th style="text-align:right">Keterangan</th></tr></thead><tbody>${rugiRows}</tbody></table></div>
+  </div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Laba per sales belum bisa ditampilkan karena data trip belum menandai sales penanggung jawab — muncul otomatis setelah area Sales aktif. "Laba Rekap Final" baru terisi di ${rekTrips.length} trip; sisanya memakai laba persiapan.</p>`;
+}
+function keuAging(){
+  const day=86400000;
+  const items=allPiutang().map(p=>({...p,sisa:clientSisa(p)})).filter(p=>p.sisa>0);
+  function bucket(p){if(!p.tgl)return 3;const d=Math.floor((today-new Date(p.tgl))/day);if(d<=0)return 0;if(d<=30)return 1;if(d<=60)return 2;return 3;}
+  const B=[{k:'Belum jatuh tempo',c:'var(--blue)',pill:'jadwal'},{k:'Lewat 1–30 hari',c:'var(--gold-ink)',pill:'dp'},{k:'Lewat 31–60 hari',c:'var(--orange)',pill:'dp'},{k:'Lewat > 60 hari',c:'var(--red)',pill:'piutang'}];
+  const sums=[0,0,0,0],cnts=[0,0,0,0];items.forEach(p=>{const b=bucket(p);sums[b]+=p.sisa;cnts[b]++;});
+  const cards=B.map((b,i)=>`<div class="scard"><div class="lbl" style="font-weight:700;color:${b.c}">${b.k}</div><div class="val mono">${sums[i]?jt(sums[i]):'Rp 0'}</div><div class="sub" style="color:var(--muted)">${cnts[i]} invoice</div></div>`).join('');
+  const rows=items.map(p=>({...p,b:bucket(p),days:p.tgl?Math.floor((today-new Date(p.tgl))/day):null})).sort((a,b)=>b.b-a.b||b.sisa-a.sisa).map(p=>{const bb=B[p.b];const ket=p.b===0?'Jatuh tempo '+(p.tgl?dateID(p.tgl):'—'):(p.days+' hari lalu');
+    return `<tr class="clk" onclick="openBayar('${p.id}')"><td><div class="nm" style="font-weight:700">${esc(p.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(p.inv)||'—'}</div></td><td>${p.tgl?dateID(p.tgl):'—'}</td><td class="price mono">${jt(p.sisa)}</td><td style="font-size:12.5px;color:${bb.c};font-weight:600">${ket}</td><td><span class="pill ${bb.pill}">${bb.k.replace('Lewat ','').replace('Belum jatuh tempo','Belum JT')}</span></td><td style="text-align:right" onclick="event.stopPropagation()"><button class="btn-acc ok" onclick="openBayar('${p.id}')">Bayar</button></td></tr>`;}).join('');
+  const tot=sums.reduce((a,b)=>a+b,0);
+  return `<div class="cards fade" style="grid-template-columns:repeat(4,1fr)">${cards}</div>
+  <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Rincian Piutang per Umur <span style="color:var(--muted);font-size:13px">(total ${jt(tot)})</span></h3><button class="btn-acc ok" onclick="exportAgingExcel()">⬇ Export Excel</button></div>
+  <table style="margin-top:12px"><thead><tr><th>Pelanggan</th><th>Tgl Trip</th><th>Sisa Piutang</th><th>Umur</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Umur dihitung dari tanggal trip (patokan pelunasan) terhadap hari ini. Klik baris untuk catat pembayaran — sisa langsung berkurang di semua tab. Hanya invoice dengan sisa &gt; 0 yang tampil.</p>`;
+}
+function xlsxStamp(){return new Date().toISOString().slice(0,10);}
+function exportAruskasExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const masuk=totalMasuk(),keluar=totalKeluar(),saldo=masuk-keluar;
+  const komitmen=allVendor().reduce((a,d)=>a+vendorSisa(d),0);
+  const gaji=totalGajiCrew();
+  const ring=[['ARUS KAS — RINGKASAN',''],['Diekspor',new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})],[''],
+    ['Uang Masuk (pembayaran klien)',masuk],['Uang Keluar (dibayar ke vendor)',keluar],['Saldo Kas',saldo],
+    ['Komitmen vendor (belum dibayar)',komitmen],['Gaji crew (trip berjalan)',gaji]];
+  const masukRows=[['Klien','No. Invoice','Tanggal Trip','Total Dibayar (Rp)']];
+  allPiutang().forEach(p=>{const paid=clientPaid(p);if(paid>0)masukRows.push([p.inst,p.inv||'-',p.tgl?dateID(p.tgl):'-',paid]);});
+  const keluarRows=[['Kategori','Vendor','No','Keterangan','Nominal Kontrak (Rp)','Dibayar (Rp)','Sisa (Rp)']];
+  allVendor().forEach(d=>{const pd=vendorPaid(d);if(pd>0)keluarRows.push([d.kat||'-',d.vendor||'-',d.no||'-',d.ket||'-',d.nom||0,pd,vendorSisa(d)]);});
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ring),'Ringkasan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(masukRows),'Uang Masuk (Klien)');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(keluarRows),'Uang Keluar (Vendor)');
+  XLSX.writeFile(wb,'Havist_ArusKas_'+xlsxStamp()+'.xlsx');
+  toast('Arus Kas diekspor ke Excel');
+}
+function exportAgingExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const day=86400000;
+  const items=allPiutang().map(p=>({...p,sisa:clientSisa(p)})).filter(p=>p.sisa>0);
+  function bucket(p){if(!p.tgl)return 3;const d=Math.floor((today-new Date(p.tgl))/day);if(d<=0)return 0;if(d<=30)return 1;if(d<=60)return 2;return 3;}
+  const BL=['Belum jatuh tempo','Lewat 1–30 hari','Lewat 31–60 hari','Lewat > 60 hari'];
+  const rows=[['Pelanggan','No. Invoice','Tanggal Trip','Sisa Piutang (Rp)','Umur (hari)','Kelompok Umur']];
+  items.map(p=>({...p,b:bucket(p),days:p.tgl?Math.floor((today-new Date(p.tgl))/day):null})).sort((a,b)=>b.b-a.b||b.sisa-a.sisa).forEach(p=>{
+    rows.push([p.inst,p.inv||'-',p.tgl?dateID(p.tgl):'-',p.sisa,p.days==null?'-':p.days,BL[p.b]]);
+  });
+  const tot=items.reduce((a,p)=>a+p.sisa,0);
+  rows.push(['','','TOTAL',tot,'','']);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['AGING PIUTANG'],['Diekspor',new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})],['']].concat(rows)),'Aging Piutang');
+  XLSX.writeFile(wb,'Havist_AgingPiutang_'+xlsxStamp()+'.xlsx');
+  toast('Aging Piutang diekspor ke Excel');
+}
+function xlsStampRow(judul){return [[judul],['Diekspor',new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})],['']];}
+function xlsRowsRingkasanTotal(){
+  const m=monthAgg(),pt=piutangTot(),cat=dpCat();
+  const totLaba=Object.values(m).reduce((a,b)=>a+b.laba,0);
+  return xlsStampRow('RINGKASAN KEUANGAN').concat([
+    ['Total Laba Tercatat',totLaba],['Total DP Masuk',pt.dp],['Sisa Piutang',pt.sisa],
+    ['Pengeluaran DP Vendor',Object.values(cat).reduce((a,b)=>a+b,0)]]);
+}
+function xlsRowsKinerjaBulan(){
+  const m=monthAgg();const rows=[['Bulan','Jumlah Trip','Pax','Bus','Laba Persiapan (Rp)']];
+  MONTHS.forEach(k=>rows.push([k.slice(8),m[k].n,m[k].pax,m[k].bus,m[k].laba]));
+  return rows;
+}
+function xlsRowsPiutangRekap(){
+  const rows=[['Pelanggan','No Invoice','Tagihan (Rp)','DP Masuk (Rp)','Sisa (Rp)','Status']];
+  allPiutang().filter(p=>p.tagih>0).forEach(p=>{const paid=clientPaid(p),sisa=clientSisa(p);rows.push([p.inst,p.inv||'-',p.tagih,paid,sisa,clientStatus(p)[1]]);});
+  return rows;
+}
+function xlsRowsDPVendorKategori(){
+  const cat=dpCat();const rows=[['Kategori','Total DP (Rp)']];
+  Object.entries(cat).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>rows.push([k,v]));
+  return rows;
+}
+function exportRingkasanExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsRingkasanTotal()),'Ringkasan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsKinerjaBulan()),'Kinerja per Bulan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsPiutangRekap()),'Rekap Piutang');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsDPVendorKategori()),'DP Vendor per Kategori');
+  XLSX.writeFile(wb,'Havist_RingkasanKeuangan_'+xlsxStamp()+'.xlsx');
+  toast('Ringkasan Keuangan diekspor ke Excel');
+}
+function xlsRowsPelunasan(){
+  const day=86400000;const P=allPiutang().filter(p=>p.tagih>0);
+  const rows=[['Pelanggan','No Invoice','Tagihan (Rp)','Dibayar (Rp)','Sisa (Rp)','Target H-7','Status','Jumlah Termin']];
+  P.forEach(p=>{const[,sl]=clientStatus(p);const paid=clientPaid(p),sisa=clientSisa(p);
+    const due=p.tgl?new Date(new Date(p.tgl)-7*day):null;
+    const termN=(p.dp>0?1:0)+payClientList(p.id).length;
+    rows.push([p.inst,p.inv||'-',p.tagih,paid,sisa,due?dateID(due):'-',sl,termN]);
+  });
+  return rows;
+}
+function exportPelunasanExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const pt=piutangTot();
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsStampRow('PELUNASAN KLIEN').concat([['Total DP Masuk',pt.dp],['Sisa Piutang',pt.sisa]])),'Ringkasan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsPelunasan()),'Pelunasan Klien');
+  XLSX.writeFile(wb,'Havist_PelunasanKlien_'+xlsxStamp()+'.xlsx');
+  toast('Pelunasan Klien diekspor ke Excel');
+}
+function xlsRowsVendor(){
+  const list=allVendor().map(d=>{const[,sl]=vendorStatusArr(d);return{...d,sl,paid:vendorPaid(d),sisa:vendorSisa(d)};});
+  const rows=[['Kategori','Vendor','No','Keterangan','Nominal (Rp)','Dibayar (Rp)','Sisa (Rp)','Jatuh Tempo','Status']];
+  list.forEach(d=>rows.push([d.kat||'-',d.vendor||'-',d.no||'-',d.ket||'-',d.nom||0,d.paid,d.sisa,vendDue(d)?dateID(d.tgl):'-',d.sl]));
+  return rows;
+}
+function exportVendorExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const list=allVendor().map(d=>({...d,paid:vendorPaid(d),sisa:vendorSisa(d)}));
+  const totPaid=list.reduce((a,d)=>a+d.paid,0),totSisa=list.reduce((a,d)=>a+d.sisa,0);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsStampRow('JADWAL VENDOR').concat([['Sudah Dibayar',totPaid],['Belum Dibayar',totSisa],['Total Komitmen',totPaid+totSisa]])),'Ringkasan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsVendor()),'Jadwal Vendor');
+  XLSX.writeFile(wb,'Havist_JadwalVendor_'+xlsxStamp()+'.xlsx');
+  toast('Jadwal Vendor diekspor ke Excel');
+}
+function xlsRowsProfitDaerah(){
+  const reg={};DATA.trips.filter(t=>t.id).forEach(t=>{const d=(t.dest||'').split('(')[0].trim();if(!d||d==='-')return;reg[d]=(reg[d]||0)+t.laba;});
+  const rows=[['Daerah','Total Laba (Rp)']];
+  Object.entries(reg).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>rows.push([k,v]));
+  return rows;
+}
+function xlsRowsProfitJenis(){
+  const jen={};DATA.trips.filter(t=>t.id).forEach(t=>{const j=t.jenis||'Lainnya';if(!jen[j])jen[j]={laba:0,n:0};jen[j].laba+=t.laba;jen[j].n++;});
+  const rows=[['Jenis Layanan','Jumlah Trip','Total Laba (Rp)','Rata-rata/Trip (Rp)']];
+  Object.entries(jen).sort((a,b)=>b[1].laba-a[1].laba).forEach(([k,v])=>rows.push([k,v.n,v.laba,Math.round(v.laba/v.n)]));
+  return rows;
+}
+function xlsRowsProfitTripRows(trips){
+  const rows=[['Trip / Instansi','Daerah','Laba / Keterangan (Rp)']];
+  trips.forEach(t=>rows.push([t.inst,(t.dest||'').split('(')[0].trim()||'-',t.laba]));
+  return rows;
+}
+function exportProfitExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const trips=DATA.trips.filter(t=>t.id);
+  const totLaba=trips.reduce((a,t)=>a+t.laba,0);
+  const withLaba=trips.filter(t=>t.laba!==0);
+  const rugi=trips.filter(t=>/Rugi|Selisih/i.test(t.status)||t.laba<0);
+  const avg=withLaba.length?totLaba/withLaba.length:0;
+  const top=[...withLaba].sort((a,b)=>b.laba-a.laba).slice(0,10);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsStampRow('PROFITABILITAS').concat([['Total Laba (Persiapan)',totLaba],['Rata-rata / Trip',Math.round(avg)],['Trip Rugi / Selisih',rugi.length]])),'Ringkasan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsProfitDaerah()),'Laba per Daerah');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsProfitJenis()),'Laba per Jenis');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsProfitTripRows(top)),'Top 10 Trip');
+  if(rugi.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsProfitTripRows(rugi)),'Trip Rugi');
+  XLSX.writeFile(wb,'Havist_Profitabilitas_'+xlsxStamp()+'.xlsx');
+  toast('Profitabilitas diekspor ke Excel');
+}
+function xlsRowsReimburse(){
+  const rows=[['Crew','Trip','Item','Keterangan','Nominal (Rp)','Tanggal','Status']];
+  reimburseList().sort((a,b)=>b.createdAt-a.createdAt).forEach(r=>{const t=allTrips().find(x=>x.id===r.tripId);
+    const plabel=r.status==='approved'?'Disetujui':r.status==='rejected'?'Ditolak':'Menunggu';
+    rows.push([r.crewName,t?t.inst:'(trip dihapus)',r.item,r.ket||'-',r.nominal,dateID(r.tgl),plabel]);
+  });
+  return rows;
+}
+function exportReimburseExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const list=reimburseList();
+  const pend=list.filter(r=>r.status==='pending'),appr=list.filter(r=>r.status==='approved'),rej=list.filter(r=>r.status==='rejected');
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsStampRow('REIMBURSE LAPANGAN').concat([['Menunggu Persetujuan',pend.length],['Disetujui',appr.length],['Ditolak',rej.length]])),'Ringkasan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsReimburse()),'Reimburse Lapangan');
+  XLSX.writeFile(wb,'Havist_Reimburse_'+xlsxStamp()+'.xlsx');
+  toast('Reimburse Lapangan diekspor ke Excel');
+}
+function exportAllKeuanganExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const masuk=totalMasuk(),keluar=totalKeluar();
+  const komitmen=allVendor().reduce((a,d)=>a+vendorSisa(d),0),gaji=totalGajiCrew();
+  const masukRows=[['Klien','No. Invoice','Tanggal Trip','Total Dibayar (Rp)']];
+  allPiutang().forEach(p=>{const paid=clientPaid(p);if(paid>0)masukRows.push([p.inst,p.inv||'-',p.tgl?dateID(p.tgl):'-',paid]);});
+  const keluarRows=[['Kategori','Vendor','No','Keterangan','Nominal Kontrak (Rp)','Dibayar (Rp)','Sisa (Rp)']];
+  allVendor().forEach(d=>{const pd=vendorPaid(d);if(pd>0)keluarRows.push([d.kat||'-',d.vendor||'-',d.no||'-',d.ket||'-',d.nom||0,pd,vendorSisa(d)]);});
+  const day=86400000;const agItems=allPiutang().map(p=>({...p,sisa:clientSisa(p)})).filter(p=>p.sisa>0);
+  function bucket(p){if(!p.tgl)return 3;const d=Math.floor((today-new Date(p.tgl))/day);if(d<=0)return 0;if(d<=30)return 1;if(d<=60)return 2;return 3;}
+  const BL=['Belum jatuh tempo','Lewat 1–30 hari','Lewat 31–60 hari','Lewat > 60 hari'];
+  const agingRows=[['Pelanggan','No. Invoice','Tanggal Trip','Sisa Piutang (Rp)','Umur (hari)','Kelompok Umur']];
+  agItems.map(p=>({...p,b:bucket(p),days:p.tgl?Math.floor((today-new Date(p.tgl))/day):null})).sort((a,b)=>b.b-a.b||b.sisa-a.sisa).forEach(p=>agingRows.push([p.inst,p.inv||'-',p.tgl?dateID(p.tgl):'-',p.sisa,p.days==null?'-':p.days,BL[p.b]]));
+  const trips=DATA.trips.filter(t=>t.id);
+  const totLabaP=trips.reduce((a,t)=>a+t.laba,0);
+  const rugi=trips.filter(t=>/Rugi|Selisih/i.test(t.status)||t.laba<0);
+  const pt=piutangTot();
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsStampRow('LAPORAN KEUANGAN LENGKAP — HAVIST TRAVELLER').concat([
+    ['Uang Masuk (kas, pembayaran klien)',masuk],['Uang Keluar (kas, dibayar ke vendor)',keluar],['Saldo Kas',masuk-keluar],
+    ['Komitmen vendor (belum dibayar)',komitmen],['Gaji crew (trip berjalan)',gaji],
+    ['Total Laba Tercatat (persiapan)',totLabaP],['Total DP Masuk (piutang)',pt.dp],['Sisa Piutang',pt.sisa],['Trip Rugi/Selisih',rugi.length]])),'Ringkasan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsKinerjaBulan()),'Kinerja per Bulan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(masukRows),'Arus Kas - Masuk');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(keluarRows),'Arus Kas - Keluar');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(agingRows),'Aging Piutang');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsPelunasan()),'Pelunasan Klien');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsVendor()),'Jadwal Vendor');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsProfitDaerah()),'Laba per Daerah');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsProfitJenis()),'Laba per Jenis');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsRowsReimburse()),'Reimburse Lapangan');
+  XLSX.writeFile(wb,'Havist_LaporanKeuanganLengkap_'+xlsxStamp()+'.xlsx');
+  toast('Semua laporan keuangan diekspor ke 1 file Excel (10 sheet)');
+}
+
+function keuReimburse(){
+  const list=reimburseList().sort((a,b)=>b.createdAt-a.createdAt);
+  const pend=list.filter(r=>r.status==='pending'),appr=list.filter(r=>r.status==='approved'),rej=list.filter(r=>r.status==='rejected');
+  const row=r=>{const t=allTrips().find(x=>x.id===r.tripId);const pillc=r.status==='approved'?'lunas':r.status==='rejected'?'piutang':'dp';const plabel=r.status==='approved'?'Disetujui':r.status==='rejected'?'Ditolak':'Menunggu';
+    return `<tr><td><div class="nm" style="font-weight:700">${esc(r.crewName)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${t?esc(t.inst):'(trip dihapus)'}</div></td><td>${esc(r.item)}<div style="font-size:11px;color:var(--muted)">${esc(r.ket||'')}</div></td><td class="price mono">${rp(r.nominal)}</td><td>${dateID(r.tgl)}</td><td><span class="pill ${pillc}">${plabel}</span></td><td style="text-align:right">${r.status==='pending'?`<button class="btn-acc ok" style="margin-right:4px" onclick="decideReimburse('${r.id}','approved')">Setuju</button><button class="btn-acc no" onclick="decideReimburse('${r.id}','rejected')">Tolak</button>`:'—'}</td></tr>`;};
+  return `<div class="cards fade" style="grid-template-columns:repeat(3,1fr)">
+    <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Menunggu Persetujuan</div><div class="val mono">${pend.length}</div><div class="sub" style="color:var(--muted)">${rp(reimburseSum(pend))}</div></div>
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg></div><div class="lbl">Disetujui</div><div class="val mono">${appr.length}</div><div class="sub up">${rp(reimburseSum(appr))}</div></div>
+    <div class="scard"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div><div class="lbl">Ditolak</div><div class="val mono">${rej.length}</div><div class="sub down">${rp(reimburseSum(rej))}</div></div>
+  </div>
+  <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Pengajuan Reimburse Lapangan</h3><button class="btn-acc ok" onclick="exportReimburseExcel()">⬇ Export Excel</button></div>
+  ${list.length?`<table style="margin-top:12px"><thead><tr><th>Crew</th><th>Keterangan</th><th>Nominal</th><th>Tanggal</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table>`:`<div style="padding:34px 19px;text-align:center;color:var(--muted);font-size:13.5px">Belum ada pengajuan reimburse dari Tour Leader/Media.</div>`}
+  </div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Diajukan oleh Tour Leader/Media dari menu Area Tour Leader &amp; Media. Nominal yang disetujui tercatat di sini sebagai biaya lapangan — belum otomatis mengurangi laba trip pada versi ini.</p>`;
+}
+let jadwalFilter='akan';
+const CHECKLIST_DEF=['Armada dikonfirmasi','Hotel dibooking','Tiket wisata dipesan','Konsumsi diatur','Data peserta lengkap','Kaos & merchandise siap'];
+function tripStatus(t){const ov=store('tripStatus',{})[t.id];if(ov)return ov;const b=t.brk?new Date(t.brk):null,p=t.pul?new Date(t.pul):(t.malam!=null?new Date(new Date(t.brk).getTime()+t.malam*86400000):b);if(p&&today>p)return'selesai';if(b&&today>=b&&(!p||today<=p))return'berlangsung';return'akan';}
+function setTripStatus(id,st){const s=store('tripStatus',{});s[id]=st;save('tripStatus',s);toast('Status trip: '+STLBL[st]);renderJadwal();const ov=document.getElementById('tripOv');if(ov&&st==='selesai')ov.remove();}
+const STLBL={akan:'Akan Datang',berlangsung:'Berlangsung',selesai:'Selesai'};
+const STPILL={akan:'jadwal',berlangsung:'dp',selesai:'lunas'};
+function setJadwalFilter(f){jadwalFilter=f;const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.jf===f));renderJadwalBody();}
+function jadwalTrips(){return allTrips().filter(t=>t.brk).sort((a,b)=>a.brk<b.brk?(jadwalFilter==='selesai'?1:-1):(jadwalFilter==='selesai'?-1:1)).filter(t=>jadwalFilter==='semua'||tripStatus(t)===jadwalFilter);}
+function renderJadwal(){const v=document.getElementById('view');if(v&&v.querySelector('#jadwalBody'))renderJadwalBody();}
+function renderJadwalBody(){
+  const b=document.getElementById('jadwalBody');if(!b)return;
+  const list=jadwalTrips();
+  if(!list.length){b.innerHTML='<div class="empty"><h3>Tidak ada trip</h3><p>Tidak ada trip pada filter ini.</p></div>';return;}
+  b.innerHTML='<div class="jgrid">'+list.map(t=>{const[pc,pl]=payStatus(t);const st=tripStatus(t);const a=assignMap()[t.id]||{};const tl=crewById(a.tl),md=crewById(a.media);
+    return `<div class="jcard" onclick="openTripDetail('${t.id}')">
+      <div class="jcard-top"><span class="pill ${STPILL[st]}">${STLBL[st]}</span>${t._new?'<span class="pill dp" style="background:var(--gold);color:var(--navy)">BARU</span>':''}</div>
+      <h4>${esc(t.inst)}</h4><div class="jcard-dest">${esc((t.dest||'').split('(')[0])}</div>
+      <div class="jcard-meta"><span>📅 ${dateID(t.brk)}</span><span>👥 ${t.pax} pax</span><span>🚌 ${t.bus||'-'} bus</span></div>
+      <div class="jcard-crew">${tl?`<span class="crew-chip" style="background:var(--teal)">TL: ${esc(tl.nama.split(' ')[0])}</span>`:'<span class="crew-chip empty">TL: -</span>'}${md?`<span class="crew-chip" style="background:var(--purple)">Media: ${esc(md.nama.split(' ')[0])}</span>`:'<span class="crew-chip empty">Media: -</span>'}</div>
+      <div class="jcard-foot"><span class="pill ${pc}">${pl}</span><button class="btn-acc no" style="font-size:10.5px;padding:3px 8px" onclick="event.stopPropagation();genRundownPDF('${t.id}')">⬇ Rundown</button></div>
+    </div>`;}).join('')+'</div>';
+}
+function vJadwal(){
+  const all=allTrips().filter(t=>t.brk);const akan=all.filter(t=>tripStatus(t)==='akan').length;
+  const filters=[['akan','Akan Datang'],['berlangsung','Berlangsung'],['selesai','Selesai'],['semua','Semua']];
+  const nav=filters.map(([k,l])=>`<button class="tab ${jadwalFilter===k?'active':''}" data-jf="${k}" onclick="setJadwalFilter('${k}')">${l}</button>`).join('');
+  return `<div class="hello fade"><h1>Jadwal Trip</h1><p>${akan} trip akan datang · klik kartu untuk detail, penugasan crew & checklist</p></div>
+  <div class="tabs" style="padding:0 0 16px">${nav}</div><div id="jadwalBody"></div>`;
+}
+function openTripDetail(id){
+  const t=allTrips().find(x=>x.id===id);if(!t)return;
+  const[pc,pl]=payStatus(t);const st=tripStatus(t);const a=assignMap()[t.id]||{};const hari=tripDays(t);
+  const p=piutMap()[t.id];const paid=p?clientPaid(p):0,sisa=p?clientSisa(p):0;
+  const tls=crewList().filter(c=>c.peran==='Tour Leader');const mds=crewList().filter(c=>c.peran==='Media');
+  const opt=(arr,sel)=>'<option value="">— pilih —</option>'+arr.map(c=>{const busy=c.id!==sel&&crewSibuk(c.id,id);return `<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.nama)}${busy?' ⚠ bentrok':''}</option>`;}).join('');
+  const cl=store('checklist',{})[id]||CHECKLIST_DEF.map(x=>({item:x,done:false}));
+  const clHTML=cl.map((c,i)=>`<label class="chk"><input type="checkbox" ${c.done?'checked':''} onchange="toggleChecklist('${id}',${i})"> ${esc(c.item)}</label>`).join('');
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='tripOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:560px"><div class="pv-bar"><b>${esc(t.inst)}</b><div><button class="btn-acc ok" style="margin-right:6px" onclick="genRundownPDF('${id}')">⬇ Rundown PDF</button>${p?`<button class="btn-acc no" style="margin-right:6px" onclick="genInvoicePDF('${id}')">⬇ Invoice</button>`:''}<button class="btn-acc no" onclick="document.getElementById('tripOv').remove()">Tutup</button></div></div>
+    <div style="background:var(--bg);padding:16px;max-height:76vh;overflow:auto">
+      <div style="display:flex;gap:8px;margin-bottom:12px">${Object.keys(STLBL).map(s=>`<button class="btn-acc ${st===s?'ok':'no'}" style="flex:1" onclick="setTripStatus('${id}','${s}')">${STLBL[s]}</button>`).join('')}</div>
+      <div class="td-card"><h5>Info Trip</h5>
+        <div class="td-row"><span>Destinasi</span><b>${esc((t.dest||'').split('(')[0])}</b></div>
+        <div class="td-row"><span>Tanggal</span><b>${dateID(t.brk)}${t.pul?' – '+dateID(t.pul):''} (${hari} hari)</b></div>
+        <div class="td-row"><span>Peserta</span><b>${t.pax} pax</b></div>
+        <div class="td-row"><span>Armada</span><b>${esc(t.armada||(t.bus?t.bus+' unit':'—'))}</b></div>
+        ${t.hotel?`<div class="td-row"><span>Hotel</span><b>${esc(t.hotel)}</b></div>`:''}
+      </div>
+      <div class="td-card"><h5>Penugasan Crew</h5>
+        <label class="flbl">Tour Leader</label><select class="finput" style="margin:4px 0 10px" onchange="assignCrew('${id}','tl',this.value);openTripDetail('${id}')">${opt(tls,a.tl)}</select>
+        <label class="flbl">Media</label><select class="finput" style="margin:4px 0 0" onchange="assignCrew('${id}','media',this.value);openTripDetail('${id}')">${opt(mds,a.media)}</select>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">Gaji crew trip ini: <b>${jt(tripGaji(t))}</b> (${hari} hari)</div>
+      </div>
+      <div class="td-card"><h5>Pembayaran</h5>
+        ${p?`<div class="td-row"><span>Tagihan</span><b>${jt(p.tagih)}</b></div><div class="td-row"><span>Dibayar</span><b style="color:var(--green)">${jt(paid)}</b></div><div class="td-row"><span>Sisa</span><b style="color:${sisa>0?'var(--red)':'var(--green)'}">${jt(sisa)}</b></div><button class="btn-save" style="margin-top:8px" onclick="document.getElementById('tripOv').remove();go('keuangan');setTimeout(()=>{setKeuTab('pelunasan');openBayar('${id}')},50)">Catat Pembayaran</button>`:'<div style="font-size:12.5px;color:var(--muted)">Belum ada invoice piutang untuk trip ini.</div>'}
+      </div>
+      <div class="td-card"><h5>Persiapan Vendor</h5>
+        ${prepTrip(id).length?`<div class="td-row"><span>Kebutuhan tercatat</span><b>${prepTrip(id).length} item</b></div><div class="td-row"><span>Total biaya vendor</span><b>${rp(prepTotal(id))}</b></div><div class="td-row"><span>Sisa harus dibayar</span><b style="color:${prepSisa(id)>0?'var(--red)':'var(--green)'}">${rp(prepSisa(id))}</b></div>`:'<div style="font-size:12.5px;color:var(--muted);margin-bottom:8px">Belum ada vendor dipilih (armada, hotel, konsumsi, tiket).</div>'}
+        <button class="btn-save" style="margin-top:8px" onclick="document.getElementById('tripOv').remove();openPrep('${id}')">${prepTrip(id).length?'Kelola Persiapan Vendor':'🧰 Atur Persiapan Vendor'}</button>
+      </div>
+      <div class="td-card"><h5>Checklist Persiapan</h5>${clHTML}</div>
+    </div></div>`;
+  document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+function toggleChecklist(id,i){const s=store('checklist',{});const cl=s[id]||CHECKLIST_DEF.map(x=>({item:x,done:false}));cl[i].done=!cl[i].done;s[id]=cl;save('checklist',s);}
+
+let katTab='kalkulator',katHotelPage=1,katDestPage=1;
+function setKatHotelPage(p){katHotelPage=p;renderKat();}
+function setKatDestPage(p){katDestPage=p;renderKat();}
+// ===== KATALOG BISA DIEDIT (master data) =====
+// CATALOG = data dasar dari Excel. CAT = yang dipakai aplikasi (dasar + hasil edit di web).
+function catGet(kind){const v=store('cat_'+kind,null);return (v&&Array.isArray(v))?v:CATALOG[kind];}
+function catSet(kind,arr){save('cat_'+kind,arr);}
+function catEdited(kind){return Array.isArray(store('cat_'+kind,null));}
+const CAT={get hotels(){return catGet('hotels');},get armada(){return catGet('armada');},get kaos(){return catGet('kaos');},get dests(){return catGet('dests');},get rooms(){return CATALOG.rooms;}};
+const CATFIELDS={
+  hotels:[['name','Nama Hotel','text'],['region','Daerah','list'],['wd','Harga Weekday / kamar (Rp)','number'],['we','Harga Weekend / kamar (Rp)','number']],
+  dests:[['name','Nama Destinasi','text'],['city','Kota / Daerah','list'],['note','Aktivitas','text'],['price','Harga Tiket / pax (Rp)','number']],
+  armada:[['name','Nama Armada','text'],['rate','Tarif / bus / hari (Rp)','number'],['seat','Kapasitas (seat)','number']],
+  kaos:[['name','Nama Kaos','text'],['price','Harga / pcs (Rp)','number']]
+};
+const CATLBL={hotels:'Hotel',dests:'Destinasi',armada:'Armada',kaos:'Kaos'};
+const CATGRP={hotels:'region',dests:'city'};
+function catAdd(kind,obj){const a=catGet(kind).slice();a.push(obj);catSet(kind,a);}
+function catUpdate(kind,i,obj){const a=catGet(kind).slice();if(i<0||i>=a.length)return;a[i]=obj;catSet(kind,a);}
+function catDel(kind,i){const a=catGet(kind).slice();if(i<0||i>=a.length)return;a.splice(i,1);catSet(kind,a);}
+function catReset(kind){const s={};try{localStorage.removeItem('havist_cat_'+kind);}catch(e){}toast(CATLBL[kind]+' dikembalikan ke data Excel');renderKat();}
+function armSeat(a){return a.seat||kapasitas(a.name);}
+function openCatForm(kind,i){
+  const flds=CATFIELDS[kind];const cur=i>=0?catGet(kind)[i]:{};
+  const grp=CATGRP[kind];
+  const listVals=grp?[...new Set(catGet(kind).map(x=>x[grp]))]:[];
+  const body=flds.map(([k,lbl,ty])=>{
+    if(ty==='list')return `<label class="flbl">${lbl}</label><input id="cf_${k}" class="finput" list="cf_dl" value="${esc(String(cur[k]==null?'':cur[k]))}" placeholder="ketik baru atau pilih"><datalist id="cf_dl">${listVals.map(v=>`<option value="${esc(v)}">`).join('')}</datalist>`;
+    return `<label class="flbl">${lbl}</label><input id="cf_${k}" class="finput" type="${ty}" value="${esc(String(cur[k]==null?'':cur[k]))}">`;
+  }).join('');
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='catOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:440px"><div class="pv-bar"><b>${i>=0?'Edit':'Tambah'} ${CATLBL[kind]}</b><button class="btn-acc no" onclick="document.getElementById('catOv').remove()">Tutup</button></div>
+    <div style="background:#fff;margin:16px;border-radius:10px;padding:18px">${body}
+      <button class="btn-save" style="margin-top:12px" onclick="submitCatForm('${kind}',${i})">${i>=0?'Simpan Perubahan':'+ Tambah ke Katalog'}</button>
+      ${i>=0?`<button class="btn-save" style="margin-top:8px;background:var(--red)" onclick="if(confirm('Hapus ${esc(String(cur.name||''))} dari katalog?')){catDel('${kind}',${i});document.getElementById('catOv').remove();toast('Dihapus dari katalog');renderKat();}">Hapus dari Katalog</button>`:''}
+    </div></div>`;
+  document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+function submitCatForm(kind,i){
+  const o={};let bad='';
+  CATFIELDS[kind].forEach(([k,lbl,ty])=>{const el=document.getElementById('cf_'+k);let v=el?el.value:'';
+    if(ty==='number'){v=+v||0;}else{v=String(v||'').trim();}
+    if(k==='name'&&!v)bad=lbl;
+    if((k==='region'||k==='city')&&!v)bad=lbl;
+    o[k]=v;});
+  if(bad){toast('Isi dulu: '+bad);return;}
+  if(i>=0)catUpdate(kind,i,o);else catAdd(kind,o);
+  document.getElementById('catOv').remove();toast(CATLBL[kind]+' '+(i>=0?'diperbarui':'ditambahkan'));renderKat();
+}
+function catToolbar(kind,extra){
+  return `<div class="cat-bar"><div><button class="btn-save" style="width:auto;padding:8px 14px" onclick="openCatForm('${kind}',-1)">+ Tambah ${CATLBL[kind]}</button>
+    ${catEdited(kind)?`<button class="btn-acc no" style="margin-left:8px" onclick="if(confirm('Kembalikan ${CATLBL[kind]} ke data Excel? Semua perubahan di web hilang.'))catReset('${kind}')">↺ Reset ke data Excel</button>`:''}</div>
+    <span style="font-size:12px;color:var(--muted)">${extra||''}${catEdited(kind)?' · <b style="color:var(--gold-ink)">sudah diubah di web</b>':''}</span></div>`;
+}
+function kapasitas(name){name=name.toUpperCase();if(name.includes('ELF'))return 15;if(name.includes('HIACE'))return 14;if(name.includes('MEDIUM'))return 33;if(name.includes('LEGRES'))return 32;return 45;}
+function vKatalog(){
+  const tabs=[['kalkulator','Kalkulator Harga'],['hotel','Hotel'],['destinasi','Destinasi Wisata'],['armada','Armada & Kaos']];
+  const nav=tabs.map(([k,l])=>`<button class="tab ${katTab===k?'active':''}" data-kt="${k}" onclick="setKatTab('${k}')">${l}</button>`).join('');
+  return `<div class="hello fade"><h1>Harga &amp; Katalog</h1><p>Kalkulator estimasi otomatis + daftar harga hotel, destinasi, armada, dan kaos</p></div>
+  <div class="tabs" style="padding:0 0 16px">${nav}</div><div id="katBody"></div>`;
+}
+function setKatTab(k){
+  katTab=k;katHotelPage=1;katDestPage=1;
+  const nav=document.querySelector('#view .tabs');
+  if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.kt===k));
+  renderKat();
+}
+function renderKat(){
+  const b=document.getElementById('katBody');if(!b)return;
+  if(katTab==='kalkulator')b.innerHTML=katKalkulator();
+  else if(katTab==='hotel')b.innerHTML=katHotel();
+  else if(katTab==='destinasi')b.innerHTML=katDestinasi();
+  else b.innerHTML=katArmada();
+  if(katTab==='kalkulator')calcQuote();
+}
+function katKalkulator(){
+  const markup=store('markup',20);
+  const armOpt=CAT.armada.map((a,i)=>`<option value="${a.rate}" data-name="${esc(a.name)}" data-seat="${armSeat(a)}" ${i===1?'selected':''}>${esc(a.name)} — ${rp(a.rate)}/hari (${armSeat(a)} seat)</option>`).join('');
+  const regions=[...new Set(CAT.hotels.map(h=>h.region))];
+  const hotOpt='<option value="0|0">— Tanpa Hotel —</option>'+regions.map(r=>`<optgroup label="${esc(r)}">`+CAT.hotels.filter(h=>h.region===r).map(h=>`<option value="${h.wd}|${h.we}">${esc(h.name)} (${rp(h.wd)}/${rp(h.we)})</option>`).join('')+'</optgroup>').join('');
+  const kaosOpt=CAT.kaos.map(k=>`<option value="${k.price}">${esc(k.name)}${k.price?' — '+rp(k.price):''}</option>`).join('');
+  const cities=[...new Set(CAT.dests.map(d=>d.city))];
+  const destBoxes=cities.map(c=>{const items=CAT.dests.filter(d=>d.city===c).map((d,i)=>{const gi=CAT.dests.indexOf(d);return `<label class="dest-item"><input type="checkbox" class="qdest" data-price="${d.price}" data-name="${esc(d.name)}" data-city="${esc(c)}" data-note="${esc(d.note||'')}" onchange="calcQuote()"><span>${esc(d.name)} <em>${d.price?rp(d.price):'Gratis'}</em>${d.note?'<span class="opt">'+esc(d.note)+'</span>':''}</span></label>`;}).join('');
+    return `<div class="citybox"><div class="cityhd" onclick="this.parentNode.classList.toggle('open')"><span>${esc(c)}</span><span class="cnt">${CAT.dests.filter(d=>d.city===c).length}</span></div><div class="citygrid">${items}</div></div>`;}).join('');
+  return `<div class="calc-wrap fade">
+    <div class="panel" style="margin:0">
+      <div class="panel-h"><h3>Input Paket</h3><span style="font-size:12px;color:var(--muted)">markup ${markup}% (ubah di Setting)</span></div>
+      <div style="padding:16px 19px">
+        <div class="frow">
+          <div><label class="flbl">Total Peserta (pax)</label><input id="q_pax" class="finput" type="number" value="50" oninput="calcQuote()"></div>
+          <div><label class="flbl">Durasi (malam inap)</label><input id="q_malam" class="finput" type="number" value="1" oninput="calcQuote()"></div>
+        </div>
+        <div class="frow">
+          <div><label class="flbl">Tanggal Berangkat</label><input id="q_tgl" class="finput" type="date" style="cursor:pointer" onclick="try{this.showPicker()}catch(e){}" onchange="calcQuote()"></div>
+          <div><label class="flbl">Konfigurasi Kamar</label><select id="q_share" class="finput" onchange="calcQuote()"><option value="4">Quad Share (isi 4)</option><option value="2">Twin Share (isi 2)</option></select></div>
+        </div>
+        <label class="flbl">Armada Transportasi</label><select id="q_arm" class="finput" onchange="calcQuote()">${armOpt}</select>
+        <label class="flbl">Akomodasi Hotel</label><select id="q_hotel" class="finput" onchange="calcQuote()">${hotOpt}</select>
+        <div class="frow">
+          <div><label class="flbl">Frekuensi Makan</label><input id="q_mfreq" class="finput" type="number" value="3" oninput="calcQuote()"></div>
+          <div><label class="flbl">Budget Makan / pax</label><input id="q_mprice" class="finput" type="number" value="35000" oninput="calcQuote()"></div>
+        </div>
+        <label class="flbl">Merchandise / Kaos</label><select id="q_kaos" class="finput" onchange="calcQuote()">${kaosOpt}</select>
+        <label class="flbl" style="margin-top:6px">Destinasi Wisata <span style="color:var(--muted-2);font-weight:500">(klik kota untuk buka)</span></label>
+        <div class="destwrap">${destBoxes}</div>
+      </div>
+    </div>
+    <div>
+      <div class="result-card">
+        <div class="rc-label">Estimasi Harga Per Pax</div>
+        <div class="rc-price" id="q_perpax">Rp 0</div>
+        <div class="rc-dur" id="q_dur">—</div>
+        <button class="rc-toggle" onclick="document.getElementById('q_secret').classList.toggle('show');this.textContent=document.getElementById('q_secret').classList.contains('show')?'🔓 Sembunyikan':'🔒 Data Internal'">🔒 Data Internal</button>
+        <div class="rc-secret" id="q_secret">
+          <div class="rc-row"><span>FOC Unit (1:10)</span><b id="q_foc">0 pax</b></div>
+          <div class="rc-row"><span>Diskon Klien</span><b id="q_diskonshow">Rp 0</b></div>
+          <div class="rc-row warn"><span>Komisi Sales (5%)</span><b id="q_komisi">Rp 0</b></div>
+          <div class="rc-row"><span>Total Jual Grup (setelah diskon)</span><b id="q_grup">Rp 0</b></div>
+          <div class="rc-row"><span>Estimasi Laba Bersih</span><b id="q_laba">Rp 0</b></div>
+        </div>
+        <div class="rc-break" id="q_break"></div>
+      </div>
+      <div class="save-box">
+        <div class="sb-h">Buat Penawaran</div>
+        <input id="q_klien" class="finput" list="q_kliendl" style="margin:6px 0" placeholder="Nama klien / instansi" oninput="calcQuote()">
+        <datalist id="q_kliendl">${klienList().map(k=>`<option value="${esc(k.nama)}">`).join('')}</datalist>
+        <input id="q_dest" class="finput" style="margin:0 0 8px" placeholder="Tujuan (mis. Jogja)">
+        <input id="q_hp" class="finput" style="margin:0 0 10px" placeholder="No. HP klien (untuk WA)">
+        <label class="flbl">Diskon Klien (Rp, opsional)</label>
+        <input id="q_diskon" class="finput" type="number" value="0" style="margin:4px 0 10px" oninput="calcQuote()" placeholder="0">
+        <button class="btn-save" onclick="saveQuote()">Simpan & Kirim ke ACC →</button>
+        <button class="btn-save" style="background:var(--gold);color:var(--navy);margin-top:8px" onclick="showPenawaran()">📄 Surat Penawaran + Itinerary</button>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5">Tersimpan sebagai penawaran, menunggu ACC Management. Surat penawaran bisa dilihat & diunduh PDF, itinerary dibuat otomatis dari destinasi yang dicentang.</p>
+      </div>
+      <div class="note-card">Pembayaran: DP 30% saat konfirmasi, pelunasan maksimal 7 hari sebelum perjalanan.</div>
+    </div>
+  </div>`;
+}
+function calcQuote(){
+  const g=id=>document.getElementById(id);if(!g('q_pax'))return;
+  const p=+g('q_pax').value||0, malam=+g('q_malam').value||0, share=+g('q_share').value||4;
+  const armSel=g('q_arm').selectedOptions[0], armRate=+armSel.value, cap=(+armSel.dataset.seat)||kapasitas(armSel.dataset.name);
+  const mFreq=+g('q_mfreq').value||0, mPrice=+g('q_mprice').value||0, kaosRate=+g('q_kaos').value||0;
+  const hd=g('q_hotel').value.split('|'); const tgl=g('q_tgl').value;
+  const isWknd=tgl&&([0,6].includes(new Date(tgl).getDay())); const hotelRate=isWknd?+hd[1]:+hd[0];
+  const markup=1+(store('markup',20)/100);
+  const bus=Math.ceil(p/cap)||0, hari=malam+1;
+  const cT=armRate*bus*hari, cM=mFreq*mPrice*p, cH=malam>0?hotelRate*malam*Math.ceil(p/share):0, cK=kaosRate*p;
+  let cW=0;document.querySelectorAll('.qdest:checked').forEach(d=>{cW+=(+d.dataset.price)*p;d.closest('.citybox').classList.add('has');});
+  document.querySelectorAll('.citybox').forEach(b=>{if(!b.querySelectorAll('.qdest:checked').length)b.classList.remove('has');});
+  const modal=cT+cM+cH+cW+cK, mk=modal*markup;
+  const foc=Math.min(Math.floor(p/10),25), subsidi=foc*(p>0?mk/p:0);
+  const jualGrup=mk-subsidi;
+  const diskon=Math.max(0,+(g('q_diskon')?g('q_diskon').value:0)||0);
+  const grupFinal=Math.max(0,jualGrup-diskon);
+  const perpax=p>0?Math.ceil((grupFinal/p)/1000)*1000:0, komisi=grupFinal*0.05, labaBersih=grupFinal-modal;
+  g('q_perpax').textContent='Rp '+perpax.toLocaleString('id-ID');
+  g('q_dur').textContent=hari+' Hari '+malam+' Malam · '+p+' pax · '+bus+' unit '+armSel.dataset.name.split(' ')[0]+(isWknd?' · Weekend':' · Weekday');
+  g('q_foc').textContent=foc+' pax';
+  if(g('q_diskonshow'))g('q_diskonshow').textContent=(diskon>0?'- ':'')+'Rp '+Math.round(diskon).toLocaleString('id-ID');
+  g('q_komisi').textContent='Rp '+Math.round(komisi).toLocaleString('id-ID');g('q_grup').textContent='Rp '+Math.round(grupFinal).toLocaleString('id-ID');
+  if(g('q_laba'))g('q_laba').innerHTML=(labaBersih<0?'<span style="color:var(--red)">Rp '+Math.round(labaBersih).toLocaleString('id-ID')+' ⚠ rugi</span>':'Rp '+Math.round(labaBersih).toLocaleString('id-ID'));
+  const br=[['Transport ('+bus+' unit × '+hari+' hari)',cT],['Makan ('+mFreq+'× × '+p+' pax)',cM],['Hotel',cH],['Wisata',cW],['Kaos',cK],['Markup '+Math.round((markup-1)*100)+'%',mk-modal]];
+  g('q_break').innerHTML='<div class="bk-h">Rincian Modal Grup</div>'+br.map(([l,v])=>`<div class="rc-row"><span>${l}</span><b>Rp ${Math.round(v).toLocaleString('id-ID')}</b></div>`).join('')+`<div class="rc-row tot"><span>Total Jual Grup (sebelum diskon)</span><b>Rp ${Math.round(jualGrup).toLocaleString('id-ID')}</b></div>`;
+  const dsel=[];document.querySelectorAll('.qdest:checked').forEach(x=>dsel.push({name:x.dataset.name,city:x.dataset.city,note:x.dataset.note,price:+x.dataset.price}));
+  lastQuote={pax:p,bus,malam,hari,perpax,total:Math.round(grupFinal),laba:Math.round(labaBersih),tgl:tgl,diskon:Math.round(diskon),komisi:Math.round(komisi),
+    armName:armSel.dataset.name,hotelName:g('q_hotel').selectedOptions[0].text,mFreq:mFreq,mPrice:mPrice,
+    kaosName:g('q_kaos').selectedOptions[0].text,kaosRate:kaosRate,isWknd:isWknd,dests:dsel};
+}
+function saveQuote(){
+  const g=id=>document.getElementById(id);
+  const klien=(g('q_klien').value||'').trim(), dest=(g('q_dest').value||'').trim()||'Paket Custom', tgl=g('q_tgl').value, hp=(g('q_hp').value||'').trim();
+  if(!klien){toast('Isi nama klien/instansi dulu');return;}
+  if(!tgl){toast('Pilih tanggal berangkat dulu');return;}
+  if(!lastQuote||!lastQuote.pax){toast('Isi detail paket dulu');return;}
+  const q=lastQuote;const list=penawaran();
+  const sid=currentSales(),sc=sid?crewById(sid):null;
+  list.push({id:'PNW-'+Date.now(),klien,dest,tgl,hp,pax:q.pax,bus:q.bus,malam:q.malam,hari:q.hari,perpax:q.perpax,total:q.total,laba:q.laba,
+    diskon:q.diskon||0,komisi:q.komisi||0,salesId:sid||'',salesName:sc?sc.nama:'',
+    armName:q.armName,hotelName:q.hotelName,mFreq:q.mFreq,kaosRate:q.kaosRate,kaosName:q.kaosName,dests:q.dests,status:'pending',created:Date.now()});
+  save('penawaran',list);
+  upsertKlien(klien,hp,sc?sc.nama:'');
+  toast('✓ Penawaran '+klien+' tersimpan & dikirim ke ACC'+(sc?' — a.n. '+sc.nama:''));
+  const kf=g('q_klien');if(kf)kf.value='';if(g('q_dest'))g('q_dest').value='';if(g('q_hp'))g('q_hp').value='';if(g('q_diskon'))g('q_diskon').value='0';
+  if(katTab==='kalkulator')calcQuote();
+}
+// ===== SALES: pilih siapa yang sedang login, data klien, performa =====
+function currentSales(){return store('currentSales','');}
+function setCurrentSales(id){save('currentSales',id);renderSales();}
+function klienList(){return store('klien',[]);}
+function upsertKlien(nama,hp,sales){
+  const list=klienList();const ex=list.find(k=>k.nama.toLowerCase()===nama.toLowerCase());
+  if(ex){if(hp)ex.hp=hp;if(sales)ex.sales=sales;}
+  else list.push({id:'KL'+Date.now().toString(36),nama,hp:hp||'',instansi:'',catatan:'',sales:sales||'',created:Date.now()});
+  save('klien',list);
+}
+function addKlienManual(){
+  const g=id=>document.getElementById(id);
+  const nama=(g('kl_nama').value||'').trim();if(!nama){toast('Isi nama klien dulu');return;}
+  const list=klienList();
+  list.push({id:'KL'+Date.now().toString(36),nama,hp:(g('kl_hp').value||'').trim(),instansi:(g('kl_instansi').value||'').trim(),catatan:(g('kl_catatan').value||'').trim(),sales:crewById(currentSales())?crewById(currentSales()).nama:'',created:Date.now()});
+  save('klien',list);toast('Klien '+nama+' ditambahkan');renderSales();
+}
+function delKlien(id){save('klien',klienList().filter(k=>k.id!==id));renderSales();}
+function klienPenawaranCount(nama){return penawaran().filter(p=>p.klien.toLowerCase()===nama.toLowerCase()).length;}
+function salesPerforma(){
+  const sales=crewList().filter(c=>c.peran==='Sales');const pnw=penawaran();
+  return sales.map(s=>{
+    const mine=pnw.filter(p=>p.salesId===s.id);
+    const acc=mine.filter(p=>p.status==='approved');
+    const nilaiACC=acc.reduce((a,p)=>a+(p.total||0),0);
+    const komisi=acc.reduce((a,p)=>a+(p.komisi||0),0);
+    const klien=new Set(mine.map(p=>p.klien.toLowerCase())).size;
+    return{id:s.id,nama:s.nama,hp:s.hp,jumlahPenawaran:mine.length,jumlahACC:acc.length,klien,nilaiACC,komisi};
+  }).sort((a,b)=>b.nilaiACC-a.nilaiACC);
+}
+let salesTab='dashboard';
+function setSalesTab(k){salesTab=k;const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.st===k));renderSales();}
+function renderSales(){const b=document.getElementById('salesBody');if(!b)return;
+  b.innerHTML=salesTab==='penawaran'?salesPenawaranTab():salesTab==='klien'?salesKlienTab():salesTab==='performa'?salesPerformaTab():salesDashboard();
+  if(salesTab==='penawaran')calcQuote();
+}
+function vSales(){
+  const tabs=[['dashboard','Dashboard'],['penawaran','Buat Penawaran'],['klien','Data Klien'],['performa','Performa Sales']];
+  const nav=tabs.map(([k,l])=>`<button class="tab ${salesTab===k?'active':''}" data-st="${k}" onclick="setSalesTab('${k}')">${l}</button>`).join('');
+  return `<div class="hello fade"><h1>Area Sales</h1><p>Katalog, penawaran, data klien, dan performa tim sales</p></div>
+    <div class="tabs fade">${nav}</div><div id="salesBody"></div>`;
+}
+function salesPicker(){
+  const sales=crewList().filter(c=>c.peran==='Sales');const sid=currentSales();
+  return `<div class="cat-bar" style="padding:0 0 14px"><div><label class="flbl" style="display:inline;margin-right:8px">Login sebagai</label>
+    <select class="finput" style="width:auto;display:inline-block;margin:0;padding:8px 12px" onchange="setCurrentSales(this.value)">
+      <option value="">— pilih sales —</option>${sales.map(s=>`<option value="${s.id}" ${s.id===sid?'selected':''}>${esc(s.nama)}</option>`).join('')}</select></div>
+    <span style="font-size:12px;color:var(--muted)">belum ada login sungguhan — ini hanya penanda sementara</span></div>`;
+}
+function salesDashboard(){
+  const sid=currentSales();const sc=sid?crewById(sid):null;
+  const all=salesPerforma();const mine=sc?all.find(x=>x.id===sid):null;
+  const pending=penawaran().filter(p=>p.salesId===sid&&p.status==='pending');
+  return `${salesPicker()}
+    ${!sc?`<div class="panel fade" style="margin:0"><div style="padding:34px 19px;text-align:center;color:var(--muted);font-size:13.5px">Pilih nama Anda di atas untuk melihat dashboard pribadi, atau langsung buat penawaran di tab <b>Buat Penawaran</b>.</div></div>`:`
+    <div class="cards fade" style="grid-template-columns:repeat(4,1fr)">
+      <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="lbl">Penawaran Dibuat</div><div class="val mono">${mine.jumlahPenawaran}</div><div class="sub" style="color:var(--muted)">${pending.length} menunggu ACC</div></div>
+      <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><div class="lbl">Di-ACC Management</div><div class="val mono">${mine.jumlahACC}</div><div class="sub" style="color:var(--muted)">${mine.jumlahPenawaran?Math.round(mine.jumlahACC/mine.jumlahPenawaran*100):0}% konversi</div></div>
+      <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="lbl">Nilai Trip Di-ACC</div><div class="val mono">${jt(mine.nilaiACC)}</div></div>
+      <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Komisi (5%)</div><div class="val mono">${jt(mine.komisi)}</div><div class="sub" style="color:var(--muted)">dari penawaran yang di-ACC</div></div>
+    </div>
+    <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Penawaran Saya</h3></div>
+      <table style="margin-top:12px"><thead><tr><th>Klien</th><th>Tujuan</th><th>Nilai</th><th>Status</th></tr></thead><tbody>${
+        penawaran().filter(p=>p.salesId===sid).slice().reverse().slice(0,10).map(p=>`<tr><td style="font-weight:600">${esc(p.klien)}</td><td style="font-size:12.5px">${esc(String(p.dest||'').split('(')[0])}</td><td class="price mono">${jt(p.total||0)}</td><td><span class="pill ${p.status==='approved'?'lunas':p.status==='rejected'?'piutang':'dp'}">${p.status==='approved'?'Di-ACC':p.status==='rejected'?'Ditolak':'Menunggu'}</span></td></tr>`).join('')||'<tr><td colspan="4" style="color:var(--muted);font-size:12.5px">Belum pernah membuat penawaran.</td></tr>'
+      }</tbody></table></div>`}`;
+}
+function salesPenawaranTab(){
+  const sid=currentSales();const sc=sid?crewById(sid):null;
+  return `${salesPicker()}<p style="font-size:12.5px;color:var(--muted);margin:-6px 0 14px">${sc?'Penawaran akan tercatat atas nama <b>'+esc(sc.nama)+'</b>.':'<span style="color:var(--gold-ink)">Pilih nama Anda dulu supaya komisi tercatat dengan benar.</span>'}</p>${katKalkulator()}`;
+}
+function salesKlienTab(){
+  const list=klienList().slice().reverse();
+  const rows=list.map(k=>`<tr><td style="font-weight:700">${esc(k.nama)}</td><td style="font-size:12.5px">${esc(k.instansi||'—')}</td><td>${esc(k.hp||'—')}</td><td style="font-size:12px">${esc(k.sales||'—')}</td><td class="mono">${klienPenawaranCount(k.nama)}</td><td style="text-align:right"><button class="pay-del" onclick="if(confirm('Hapus data klien ${esc(k.nama)}?'))delKlien('${k.id}')">✕</button></td></tr>`).join('');
+  return `<div class="grid fade" style="grid-template-columns:1fr 320px">
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Data Klien</h3><span style="font-size:12px;color:var(--muted)">${list.length} klien tercatat</span></div>
+      <table style="margin-top:12px"><thead><tr><th>Nama</th><th>Instansi</th><th>No. HP</th><th>Sales</th><th>Penawaran</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="color:var(--muted);font-size:12.5px">Belum ada data klien. Klien otomatis tercatat saat penawaran dibuat.</td></tr>'}</tbody></table></div>
+    <div class="side-card" style="margin:0"><div class="panel-h" style="padding:0 0 14px"><h3 style="font-size:14.5px">Tambah Klien</h3></div>
+      <label class="flbl">Nama Klien / Instansi</label><input id="kl_nama" class="finput" placeholder="Nama">
+      <label class="flbl">Instansi / Asal</label><input id="kl_instansi" class="finput" placeholder="mis. Sekolah, Perusahaan">
+      <label class="flbl">No. HP</label><input id="kl_hp" class="finput" placeholder="0812-...">
+      <label class="flbl">Catatan</label><textarea id="kl_catatan" class="finput" rows="2" placeholder="Preferensi, catatan khusus..."></textarea>
+      <button class="btn-save" onclick="addKlienManual()">+ Tambah Klien</button>
+    </div></div>`;
+}
+function salesPerformaTab(){
+  const perf=salesPerforma();
+  const tot=perf.reduce((a,s)=>({nilaiACC:a.nilaiACC+s.nilaiACC,komisi:a.komisi+s.komisi,jumlahACC:a.jumlahACC+s.jumlahACC}),{nilaiACC:0,komisi:0,jumlahACC:0});
+  const rows=perf.map((s,i)=>`<tr><td style="font-weight:700">${i===0&&s.nilaiACC>0?'🏆 ':''}${esc(s.nama)}</td><td class="mono">${s.jumlahPenawaran}</td><td class="mono">${s.jumlahACC}</td><td class="mono">${s.klien}</td><td class="price mono">${jt(s.nilaiACC)}</td><td class="price mono" style="color:var(--gold-ink)">${jt(s.komisi)}</td></tr>`).join('');
+  return `<div class="cards fade" style="grid-template-columns:repeat(3,1fr)">
+      <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/></svg></div><div class="lbl">Tim Sales</div><div class="val mono">${perf.length}</div><div class="sub" style="color:var(--muted)">${tot.jumlahACC} penawaran di-ACC</div></div>
+      <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="lbl">Total Nilai Di-ACC</div><div class="val mono">${jt(tot.nilaiACC)}</div></div>
+      <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Total Komisi</div><div class="val mono">${jt(tot.komisi)}</div></div>
+    </div>
+    <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Rekap Performa per Sales</h3><span style="font-size:12px;color:var(--muted)">diurutkan dari nilai ACC tertinggi</span></div>
+      <table style="margin-top:12px"><thead><tr><th>Nama</th><th>Penawaran</th><th>Di-ACC</th><th>Klien</th><th>Nilai Di-ACC</th><th>Komisi</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="6" style="color:var(--muted);font-size:12.5px">Belum ada data sales. Tambah sales baru di menu Crew.</td></tr>'}</tbody></table></div>`;
+}
+function pnwDecide(id,act){const list=penawaran();const p=list.find(x=>x.id===id);if(p){p.status=act;save('penawaran',list);}toast(act==='approved'?'Penawaran di-ACC → masuk Jadwal & Keuangan':'Penawaran ditolak');go('acc');}
+function waLink(hp,text){let n=(hp||'').replace(/\D/g,'');if(!n)return '';if(n[0]==='0')n='62'+n.slice(1);else if(n.slice(0,2)!=='62')n='62'+n;return 'https://wa.me/'+n+'?text='+encodeURIComponent(text);}
+function buildItinerary(q,dest){
+  const days=Math.max(1,(q.malam||0)+1);const D=(q.dests||[]).slice();const per=Math.max(1,Math.ceil(D.length/days));
+  const out=[];
+  for(let i=0;i<days;i++){
+    const slice=D.slice(i*per,(i+1)*per);const acts=[];
+    if(i===0)acts.push('Titik kumpul & keberangkatan menuju '+dest);else acts.push('Sarapan di hotel');
+    slice.forEach(d=>acts.push('Kunjungan '+d.name+(d.note?' - '+d.note:'')));
+    if(q.malam>0&&i<days-1){acts.push('Makan siang & makan malam');acts.push('Check-in / istirahat di '+(q.hotelName&&!/Tanpa Hotel/i.test(q.hotelName)?q.hotelName:'hotel'));}
+    else if(i<days-1){acts.push('Makan siang');}
+    if(i===days-1){acts.push('Belanja oleh-oleh khas');acts.push('Perjalanan kembali ke titik kumpul');}
+    out.push({hari:i+1,acts});
+  }
+  return out;
+}
+let pvActive=null;
+function penawaranDetail(rec){
+  const g=id=>document.getElementById(id);
+  const info=store('info',{nama:'Havist Traveller',hp:'0895 3385 99354',email:'kalabyentertainment@gmail.com',alamat:'Komplek Keluarga Besar H. Mamat, Ds. Kadu, Kec. Curug, Kab. Tangerang'});
+  let q,klien,dest,hp;
+  if(rec){q={pax:rec.pax,bus:rec.bus,malam:rec.malam,hari:rec.hari||(rec.malam+1),perpax:rec.perpax,total:rec.total,tgl:rec.tgl,armName:rec.armName||'Armada',hotelName:rec.hotelName||'hotel',mFreq:rec.mFreq||3,kaosRate:rec.kaosRate||0,kaosName:rec.kaosName||'',dests:rec.dests||[]};klien=rec.klien;dest=rec.dest;hp=rec.hp||'';}
+  else{q=lastQuote;klien=(g('q_klien')?g('q_klien').value.trim():'')||'(Calon Pelanggan)';dest=(g('q_dest')?g('q_dest').value.trim():'')||(q.dests&&q.dests[0]?q.dests[0].city:'Paket Wisata');hp=g('q_hp')?g('q_hp').value.trim():'';}
+  const tglTrip=q.tgl?new Date(q.tgl).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'(tanggal menyusul)';
+  const no=rec?('PNW/'+(new Date().getFullYear())+'/'+String(rec.created||Date.now()).slice(-5)):('PNW/'+(new Date().getFullYear())+'/'+String(Date.now()).slice(-5));
+  const tglSurat=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  const fasil=['Transportasi '+q.armName+' ('+q.bus+' unit)',(q.malam>0?'Akomodasi '+q.malam+' malam ('+(q.hotelName||'hotel')+')':'Trip tanpa menginap'),'Makan '+q.mFreq+'x','Tiket masuk destinasi wisata',(q.kaosRate>0?q.kaosName:'Dokumentasi perjalanan'),'Tour Leader & P3K'];
+  return {q,info,klien,dest,hp,tglTrip,no,tglSurat,fasil,itin:buildItinerary(q,dest)};
+}
+function showPenawaran(id){
+  const rec=id?penawaran().find(x=>x.id===id):null;
+  if(!rec&&(!lastQuote||!lastQuote.pax)){toast('Isi detail paket & hitung dulu');return;}
+  const D=penawaranDetail(rec);pvActive=D;const q=D.q;
+  const fasilHTML=D.fasil.map(f=>`<li>${esc(f)}</li>`).join('');
+  const itinHTML=D.itin.map(d=>`<div class="pv-day"><div class="pv-day-h">Hari ${d.hari}</div><ul>${d.acts.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`).join('');
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='pvOverlay';
+  ov.innerHTML=`<div class="pv-modal">
+    <div class="pv-bar"><b>Surat Penawaran</b><div><button class="btn-acc ok" onclick="genPenawaranPDF()">⬇ Unduh PDF</button><button class="btn-acc no" onclick="document.getElementById('pvOverlay').remove()">Tutup</button></div></div>
+    <div class="pv-paper" id="pvPaper">
+      <div class="pv-letterhead"><div class="pv-brand">HAVIST TRAVELLER</div><div class="pv-tag">Your Travel Dream Makers</div><div class="pv-contact">${esc(D.info.alamat)}<br>${esc(D.info.hp)} · ${esc(D.info.email)}</div></div>
+      <h2 class="pv-title">SURAT PENAWARAN HARGA</h2>
+      <table class="pv-meta"><tr><td>Nomor</td><td>: ${esc(D.no)}</td><td>Tanggal</td><td>: ${esc(D.tglSurat)}</td></tr></table>
+      <p class="pv-to">Kepada Yth.<br><b>${esc(D.klien)}</b>${D.hp?'<br>'+esc(D.hp):''}</p>
+      <p>Dengan hormat, berikut kami sampaikan penawaran paket perjalanan wisata sesuai permintaan Bapak/Ibu:</p>
+      <table class="pv-sum">
+        <tr><td>Tujuan</td><td>: <b>${esc(D.dest)}</b></td></tr>
+        <tr><td>Tanggal Berangkat</td><td>: ${esc(D.tglTrip)}</td></tr>
+        <tr><td>Durasi</td><td>: ${q.hari} Hari ${q.malam} Malam</td></tr>
+        <tr><td>Jumlah Peserta</td><td>: ${q.pax} pax</td></tr>
+        <tr><td>Armada</td><td>: ${esc(q.armName)} (${q.bus} unit)</td></tr>
+        <tr><td>Akomodasi</td><td>: ${esc(q.malam>0?q.hotelName:'—')}</td></tr>
+      </table>
+      <div class="pv-price"><span>Harga per Pax</span><b>${rp(q.perpax)}</b></div>
+      <div class="pv-price sub"><span>Estimasi Total (${q.pax} pax)</span><b>${rp(q.total)}</b></div>
+      <h3 class="pv-h3">Fasilitas Termasuk</h3><ul class="pv-fasil">${fasilHTML}</ul>
+      <h3 class="pv-h3">Itinerary Perjalanan</h3><div class="pv-itin">${itinHTML}</div>
+      <h3 class="pv-h3">Syarat & Ketentuan</h3><ul class="pv-fasil"><li>DP 30% saat konfirmasi pemesanan.</li><li>Pelunasan maksimal 7 hari sebelum keberangkatan.</li><li>Harga dapat berubah sewaktu-waktu sebelum konfirmasi.</li></ul>
+      <p class="pv-close">Demikian penawaran ini kami sampaikan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>
+      <div class="pv-sign">Hormat kami,<br><br><b>Havist Traveller</b></div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+async function genPenawaranPDF(){
+  if(!window.jspdf){toast('Pustaka PDF belum siap, coba lagi');return;}
+  const D=pvActive||penawaranDetail();const q=D.q;const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const L=18,R=192,W=R-L;let y=16;
+  const NAVY=[14,36,74],GOLD=[180,140,0],GREY=[110,120,135];
+  function pageBreak(h){if(y+h>282){doc.addPage();y=16;}}
+  function txt(s,x,opt={}){doc.setFont('helvetica',opt.b?'bold':'normal');doc.setFontSize(opt.s||10);if(opt.c)doc.setTextColor(...opt.c);else doc.setTextColor(30,30,30);const lines=doc.splitTextToSize(s,opt.w||W);lines.forEach(ln=>{pageBreak(opt.lh||5.2);doc.text(ln,x,y);y+=opt.lh||5.2;});}
+  // letterhead
+  doc.setFont('helvetica','bold');doc.setFontSize(20);doc.setTextColor(...NAVY);doc.text('HAVIST TRAVELLER',L,y);y+=6;
+  doc.setFont('helvetica','italic');doc.setFontSize(9);doc.setTextColor(...GOLD);doc.text('Your Travel Dream Makers',L,y);y+=5;
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...GREY);
+  doc.splitTextToSize(D.info.alamat+'  |  '+D.info.hp+'  |  '+D.info.email,W).forEach(ln=>{doc.text(ln,L,y);y+=3.8;});
+  y+=2;doc.setDrawColor(...NAVY);doc.setLineWidth(.6);doc.line(L,y,R,y);y+=8;
+  doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(...NAVY);doc.text('SURAT PENAWARAN HARGA',105,y,{align:'center'});y+=8;
+  txt('Nomor : '+D.no+'        Tanggal : '+D.tglSurat,L,{s:9,c:GREY});y+=2;
+  txt('Kepada Yth.',L,{s:10});txt(D.klien,L,{b:true,s:10});if(D.hp)txt(D.hp,L,{s:9,c:GREY});y+=2;
+  txt('Dengan hormat, berikut kami sampaikan penawaran paket perjalanan wisata sesuai permintaan Bapak/Ibu:',L,{s:10});y+=2;
+  const sum=[['Tujuan',D.dest],['Tanggal Berangkat',D.tglTrip],['Durasi',q.hari+' Hari '+q.malam+' Malam'],['Jumlah Peserta',q.pax+' pax'],['Armada',q.armName+' ('+q.bus+' unit)'],['Akomodasi',q.malam>0?q.hotelName:'—']];
+  sum.forEach(([k,v])=>{pageBreak(5.4);doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(60,60,60);doc.text(k,L,y);doc.text(':',L+42,y);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);doc.splitTextToSize(String(v),W-46).forEach((ln,i)=>{if(i>0)y+=5;doc.text(ln,L+46,y);});y+=5.4;});
+  y+=2;pageBreak(16);doc.setFillColor(245,247,250);doc.rect(L,y,W,14,'F');doc.setTextColor(...NAVY);doc.setFont('helvetica','normal');doc.setFontSize(10);doc.text('Harga per Pax',L+4,y+6);doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(rp(q.perpax),R-4,y+7,{align:'right'});doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...GREY);doc.text('Estimasi total '+q.pax+' pax : '+rp(q.total),L+4,y+11.5);y+=20;
+  function section(t){pageBreak(10);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...NAVY);doc.text(t,L,y);y+=6;}
+  section('Fasilitas Termasuk');D.fasil.forEach(f=>txt('•  '+f,L+2,{s:9.5}));y+=2;
+  section('Itinerary Perjalanan');
+  D.itin.forEach(d=>{pageBreak(8);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...GOLD);doc.text('Hari '+d.hari,L+2,y);y+=5;d.acts.forEach(a=>txt('•  '+a,L+6,{s:9.5,w:W-8}));y+=2;});
+  section('Syarat & Ketentuan');['DP 30% saat konfirmasi pemesanan.','Pelunasan maksimal 7 hari sebelum keberangkatan.','Harga dapat berubah sewaktu-waktu sebelum konfirmasi.'].forEach(s=>txt('•  '+s,L+2,{s:9.5}));y+=4;
+  txt('Demikian penawaran ini kami sampaikan. Atas perhatian dan kerja samanya kami ucapkan terima kasih.',L,{s:10});y+=8;
+  txt('Hormat kami,',L,{s:10});y+=10;txt('Havist Traveller',L,{b:true,s:10});
+  const blob=doc.output('blob');
+  const dl=await claude.use('downloads');
+  if(!dl){toast('Unduhan tidak tersedia di tampilan ini. Buka artifact di claude.ai.');return;}
+  try{await dl.save({filename:'Penawaran-'+D.klien.replace(/[^\w]+/g,'_')+'.pdf',data:blob});toast('PDF penawaran siap');}
+  catch(e){if(e&&e.code==='declined')toast('Unduhan dibatalkan');else toast('Gagal mengunduh PDF');}
+}
+function waPesan(p){return 'Halo '+p.klien+', berikut penawaran trip '+p.dest+' ('+p.pax+' pax, '+p.malam+' malam): Rp '+p.perpax.toLocaleString('id-ID')+'/pax, total Rp '+p.total.toLocaleString('id-ID')+'. Terima kasih — Havist Traveller.';}
+// ---------- PDF: kerangka bersama (kop surat + helper) ----------
+function infoPerusahaan(){return store('info',{nama:'Havist Traveller',hp:'0895 3385 99354',email:'kalabyentertainment@gmail.com',alamat:'Komplek Keluarga Besar H. Mamat, Ds. Kadu, Kec. Curug, Kab. Tangerang',rek:''});}
+function pdfKit(judul){
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const info=infoPerusahaan();
+  const L=18,R=192,W=R-L;const NAVY=[14,36,74],GOLD=[180,140,0],GREY=[110,120,135];
+  const K={doc,L,R,W,NAVY,GOLD,GREY,info,y:16};
+  K.pageBreak=h=>{if(K.y+h>282){doc.addPage();K.y=16;}};
+  K.txt=(s,x,opt={})=>{doc.setFont('helvetica',opt.b?'bold':'normal');doc.setFontSize(opt.s||10);doc.setTextColor(...(opt.c||[30,30,30]));doc.splitTextToSize(String(s),opt.w||W).forEach(ln=>{K.pageBreak(opt.lh||5.2);doc.text(ln,x,K.y);K.y+=opt.lh||5.2;});};
+  K.section=t=>{K.pageBreak(11);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...NAVY);doc.text(t,L,K.y);K.y+=6;};
+  K.kv=(k,v,wk)=>{K.pageBreak(5.4);doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(60,60,60);doc.text(k,L,K.y);doc.text(':',L+(wk||42),K.y);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);doc.splitTextToSize(String(v),W-(wk||42)-4).forEach((ln,i)=>{if(i>0)K.y+=5;doc.text(ln,L+(wk||42)+4,K.y);});K.y+=5.4;};
+  K.rowAmt=(k,v,opt={})=>{K.pageBreak(5.6);doc.setFont('helvetica',opt.b?'bold':'normal');doc.setFontSize(opt.s||10);doc.setTextColor(...(opt.c||[45,45,45]));doc.text(k,L+2,K.y);doc.text(String(v),R-2,K.y,{align:'right'});K.y+=opt.lh||5.6;};
+  K.hr=()=>{doc.setDrawColor(215,219,226);doc.setLineWidth(.3);doc.line(L,K.y,R,K.y);K.y+=4;};
+  // kop surat
+  doc.setFont('helvetica','bold');doc.setFontSize(20);doc.setTextColor(...NAVY);doc.text('HAVIST TRAVELLER',L,K.y);K.y+=6;
+  doc.setFont('helvetica','italic');doc.setFontSize(9);doc.setTextColor(...GOLD);doc.text('Your Travel Dream Makers',L,K.y);K.y+=5;
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...GREY);
+  doc.splitTextToSize(info.alamat+'  |  '+info.hp+'  |  '+info.email,W).forEach(ln=>{doc.text(ln,L,K.y);K.y+=3.8;});
+  K.y+=2;doc.setDrawColor(...NAVY);doc.setLineWidth(.6);doc.line(L,K.y,R,K.y);K.y+=8;
+  doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(...NAVY);doc.text(judul,105,K.y,{align:'center'});K.y+=8;
+  return K;
+}
+async function pdfSave(doc,filename){
+  const blob=doc.output('blob');
+  const dl=await claude.use('downloads');
+  if(!dl){toast('Unduhan tidak tersedia di tampilan ini. Buka artifact di claude.ai.');return false;}
+  try{await dl.save({filename,data:blob});toast('PDF siap diunduh');return true;}
+  catch(e){if(e&&e.code==='declined')toast('Unduhan dibatalkan');else toast('Gagal mengunduh PDF');return false;}
+}
+function noInvoice(p){return p.inv&&p.inv!=='(dari penawaran)'?p.inv:'INV/'+new Date().getFullYear()+'/'+String(p.id).replace(/\D/g,'').slice(-5).padStart(4,'0');}
+// ---------- PDF: INVOICE KLIEN ----------
+async function genInvoicePDF(id){
+  if(!window.jspdf){toast('Pustaka PDF belum siap, coba lagi');return;}
+  const p=allPiutang().find(x=>x.id===id);if(!p){toast('Data piutang tidak ditemukan');return;}
+  const t=allTrips().find(x=>x.id===id);
+  const paid=clientPaid(p),sisa=clientSisa(p);const[,sl]=clientStatus(p);
+  const K=pdfKit('INVOICE');const{doc,L,R,W,NAVY,GOLD,GREY}=K;
+  const tglSurat=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  K.txt('Nomor : '+noInvoice(p)+'        Tanggal : '+tglSurat,L,{s:9,c:GREY});K.y+=2;
+  K.txt('Kepada Yth.',L,{s:10});K.txt(p.inst,L,{b:true,s:11});K.y+=3;
+  K.section('Rincian Tagihan');
+  K.kv('Keperluan',t?('Paket wisata '+String(t.dest||'').split('(')[0].trim()):'Paket perjalanan wisata');
+  if(t&&t.brk)K.kv('Tanggal Trip',new Date(t.brk).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
+  K.kv('Jumlah Peserta',(p.pax||0)+' pax');
+  if(p.pax>0)K.kv('Harga per Pax',rp(Math.round((p.tagih||0)/p.pax)));
+  K.y+=3;K.hr();
+  K.rowAmt('Total Tagihan',rp(p.tagih||0),{b:true,s:11});K.hr();
+  K.section('Riwayat Pembayaran');
+  const hist=[];if(p.dp>0)hist.push(['DP awal','',p.dp]);
+  payClientList(p.id).forEach(x=>hist.push([x.termin||'Pembayaran',x.date||'',+x.amount||0]));
+  if(hist.length)hist.forEach(([k,d,v])=>K.rowAmt(k+(d?'  ('+new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})+')':''),'- '+rp(v),{s:9.5,c:[43,157,110]}));
+  else K.txt('Belum ada pembayaran yang tercatat.',L+2,{s:9.5,c:GREY});
+  K.y+=1;K.hr();
+  K.pageBreak(18);doc.setFillColor(sisa>0?253:245,sisa>0?240:250,sisa>0?240:247);doc.rect(L,K.y,W,15,'F');
+  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(...NAVY);doc.text(sisa>0?'Sisa yang Harus Dibayar':'Status Pembayaran',L+4,K.y+6);
+  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(...(sisa>0?[197,48,48]:[43,157,110]));doc.text(sisa>0?rp(sisa):'LUNAS',R-4,K.y+8,{align:'right'});
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...GREY);doc.text('Sudah dibayar '+rp(paid)+' dari '+rp(p.tagih||0)+'  ('+sl+')',L+4,K.y+12);K.y+=21;
+  if(sisa>0){
+    K.section('Pembayaran');
+    if(K.info.rek)K.txt('Transfer ke: '+K.info.rek,L+2,{s:10,b:true});
+    else K.txt('Hubungi '+K.info.hp+' untuk informasi rekening pembayaran.',L+2,{s:9.5});
+    if(t&&t.brk){const batas=new Date(t.brk);batas.setDate(batas.getDate()-7);
+      K.txt('Pelunasan paling lambat '+batas.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})+' (H-7 keberangkatan).',L+2,{s:9.5,c:GREY});}
+    K.y+=2;
+  }
+  K.txt('Mohon konfirmasi setelah melakukan pembayaran. Terima kasih atas kepercayaan Bapak/Ibu.',L,{s:10});K.y+=8;
+  K.txt('Hormat kami,',L,{s:10});K.y+=10;K.txt('Havist Traveller',L,{b:true,s:10});
+  await pdfSave(doc,'Invoice-'+String(p.inst).replace(/[^\w]+/g,'_')+'.pdf');
+}
+// ---------- PDF: RUNDOWN / ITINERARY TRIP ----------
+function rundownItin(t){
+  const hari=tripDays(t);
+  const dsts=prepTrip(t.id).filter(x=>x.kat==='Wisata / Tiket'&&!/belum ditentukan/i.test(x.vendor)).map(x=>({name:x.vendor,note:''}));
+  const dest=String(t.dest||'').split('(')[0].trim()||'destinasi';
+  const q={malam:Math.max(0,hari-1),dests:dsts.length?dsts:[{name:'destinasi wisata '+dest,note:''}],hotelName:(prepTrip(t.id).find(x=>x.kat==='Hotel / Villa')||{}).vendor||t.hotel||''};
+  return buildItinerary(q,dest);
+}
+async function genRundownPDF(id){
+  if(!window.jspdf){toast('Pustaka PDF belum siap, coba lagi');return;}
+  const t=allTrips().find(x=>x.id===id);if(!t){toast('Trip tidak ditemukan');return;}
+  const a=assignMap()[t.id]||{};const tl=crewById(a.tl),md=crewById(a.media);
+  const hari=tripDays(t);const items=prepTrip(t.id);
+  const arm=items.find(x=>x.kat==='Transport / Bus'),hot=items.find(x=>x.kat==='Hotel / Villa');
+  const K=pdfKit('RUNDOWN PERJALANAN');const{doc,L,R,W,NAVY,GOLD,GREY}=K;
+  K.txt(t.inst,L,{b:true,s:12});K.txt(String(t.dest||'').split('(')[0].trim(),L,{s:10,c:GOLD});K.y+=3;
+  K.section('Informasi Trip');
+  K.kv('Tanggal',(t.brk?new Date(t.brk).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'—')+(t.pul?' s/d '+new Date(t.pul).toLocaleDateString('id-ID',{day:'numeric',month:'long'}):''));
+  K.kv('Durasi',hari+' hari '+Math.max(0,hari-1)+' malam');
+  K.kv('Jumlah Peserta',(t.pax||0)+' pax');
+  K.kv('Armada',arm?arm.vendor:(t.armada||(t.bus?t.bus+' unit bus':'—')));
+  K.kv('Akomodasi',hot?hot.vendor:(t.hotel||'—'));
+  K.kv('Status',STLBL[tripStatus(t)]);
+  K.y+=3;
+  K.section('Crew Bertugas');
+  K.kv('Tour Leader',tl?tl.nama+(tl.hp?' ('+tl.hp+')':''):'belum ditugaskan');
+  K.kv('Media / Dokumentasi',md?md.nama+(md.hp?' ('+md.hp+')':''):'belum ditugaskan');
+  K.kv('Narahubung',K.info.nama+' — '+K.info.hp);
+  K.y+=3;
+  K.section('Susunan Acara');
+  rundownItin(t).forEach(d=>{K.pageBreak(9);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...GOLD);doc.text('Hari '+d.hari,L+2,K.y);K.y+=5;
+    d.acts.forEach(x=>K.txt('•  '+x,L+6,{s:9.5,w:W-8}));K.y+=2;});
+  if(items.length){
+    K.section('Vendor & Perlengkapan');
+    items.forEach(x=>K.rowAmt(x.kat.split(' ')[0]+' — '+x.vendor,x.due?'tempo '+new Date(x.due).toLocaleDateString('id-ID',{day:'2-digit',month:'short'}):'—',{s:9.5}));
+    K.y+=2;
+  }
+  const cl=store('checklist',{})[id]||CHECKLIST_DEF.map(x=>({item:x,done:false}));
+  K.section('Checklist Persiapan');
+  cl.forEach(c=>K.txt((c.done?'[v]  ':'[  ]  ')+c.item,L+2,{s:9.5,c:c.done?[43,157,110]:[45,45,45]}));
+  K.y+=5;
+  K.txt('Dokumen ini dibuat otomatis dari data Management Havist Traveller.',L,{s:8.5,c:GREY});
+  await pdfSave(doc,'Rundown-'+String(t.inst).replace(/[^\w]+/g,'_')+'.pdf');
+}
+function katHotel(){
+  const H=CAT.hotels;const regions=[...new Set(H.map(h=>h.region))];
+  const PER=3;const pageRegions=pageSlice(regions,katHotelPage,PER);
+  const blocks=pageRegions.map(r=>{const rows=H.map((h,i)=>[h,i]).filter(([h])=>h.region===r).map(([h,i])=>`<tr class="clk" onclick="openCatForm('hotels',${i})"><td style="font-weight:600">${esc(h.name)}</td><td class="mono">${rp(h.wd)}</td><td class="mono">${rp(h.we)}</td><td style="text-align:right"><button class="btn-acc no" onclick="event.stopPropagation();openCatForm('hotels',${i})">Edit</button></td></tr>`).join('');
+    return `<div class="panel" style="margin-bottom:18px"><div class="panel-h"><h3 style="font-size:14px">${esc(r)} <span style="color:var(--muted);font-size:12px;font-weight:600">(${H.filter(h=>h.region===r).length})</span></h3></div><table style="margin-top:10px"><thead><tr><th>Hotel</th><th>Weekday</th><th>Weekend</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>`;}).join('');
+  return `<div class="fade">${catToolbar('hotels',H.length+' hotel di '+regions.length+' wilayah · harga per kamar/malam')}${blocks}${pagerHTML(regions.length,katHotelPage,PER,'setKatHotelPage')}</div>`;
+}
+function katDestinasi(){
+  const D=CAT.dests;const cities=[...new Set(D.map(d=>d.city))];
+  const PER=3;const pageCities=pageSlice(cities,katDestPage,PER);
+  const blocks=pageCities.map(c=>{const rows=D.map((d,i)=>[d,i]).filter(([d])=>d.city===c).map(([d,i])=>`<tr class="clk" onclick="openCatForm('dests',${i})"><td style="font-weight:600">${esc(d.name)}</td><td style="color:var(--muted);font-size:12.5px">${esc(d.note)}</td><td class="mono">${d.price?rp(d.price):'<span style=color:var(--green)>Gratis</span>'}</td><td style="text-align:right"><button class="btn-acc no" onclick="event.stopPropagation();openCatForm('dests',${i})">Edit</button></td></tr>`).join('');
+    return `<div class="panel" style="margin-bottom:18px"><div class="panel-h"><h3 style="font-size:14px">${esc(c)} <span style="color:var(--muted);font-size:12px;font-weight:600">(${D.filter(d=>d.city===c).length})</span></h3></div><table style="margin-top:10px"><thead><tr><th>Destinasi</th><th>Aktivitas</th><th>Harga/pax</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>`;}).join('');
+  return `<div class="fade">${catToolbar('dests',D.length+' destinasi di '+cities.length+' kota')}${blocks}${pagerHTML(cities.length,katDestPage,PER,'setKatDestPage')}</div>`;
+}
+function katArmada(){
+  const A=CAT.armada,K=CAT.kaos;
+  const arm=A.map((a,i)=>`<tr class="clk" onclick="openCatForm('armada',${i})"><td style="font-weight:600">${esc(a.name)}</td><td class="mono">${rp(a.rate)} / hari</td><td class="mono">${armSeat(a)} seat</td><td style="text-align:right"><button class="btn-acc no" onclick="event.stopPropagation();openCatForm('armada',${i})">Edit</button></td></tr>`).join('');
+  const kaos=K.map((k,i)=>[k,i]).filter(([k])=>k.price>0).map(([k,i])=>`<tr class="clk" onclick="openCatForm('kaos',${i})"><td style="font-weight:600">${esc(k.name)}</td><td class="mono">${rp(k.price)} / pcs</td><td style="text-align:right"><button class="btn-acc no" onclick="event.stopPropagation();openCatForm('kaos',${i})">Edit</button></td></tr>`).join('');
+  return `<div class="grid fade" style="grid-template-columns:1fr 1fr">
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Armada Transportasi</h3></div>${catToolbar('armada',A.length+' jenis')}<table style="margin-top:4px"><thead><tr><th>Jenis</th><th>Tarif</th><th>Kapasitas</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${arm}</tbody></table></div>
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Merchandise / Kaos</h3></div>${catToolbar('kaos',K.filter(k=>k.price>0).length+' jenis')}<table style="margin-top:4px"><thead><tr><th>Jenis</th><th>Harga</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${kaos}</tbody></table></div>
+  </div>`;
+}
+
+// ---- prototype state (localStorage, aman dengan try/catch) ----
+function store(k,def){try{const v=localStorage.getItem('havist_'+k);return v?JSON.parse(v):def;}catch(e){return def;}}
+function save(k,v){try{localStorage.setItem('havist_'+k,JSON.stringify(v));}catch(e){}}
+
+const SEED_ACC=[
+  {id:'A1',klien:'SMPN 4 Cikupa',pax:280,dest:'Yogyakarta (Malioboro, Keraton)',sales:'Dewi',nilai:154000000,dp:30},
+  {id:'A2',klien:'PT Surya Toto',pax:60,dest:'Bandung (Tangkuban Perahu)',sales:'Fajar',nilai:33000000,dp:50},
+  {id:'A3',klien:'SDN Kutabumi 2',pax:120,dest:'Bogor (Pelita Desa)',sales:'Rian',nilai:42000000,dp:0},
+];
+function accState(){return store('acc',{});}  // {id:'approved'|'rejected'}
+function accDecide(id,act){const s=accState();s[id]=act;save('acc',s);toast(act==='approved'?'Klien di-ACC → masuk jadwal':'Pengajuan ditolak, dikembalikan ke Sales');go('acc');}
+let accDonePage=1;
+function setAccDonePage(p){accDonePage=p;go('acc');}
+function vACC(){
+  const s=accState();const pending=SEED_ACC.filter(a=>!s[a.id]);
+  const done=SEED_ACC.filter(a=>s[a.id]);
+  const rows=pending.map(a=>`<tr><td><div class="trip"><div class="th" style="background:var(--blue)">${ab(a.klien)}</div><div><div class="nm">${esc(a.klien)}</div><div class="loc">${esc(a.dest.split('(')[0])} · ${a.pax} pax</div></div></div></td><td style="font-size:12.5px">${esc(a.sales)}</td><td class="price mono">${jt(a.nilai)}</td><td><span class="pill ${a.dp>0?'dp':'piutang'}">DP ${a.dp}%</span></td><td style="text-align:right"><button class="btn-acc ok" onclick="accDecide('${a.id}','approved')">ACC</button><button class="btn-acc no" onclick="accDecide('${a.id}','rejected')">Tolak</button></td></tr>`).join('');
+  const doneRowsArr=done.map(a=>`<tr><td><div class="nm" style="font-weight:700">${esc(a.klien)}</div><div class="loc" style="font-size:11.5px;color:var(--muted)">${esc(a.sales)} · ${jt(a.nilai)}</div></td><td><span class="pill ${s[a.id]==='approved'?'lunas':'piutang'}">${s[a.id]==='approved'?'Di-ACC':'Ditolak'}</span></td><td style="text-align:right"><button class="btn-acc no" onclick="(function(){const x=accState();delete x['${a.id}'];save('acc',x);go('acc');})()">Batalkan</button></td></tr>`);
+  const pnwPending=penawaran().filter(p=>p.status==='pending');
+  const pnwRows=pnwPending.map(p=>{const wa=p.hp?waLink(p.hp,waPesan(p)):'';
+    return `<tr><td><div class="trip"><div class="th" style="background:var(--gold);color:var(--navy)">${ab(p.klien)}</div><div><div class="nm">${esc(p.klien)}</div><div class="loc">${esc(p.dest)} · ${p.pax} pax · ${p.malam} malam${p.hp?' · '+esc(p.hp):''}</div></div></div></td><td class="mono">${rp(p.perpax)}/pax</td><td class="price mono">${jt(p.total)}</td><td style="text-align:right;white-space:nowrap"><button class="btn-acc" style="background:var(--gold);color:var(--navy)" onclick="showPenawaran('${p.id}')">PDF</button>${wa?`<a class="btn-wa" href="${wa}" target="_blank" rel="noopener">WA</a>`:''}<button class="btn-acc ok" onclick="pnwDecide('${p.id}','approved')">ACC</button><button class="btn-acc no" onclick="pnwDecide('${p.id}','rejected')">Tolak</button></td></tr>`;}).join('');
+  const pnwDone=penawaran().filter(p=>p.status&&p.status!=='pending');
+  const pnwDoneRowsArr=pnwDone.map(p=>`<tr><td><div class="nm" style="font-weight:700">${esc(p.klien)}</div><div class="loc" style="font-size:11.5px;color:var(--muted)">${esc(p.dest)} · ${jt(p.total)}</div></td><td><span class="pill ${p.status==='approved'?'lunas':'piutang'}">${p.status==='approved'?'Di-ACC':'Ditolak'}</span></td><td style="text-align:right;white-space:nowrap"><button class="btn-acc" style="background:var(--gold);color:var(--navy)" onclick="showPenawaran('${p.id}')">PDF</button><button class="btn-acc no" onclick="pnwDecide('${p.id}','pending')">Kembalikan</button></td></tr>`);
+  const allDoneArr=pnwDoneRowsArr.concat(doneRowsArr);
+  const PER_DONE=10;const doneRowsHTML=pageSlice(allDoneArr,accDonePage,PER_DONE).join('');
+  const totalPending=pending.length+pnwPending.length;
+  return `<div class="hello fade"><h1>ACC Klien</h1><p>${totalPending} pengajuan menunggu persetujuan Management</p></div>
+  ${pnwPending.length?`<div class="panel fade"><div class="panel-h"><h3>Penawaran Baru dari Kalkulator <span style="color:var(--gold-ink);font-size:13px">(${pnwPending.length})</span></h3></div><table style="margin-top:12px"><thead><tr><th>Klien & Tujuan</th><th>Harga/pax</th><th>Nilai Total</th><th style="text-align:right">Keputusan</th></tr></thead><tbody>${pnwRows}</tbody></table></div>`:''}
+  <div class="panel fade"><div class="panel-h"><h3>Pengajuan Sales (contoh) <span style="color:var(--red);font-size:13px">(${pending.length})</span></h3></div>
+  ${pending.length?`<table style="margin-top:12px"><thead><tr><th>Klien</th><th>Sales</th><th>Nilai</th><th>DP</th><th style="text-align:right">Keputusan</th></tr></thead><tbody>${rows}</tbody></table>`:`<div style="padding:34px 19px;text-align:center;color:var(--muted);font-size:13.5px">Semua pengajuan contoh sudah diproses 🎉</div>`}
+  </div>
+  ${allDoneArr.length?`<div class="panel fade" style="margin:0"><div class="panel-h"><h3>Sudah Diproses</h3></div><table style="margin-top:12px"><thead><tr><th>Klien</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${doneRowsHTML}</tbody></table>${pagerHTML(allDoneArr.length,accDonePage,PER_DONE,'setAccDonePage')}</div>`:''}
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Penawaran baru dibuat dari Kalkulator (Harga & Katalog). Begitu di-ACC, trip otomatis masuk Jadwal Trip dan Keuangan. Baris "contoh" hanya untuk ilustrasi.</p>`;
+}
+
+const SEED_CREW=[
+  {id:'K1',nama:'Dewi Lestari',peran:'Sales',hp:'0812-1111-2201',tarif:0,status:'Aktif'},
+  {id:'K2',nama:'Fajar Nugroho',peran:'Sales',hp:'0812-1111-2202',tarif:0,status:'Aktif'},
+  {id:'K3',nama:'Rian Saputra',peran:'Sales',hp:'0812-1111-2203',tarif:0,status:'Aktif'},
+  {id:'K4',nama:'Bayu Pratama',peran:'Tour Leader',hp:'0813-2222-3301',tarif:175000,status:'Aktif'},
+  {id:'K5',nama:'Sinta Maharani',peran:'Tour Leader',hp:'0813-2222-3302',tarif:175000,status:'Aktif'},
+  {id:'K7',nama:'Yoga Prasetya',peran:'Tour Leader',hp:'0813-2222-3304',tarif:150000,status:'Aktif'},
+  {id:'K6',nama:'Arga Wibowo',peran:'Media',hp:'0813-2222-3303',tarif:150000,status:'Aktif'},
+  {id:'K8',nama:'Nadia Putri',peran:'Media',hp:'0813-2222-3305',tarif:130000,status:'Aktif'},
+];
+let crewTab='daftar';
+function crewList(){return SEED_CREW.concat(store('crew_add',[]));}
+function crewById(id){return crewList().find(c=>c.id===id);}
+function tripDays(t){if(t.malam!=null&&t._new)return (t.malam||0)+1;if(t.brk&&t.pul){const dd=Math.round((new Date(t.pul)-new Date(t.brk))/86400000)+1;return dd>0?dd:1;}return 1;}
+function assignMap(){return store('assign',{});}
+function assignCrew(tripId,role,crewId){
+  if(crewId){const b=crewBentrok(crewId,tripId);
+    if(b.length){const c=crewById(crewId);
+      if(!confirm(c.nama+' sudah bertugas di:\n\n'+b.map(t=>'• '+t.inst+' ('+dateID(t.brk)+(t.pul?'–'+dateID(t.pul):'')+')').join('\n')+'\n\nTanggalnya bentrok. Tetap tugaskan?')){renderCrew();return;}}}
+  const s=assignMap();s[tripId]=s[tripId]||{};if(crewId)s[tripId][role]=crewId;else delete s[tripId][role];save('assign',s);renderCrew();}
+// --- ketersediaan crew: cek tanggal trip yang tumpang tindih ---
+function tripRange(t){if(!t.brk)return null;const a=new Date(t.brk);const b=t.pul?new Date(t.pul):new Date(a.getTime()+(tripDays(t)-1)*86400000);return[a,b];}
+function overlap(r1,r2){return r1&&r2&&r1[0]<=r2[1]&&r2[0]<=r1[1];}
+function crewTrips(crewId){const m=assignMap();return allTrips().filter(t=>{const a=m[t.id];return a&&(a.tl===crewId||a.media===crewId);});}
+function crewBentrok(crewId,tripId){
+  const t=allTrips().find(x=>x.id===tripId);const r=tripRange(t);if(!r)return[];
+  return crewTrips(crewId).filter(o=>o.id!==tripId&&overlap(r,tripRange(o)));
+}
+function crewSibuk(crewId,tripId){return crewBentrok(crewId,tripId).length>0;}
+function crewGaji(crewId){const c=crewById(crewId);if(!c)return 0;return crewTrips(crewId).reduce((s,t)=>s+(c.tarif||0)*tripDays(t),0);}
+function crewStat(crewId){const ts=crewTrips(crewId);return{n:ts.length,hari:ts.reduce((s,t)=>s+tripDays(t),0),gaji:crewGaji(crewId),trips:ts};}
+function tripGaji(t){const a=assignMap()[t.id]||{};const tl=crewById(a.tl),md=crewById(a.media);const hari=tripDays(t);return ((tl?tl.tarif:0)+(md?md.tarif:0))*hari;}
+function totalGajiCrew(){return upcoming().reduce((s,t)=>s+tripGaji(t),0);}
+// ===== Reimburse biaya lapangan (Tour Leader & Media) =====
+function currentTL(){return store('currentTL','');}
+function setCurrentTL(id){save('currentTL',id);renderTL();}
+function reimburseList(){return store('reimburse',[]);}
+function reimburseByCrew(crewId){return reimburseList().filter(r=>r.crewId===crewId).sort((a,b)=>b.createdAt-a.createdAt);}
+function reimburseByTrip(tripId){return reimburseList().filter(r=>r.tripId===tripId);}
+function reimburseSum(list){return list.reduce((s,r)=>s+(r.nominal||0),0);}
+function submitReimburse(){
+  const crewId=currentTL();if(!crewId){toast('Pilih nama Anda dulu');return;}
+  const g=id=>document.getElementById(id);
+  const tripId=g('rb_trip')?g('rb_trip').value:'';
+  const item=(g('rb_item')?g('rb_item').value:'').trim();
+  const nominal=Math.max(0,+(g('rb_nominal')?g('rb_nominal').value:0)||0);
+  const ket=g('rb_ket')?g('rb_ket').value.trim():'';
+  if(!tripId){toast('Pilih trip dulu');return;}
+  if(!item||!nominal){toast('Isi jenis & nominal biaya');return;}
+  const c=crewById(crewId);
+  const list=reimburseList();
+  list.push({id:'RB-'+Date.now(),tripId,crewId,crewName:c?c.nama:'',item,nominal,ket,tgl:new Date().toISOString().slice(0,10),status:'pending',createdAt:Date.now()});
+  save('reimburse',list);
+  toast('✓ Reimburse diajukan — menunggu persetujuan Management');
+  renderTL();
+}
+function decideReimburse(id,status){
+  const list=reimburseList();const r=list.find(x=>x.id===id);if(!r)return;
+  r.status=status;r.decidedAt=Date.now();save('reimburse',list);
+  toast(status==='approved'?'✓ Reimburse '+r.crewName+' disetujui':'Reimburse '+r.crewName+' ditolak');
+  renderKeu();
+}
+function delReimburse(id){save('reimburse',reimburseList().filter(x=>x.id!==id));renderTL();}
+// ===== Area Tour Leader & Media =====
+let tlTab='jadwal';
+let tlChecklistTrip='';
+function setTLTab(k){tlTab=k;const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tt===k));renderTL();}
+function setTLChecklistTrip(id){tlChecklistTrip=id;renderTL();}
+function renderTL(){
+  const b=document.getElementById('tlBody');if(!b)return;
+  b.innerHTML=tlPicker()+(tlTab==='checklist'?tlChecklistTab():tlTab==='reimburse'?tlReimburseTab():tlTab==='gaji'?tlGajiTab():tlJadwalTab());
+}
+function vTL(){
+  const tabs=[['jadwal','Jadwal Saya'],['checklist','Checklist'],['reimburse','Reimburse'],['gaji','Gaji Saya']];
+  const nav=tabs.map(([k,l])=>`<button class="tab ${tlTab===k?'active':''}" data-tt="${k}" onclick="setTLTab('${k}')">${l}</button>`).join('');
+  return `<div class="hello fade"><h1>Tour Leader &amp; Media</h1><p>Jadwal tugas, checklist persiapan, reimburse biaya lapangan &amp; gaji per trip</p></div>
+    <div class="tabs fade">${nav}</div><div id="tlBody"></div>`;
+}
+function tlPicker(){
+  const crew=crewList().filter(c=>c.peran==='Tour Leader'||c.peran==='Media');const cid=currentTL();
+  return `<div class="cat-bar" style="padding:0 0 14px"><div><label class="flbl" style="display:inline;margin-right:8px">Login sebagai</label>
+    <select class="finput" style="width:auto;display:inline-block;margin:0;padding:8px 12px" onchange="setCurrentTL(this.value)">
+      <option value="">— pilih Tour Leader / Media —</option>${crew.map(c=>`<option value="${c.id}" ${c.id===cid?'selected':''}>${esc(c.nama)} (${c.peran})</option>`).join('')}</select></div>
+    <span style="font-size:12px;color:var(--muted)">belum ada login sungguhan — ini hanya penanda sementara</span></div>`;
+}
+function tlJadwalTab(){
+  const cid=currentTL();
+  if(!cid)return '<div class="empty"><h3>Pilih nama Anda</h3><p>Pilih nama di atas untuk melihat jadwal tugas Anda.</p></div>';
+  const stat=crewStat(cid);
+  const up=stat.trips.filter(t=>tripStatus(t)!=='selesai').sort((a,b)=>a.brk<b.brk?-1:1);
+  const done=stat.trips.filter(t=>tripStatus(t)==='selesai');
+  const pend=reimburseByCrew(cid).filter(r=>r.status==='pending');
+  const cardHTML=t=>{const st=tripStatus(t);const a=assignMap()[t.id]||{};const peran=a.tl===cid?'Tour Leader':'Media';
+    return `<div class="jcard" onclick="openTLTrip('${t.id}')">
+      <div class="jcard-top"><span class="pill ${STPILL[st]}">${STLBL[st]}</span><span class="pill jadwal" style="background:var(--navy);color:#fff">${peran}</span></div>
+      <h4>${esc(t.inst)}</h4><div class="jcard-dest">${esc((t.dest||'').split('(')[0])}</div>
+      <div class="jcard-meta"><span>📅 ${dateID(t.brk)}${t.pul?'–'+dateID(t.pul):''}</span><span>👥 ${t.pax} pax</span><span>🧰 ${prepTrip(t.id).length} item vendor</span></div>
+    </div>`;};
+  return `<div class="cards fade" style="grid-template-columns:repeat(4,1fr)">
+    <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="lbl">Trip Mendatang</div><div class="val mono">${up.length}</div></div>
+    <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Total Hari Tugas</div><div class="val mono">${stat.hari}</div></div>
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="lbl">Estimasi Gaji</div><div class="val mono">${rp(stat.gaji)}</div></div>
+    <div class="scard"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a1.5 1.5 0 0 0 1.3 2.2h17.8a1.5 1.5 0 0 0 1.3-2.2L13.7 3.9a1.5 1.5 0 0 0-2.6 0z"/></svg></div><div class="lbl">Reimburse Pending</div><div class="val mono">${pend.length}</div></div>
+  </div>
+  <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Trip Mendatang &amp; Berlangsung</h3></div>
+  ${up.length?`<div class="jgrid" style="margin-top:12px">${up.map(cardHTML).join('')}</div>`:`<div style="padding:30px 0;text-align:center;color:var(--muted);font-size:13px">Tidak ada trip aktif.</div>`}
+  </div>
+  ${done.length?`<div class="panel fade" style="margin:0"><div class="panel-h"><h3>Riwayat Trip Selesai</h3></div><div class="jgrid" style="margin-top:12px">${done.map(cardHTML).join('')}</div></div>`:''}`;
+}
+function openTLTrip(id){
+  const t=allTrips().find(x=>x.id===id);if(!t)return;
+  const cid=currentTL();const a=assignMap()[id]||{};const peran=a.tl===cid?'Tour Leader':'Media';
+  const cl=store('checklist',{})[id]||CHECKLIST_DEF.map(x=>({item:x,done:false}));
+  const clHTML=cl.map((c,i)=>`<label class="chk"><input type="checkbox" ${c.done?'checked':''} onchange="toggleChecklist('${id}',${i});openTLTrip('${id}')"> ${esc(c.item)}</label>`).join('');
+  const prep=prepTrip(id);
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='tlOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:520px"><div class="pv-bar"><b>${esc(t.inst)}</b><button class="btn-acc no" onclick="document.getElementById('tlOv').remove()">Tutup</button></div>
+  <div style="background:var(--bg);padding:16px;max-height:76vh;overflow:auto">
+    <div class="td-card"><h5>Info Trip</h5>
+      <div class="td-row"><span>Peran Anda</span><b>${peran}</b></div>
+      <div class="td-row"><span>Destinasi</span><b>${esc((t.dest||'').split('(')[0])}</b></div>
+      <div class="td-row"><span>Tanggal</span><b>${dateID(t.brk)}${t.pul?' – '+dateID(t.pul):''}</b></div>
+      <div class="td-row"><span>Peserta</span><b>${t.pax} pax</b></div>
+      <div class="td-row"><span>Armada</span><b>${esc(t.armada||(t.bus?t.bus+' unit':'—'))}</b></div>
+    </div>
+    <div class="td-card"><h5>Checklist Persiapan</h5>${clHTML}</div>
+    <div class="td-card"><h5>Persiapan Vendor</h5>${prep.length?prep.map(p=>`<div class="td-row"><span>${esc(p.kat)}</span><b>${esc(p.vendor||'-')}</b></div>`).join(''):'<div style="font-size:12.5px;color:var(--muted)">Belum ada data vendor.</div>'}</div>
+    <button class="btn-save" onclick="document.getElementById('tlOv').remove();setTLTab('reimburse');setTimeout(()=>{const s=document.getElementById('rb_trip');if(s)s.value='${id}';},50)">💸 Ajukan Reimburse untuk Trip Ini</button>
+  </div></div>`;
+  document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+function tlChecklistTab(){
+  const cid=currentTL();if(!cid)return '<div class="empty"><h3>Pilih nama Anda</h3></div>';
+  const trips=crewTrips(cid).filter(t=>tripStatus(t)!=='selesai').sort((a,b)=>a.brk<b.brk?-1:1);
+  if(!trips.length)return '<div class="empty"><h3>Tidak ada trip aktif</h3><p>Checklist muncul untuk trip yang sedang berjalan atau akan datang.</p></div>';
+  const sel=tlChecklistTrip&&trips.find(t=>t.id===tlChecklistTrip)?tlChecklistTrip:trips[0].id;
+  const cl=store('checklist',{})[sel]||CHECKLIST_DEF.map(x=>({item:x,done:false}));
+  const done=cl.filter(c=>c.done).length;
+  const clHTML=cl.map((c,i)=>`<label class="chk"><input type="checkbox" ${c.done?'checked':''} onchange="toggleChecklist('${sel}',${i});renderTL()"> ${esc(c.item)}</label>`).join('');
+  return `<div class="panel fade" style="margin:0"><div class="panel-h"><h3>Checklist Persiapan</h3></div>
+    <div style="padding:16px 19px 0"><label class="flbl">Pilih Trip</label>
+    <select class="finput" onchange="setTLChecklistTrip(this.value)">${trips.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.inst)} — ${dateID(x.brk)}</option>`).join('')}</select></div>
+    <div style="padding:16px 19px"><div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">${done}/${cl.length} selesai</div>${clHTML}</div>
+  </div>`;
+}
+function tlReimburseTab(){
+  const cid=currentTL();if(!cid)return '<div class="empty"><h3>Pilih nama Anda</h3></div>';
+  const trips=crewTrips(cid).sort((a,b)=>a.brk<b.brk?-1:1);
+  const mine=reimburseByCrew(cid);
+  const row=r=>{const t=allTrips().find(x=>x.id===r.tripId);const pillc=r.status==='approved'?'lunas':r.status==='rejected'?'piutang':'dp';const plabel=r.status==='approved'?'Disetujui':r.status==='rejected'?'Ditolak':'Menunggu';
+    return `<tr><td><div class="nm" style="font-weight:700">${t?esc(t.inst):'(trip dihapus)'}</div><div class="loc" style="font-size:11px;color:var(--muted)">${dateID(r.tgl)}</div></td><td>${esc(r.item)}<div style="font-size:11px;color:var(--muted)">${esc(r.ket||'')}</div></td><td class="price mono">${rp(r.nominal)}</td><td><span class="pill ${pillc}">${plabel}</span></td><td style="text-align:right">${r.status==='pending'?`<button class="btn-acc no" onclick="delReimburse('${r.id}')">Batal</button>`:'—'}</td></tr>`;};
+  return `<div class="panel fade" style="margin:0"><div class="panel-h"><h3>Ajukan Reimburse Biaya Lapangan</h3></div>
+    <div style="padding:16px 19px">
+      <label class="flbl">Trip</label><select id="rb_trip" class="finput" style="margin-bottom:10px"><option value="">— pilih trip —</option>${trips.map(t=>`<option value="${t.id}">${esc(t.inst)} — ${dateID(t.brk)}</option>`).join('')}</select>
+      <div class="frow"><div><label class="flbl">Jenis Biaya</label><input id="rb_item" class="finput" placeholder="mis. Parkir, Tol, Makan darurat"></div><div><label class="flbl">Nominal (Rp)</label><input id="rb_nominal" class="finput" type="number" placeholder="0"></div></div>
+      <label class="flbl">Keterangan (opsional)</label><input id="rb_ket" class="finput" style="margin-bottom:10px" placeholder="catatan tambahan">
+      <button class="btn-save" onclick="submitReimburse()">Ajukan Reimburse</button>
+    </div>
+  </div>
+  <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Riwayat Pengajuan Saya</h3></div>
+  ${mine.length?`<table style="margin-top:12px"><thead><tr><th>Trip</th><th>Keterangan</th><th>Nominal</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead><tbody>${mine.map(row).join('')}</tbody></table>`:`<div style="padding:30px 0;text-align:center;color:var(--muted);font-size:13px">Belum ada pengajuan.</div>`}
+  </div>`;
+}
+function tlGajiTab(){
+  const cid=currentTL();if(!cid)return '<div class="empty"><h3>Pilih nama Anda</h3></div>';
+  const c=crewById(cid);const stat=crewStat(cid);
+  const rows=stat.trips.slice().sort((a,b)=>a.brk<b.brk?1:-1).map(t=>{const hari=tripDays(t);const gaji=(c.tarif||0)*hari;const st=tripStatus(t);
+    return `<tr><td><div class="nm" style="font-weight:700">${esc(t.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${dateID(t.brk)}${t.pul?'–'+dateID(t.pul):''}</div></td><td>${hari} hari</td><td><span class="pill ${STPILL[st]}">${STLBL[st]}</span></td><td class="price mono">${rp(gaji)}</td></tr>`;}).join('');
+  return `<div class="cards fade" style="grid-template-columns:repeat(3,1fr)">
+    <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="lbl">Tarif / Hari</div><div class="val mono">${rp(c?c.tarif:0)}</div></div>
+    <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Total Hari Tugas</div><div class="val mono">${stat.hari}</div></div>
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5L20 7"/></svg></div><div class="lbl">Total Estimasi Gaji</div><div class="val mono">${rp(stat.gaji)}</div></div>
+  </div>
+  <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Rincian Gaji per Trip</h3></div>
+  ${rows?`<table style="margin-top:12px"><thead><tr><th>Trip</th><th>Durasi</th><th>Status</th><th>Gaji</th></tr></thead><tbody>${rows}</tbody></table>`:`<div style="padding:30px 0;text-align:center;color:var(--muted);font-size:13px">Belum ada trip ditugaskan.</div>`}
+  </div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Estimasi dihitung dari tarif harian × jumlah hari trip. Belum termasuk reimburse biaya lapangan yang disetujui.</p>`;
+}
+// ===== Area Umum / Halaman Publik =====
+let umumTab='paket';
+let lastUmumEst=null;
+let umumDestQ='';
+function setUmumTab(k){umumTab=k;umumDestQ='';const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.ut===k));renderUmum();}
+function setUmumDestQ(v){umumDestQ=v;renderUmum();}
+function renderUmum(){
+  const b=document.getElementById('umumBody');if(!b)return;
+  b.innerHTML=umumTab==='hotel'?umumHotelTab():umumTab==='armada'?umumArmadaTab():umumTab==='estimasi'?umumEstimasiTab():umumPaketTab();
+  if(umumTab==='estimasi')calcUmum();
+  if(umumTab==='paket'){const q=document.getElementById('umDestSearch');if(q){q.value=umumDestQ;if(umumDestQ)q.focus();}}
+}
+const DESTPHOTO={}; // isi {'Nama Destinasi':'data:image/...;base64,...'} di sini begitu foto asli Havist sudah ada — otomatis dipakai menggantikan gradasi warna.
+const UMGRAD=['linear-gradient(135deg,#275BB5,#1AA6B7)','linear-gradient(135deg,#163A6B,#8E63D6)','linear-gradient(135deg,#0E244A,#275BB5)','linear-gradient(135deg,#1AA6B7,#2B9D6E)','linear-gradient(135deg,#8E63D6,#275BB5)','linear-gradient(135deg,#2B9D6E,#1AA6B7)','linear-gradient(135deg,#275BB5,#163A6B)','linear-gradient(135deg,#1AA6B7,#275BB5)'];
+function umumFeatured(){
+  const cities=[...new Set(CAT.dests.map(d=>d.city))];
+  return cities.map(c=>CAT.dests.find(d=>d.city===c)).filter(Boolean).slice(0,8);
+}
+function umumStats(){
+  const nCity=[...new Set(CAT.dests.map(d=>d.city))].length;
+  return [[CAT.dests.length+'+','Destinasi Wisata'],[nCity,'Kota/Wilayah Tujuan'],[allTrips().length+'+','Trip Terlaksana'],[(CAT.hotels.length+CAT.armada.length)+'+','Mitra Hotel &amp; Armada']];
+}
+function umumHeroSearch(e){
+  e.preventDefault();
+  const v=(document.getElementById('umHeroSearch').value||'').trim();
+  umumTab='paket';umumDestQ=v;
+  const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.ut==='paket'));
+  renderUmum();
+  const b=document.getElementById('umumBody');if(b)b.scrollIntoView({behavior:'smooth'});
+}
+// Band kepercayaan — dihitung dari jumlah nama klien/rombongan berbeda di data trip asli (bukan logo/nama karangan).
+function umumTrustBand(){
+  const n=new Set(allTrips().map(t=>t.inst).filter(Boolean)).size;
+  return `<div class="umtrust fade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg>
+    <p>Dipercaya oleh <b>${n}+</b> sekolah, instansi &amp; rombongan berbeda untuk perjalanan mereka</p></div>`;
+}
+// FAQ halaman publik — isi pertanyaan yang sering ditanyakan lewat WhatsApp, supaya calon klien bisa cari tahu sendiri dulu.
+const UMUM_FAQ=[
+  ['Bagaimana cara memesan paket wisata?','Hubungi tim Sales kami via WhatsApp dengan info jumlah peserta, tujuan, dan perkiraan tanggal keberangkatan. Tim kami akan membuatkan penawaran harga sesuai kebutuhan rombongan Anda.'],
+  ['Berapa minimal jumlah peserta?','Paket rombongan umumnya menyesuaikan kapasitas armada (mis. 1 bus), namun kami juga membantu menghitungkan kebutuhan yang lebih kecil — silakan tanyakan langsung ke tim Sales.'],
+  ['Bagaimana sistem pembayarannya?','DP 30% saat konfirmasi booking, dan pelunasan maksimal 7 hari sebelum tanggal keberangkatan.'],
+  ['Bisakah request destinasi, hotel, atau armada tertentu?','Bisa. Kami terbuka untuk request destinasi, hotel, dan armada sesuai kebutuhan — tim Sales akan menghitungkan estimasi biayanya lewat Kalkulator di halaman ini.'],
+  ['Apakah ada tour leader & dokumentasi selama perjalanan?','Ya, setiap trip didampingi tour leader berpengalaman, dan untuk sebagian trip disertai tim media untuk dokumentasi perjalanan.'],
+];
+function umumFaqSection(){
+  const items=UMUM_FAQ.map(([q,a])=>`<div class="umfaq-item"><button class="umfaq-q" onclick="this.parentNode.classList.toggle('open')"><span>${esc(q)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button><div class="umfaq-a"><p>${esc(a)}</p></div></div>`).join('');
+  return `<div class="umsec-head"><div><span class="tag">Pertanyaan Umum</span><h2>Yang Sering Ditanyakan</h2></div></div>
+  <div class="umfaq fade">${items}</div>`;
+}
+// Testimoni asli dari pelanggan — isi array ini begitu ada komentar/review asli dari Instagram, YouTube, atau DM/WhatsApp.
+// Format tiap item: {quote, name, sumber, tur, platform (emoji), foto (url/base64, opsional)}. Kosong = tampil placeholder "menunggu testimoni".
+const TESTIMONI=[];
+function umumTestiSection(){
+  const has=TESTIMONI.length>0;
+  const nTrip=allTrips().length,nDest=CAT.dests.length,nPartner=CAT.hotels.length+CAT.armada.length;
+  const nPax=allTrips().reduce((s,t)=>s+(t.pax||0),0);
+  const statCard=`<div class="umt-card-stat">
+    <div class="umt-rating-row"><div class="umt-rating-n">${nPax.toLocaleString('id-ID')}+</div><div class="umt-rating-txt">Peserta sudah<br>kami layani</div></div>
+    <div class="umt-feat">
+      <div class="umt-feat-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> ${nDest}+ destinasi wisata tersedia</div>
+      <div class="umt-feat-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3z"/></svg> ${nPartner}+ mitra hotel &amp; armada terpilih</div>
+      <div class="umt-feat-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> ${nTrip}+ trip sudah terlaksana</div>
+    </div>
+    <div class="umt-cta-block">
+      <div class="lbl1">Siap merencanakan perjalanan sendiri?</div>
+      <div class="lbl2">Yuk, mulai sekarang!</div>
+      <div class="umt-cta-row">
+        <button class="umt-cta-btn" onclick="setUmumTab('estimasi');document.getElementById('umumBody').scrollIntoView({behavior:'smooth'})">Rencanakan Trip</button>
+        <button class="umt-cta-arrow" onclick="setUmumTab('estimasi');document.getElementById('umumBody').scrollIntoView({behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M7 17 17 7M9 7h8v8"/></svg></button>
+      </div>
+    </div>
+  </div>`;
+  const first=has?TESTIMONI[0]:null;
+  const photoBg=first&&first.foto?`background-image:url('${first.foto}')`:`background:${UMGRAD[0]}`;
+  const photoCard=`<div class="umt-card-photo" style="${photoBg}"><div class="ov"></div>
+    <div class="cap">
+      <div class="q">${first?('“'+esc(first.quote)+'”'):'Testimoni asli dari pelanggan akan tampil di sini.'}</div>
+      <div class="a">${first?('— '+esc(first.name)+(first.sumber?', '+esc(first.sumber):'')):'Menunggu testimoni pertama'}</div>
+    </div>
+  </div>`;
+  const listSrc=has?TESTIMONI:[
+    {quote:'Testimoni asli dari Instagram akan ditambahkan di sini.',name:'Menunggu testimoni',sumber:'Instagram',platform:'📸'},
+    {quote:'Testimoni asli dari YouTube akan ditambahkan di sini.',name:'Menunggu testimoni',sumber:'YouTube',platform:'▶️'},
+    {quote:'Testimoni asli dari DM & WhatsApp akan ditambahkan di sini.',name:'Menunggu testimoni',sumber:'WhatsApp',platform:'💬'}];
+  const doubled=listSrc.concat(listSrc);
+  const mcards=doubled.map(t=>`<div class="umt-mcard"><div class="plat">${t.platform||'💬'} ${esc(t.sumber||'')}</div><div class="q">“${esc(t.quote)}”</div><div class="who"><div class="ava" ${t.foto?`style="background-image:url('${t.foto}')"`:''}>${t.foto?'':'?'}</div><div><b>${esc(t.name)}</b><span>${esc(t.tur||'')}</span></div></div></div>`).join('');
+  return `<div class="umt-wrap">
+    <div class="umt-head">
+      <div>
+        <div class="umt-tagrow"><div class="umt-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z"/></svg></div><div class="umt-pill">Testimoni</div></div>
+        <h2>Apa kata mereka<br><span>tentang perjalanan bersama kami</span></h2>
+      </div>
+      <div class="umt-sub">Setiap perjalanan yang kami susun dibangun dari kepercayaan dan pengalaman nyata peserta.</div>
+    </div>
+    <div class="umt-grid">${statCard}${photoCard}<div class="umt-marquee"><div class="umt-track">${mcards}</div></div></div>
+  </div>`;
+}
+function vUmum(){
+  const tabs=[['paket','Paket & Destinasi'],['hotel','Hotel'],['armada','Armada'],['estimasi','Estimasi Biaya']];
+  const nav=tabs.map(([k,l])=>`<button class="tab ${umumTab===k?'active':''}" data-ut="${k}" onclick="setUmumTab('${k}')">${l}</button>`).join('');
+  const info=infoPerusahaan();
+  const stats=umumStats();
+  const feat=umumFeatured();
+  const nCity=[...new Set(CAT.dests.map(d=>d.city))].length;
+  const featHTML=feat.map((d,i)=>{const photo=DESTPHOTO[d.name];const bg=photo?`background-image:url('${photo}')`:`background:${UMGRAD[i%UMGRAD.length]}`;
+    return `<div class="umfeat-card" style="${bg}"><div class="ov"></div><div class="cnt"><b>${esc(d.name)}</b><span>${esc(d.city)}</span></div></div>`;}).join('');
+  return `
+  <div class="umhero fade">
+    <span class="umhero-tag">✈️ ${esc(info.nama)}</span>
+    <h1>Jelajahi Indonesia Bersama <em>${esc(info.nama)}</em></h1>
+    <p>Paket wisata, outing, dan study tour dengan armada, hotel, dan tour leader berpengalaman — rencanakan perjalanan rombongan Anda tanpa ribet.</p>
+    <form class="umhero-search" onsubmit="umumHeroSearch(event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="umHeroSearch" placeholder="Coba cari destinasi, mis. Jogja, Pantai, Candi...">
+      <button type="submit">Cari →</button>
+    </form>
+    <div class="umhero-cta">
+      <button class="btn-um-primary" onclick="setUmumTab('paket');document.getElementById('umumBody').scrollIntoView({behavior:'smooth'})">Lihat Paket Wisata →</button>
+      <button class="btn-um-ghost" onclick="setUmumTab('estimasi');document.getElementById('umumBody').scrollIntoView({behavior:'smooth'})">▶ Hitung Estimasi Biaya</button>
+    </div>
+    <div class="umstats">${stats.map(([n,l])=>`<div class="umstat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('')}</div>
+  </div>
+
+  <div class="umsec-head"><div><span class="tag">Kenapa Memilih Kami</span><h2>Setiap Perjalanan, Kami Pastikan Berkesan</h2></div></div>
+  <div class="umwhy fade">
+    <div class="umwhy-card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 3.5a3.2 3.2 0 0 1 0 6M21 20a6 6 0 0 0-5-5.9"/></svg></div><h4>Tour Leader &amp; Media Berpengalaman</h4><p>Setiap trip didampingi tour leader yang memahami rute &amp; destinasi, serta tim media untuk dokumentasi perjalanan.</p></div>
+    <div class="umwhy-card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 8.4 12 3 3.4 8.4v7.2L12 21l8.6-5.4z"/><path d="M12 12 3.4 8.4M12 12v9M12 12l8.6-3.6"/></svg></div><h4>Armada &amp; Hotel Terpilih</h4><p>Bekerja sama dengan ${CAT.armada.length}+ armada dan ${CAT.hotels.length}+ hotel/penginapan di berbagai daerah.</p></div>
+    <div class="umwhy-card"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><h4>Harga Transparan</h4><p>Hitung sendiri estimasi biaya di halaman ini — tanpa biaya tersembunyi, konfirmasi akhir dari tim sales kami.</p></div>
+  </div>
+
+  ${umumTrustBand()}
+
+  <div class="umsec-head"><div><span class="tag">Destinasi Populer</span><h2>Jelajahi ${nCity} Kota/Wilayah Tujuan</h2></div></div>
+  <div class="umfeat-grid fade">${featHTML}</div>
+
+  ${umumTestiSection()}
+
+  ${umumFaqSection()}
+
+  <div class="umcta fade">
+    <div><h3 style="margin-bottom:4px">Siap merencanakan trip?</h3><p style="color:rgba(255,255,255,.7);font-size:13px">Tim kami siap bantu susun paket sesuai kebutuhan rombongan Anda.</p></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn-um-primary" style="text-decoration:none" target="_blank" href="${waLink(info.hp,'Halo '+info.nama+', saya ingin tanya paket wisata.')}">💬 Chat via WhatsApp</a>
+      <button class="btn-um-ghost" onclick="go('dashboard')">Masuk ke Area Internal →</button>
+    </div>
+  </div>
+
+  <div class="umsec-head" style="margin-top:34px"><div><span class="tag">Katalog Lengkap</span><h2>Cari Paket, Hotel &amp; Armada</h2></div></div>
+  <div class="tabs fade" style="padding:0 0 16px">${nav}</div><div id="umumBody"></div>`;
+}
+function umumPaketTab(){
+  const all=CAT.dests;
+  if(!all.length)return '<div class="empty"><h3>Belum ada destinasi</h3></div>';
+  const q=umumDestQ.trim().toLowerCase();
+  const matched=q?all.filter(d=>d.name.toLowerCase().includes(q)||d.city.toLowerCase().includes(q)||(d.note||'').toLowerCase().includes(q)):all;
+  const cities=[...new Set(matched.map(d=>d.city))];
+  const searchBar=`<div class="um-searchbar">
+    <div class="um-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="umDestSearch" placeholder="Cari destinasi atau kota (mis. Jogja, Pantai, Candi)..." oninput="setUmumDestQ(this.value)"></div>
+    <div class="um-search-count">${matched.length} destinasi${q?' ditemukan':''}${cities.length?' di '+cities.length+' kota':''}</div>
+  </div>`;
+  if(q&&!matched.length)return searchBar+`<div class="empty"><h3>Tidak ditemukan</h3><p>Tidak ada destinasi yang cocok dengan "${esc(umumDestQ)}".</p></div>`;
+  const blocks=cities.map(c=>{
+    const items=matched.filter(d=>d.city===c).map(d=>`<div class="jcard" style="cursor:default">
+      <h4>${esc(d.name)}</h4><div class="jcard-dest">${esc(c)}</div>
+      <div class="jcard-meta"><span>🎟️ ${d.price?rp(d.price)+'/pax':'Gratis'}</span></div>
+      ${d.note?`<div style="font-size:11.5px;color:var(--muted);margin-top:6px">${esc(d.note)}</div>`:''}
+    </div>`).join('');
+    return `<div class="panel fade" style="margin-bottom:18px"><div class="panel-h"><h3>${esc(c)} <span style="color:var(--muted);font-size:12px;font-weight:600">(${matched.filter(d=>d.city===c).length} destinasi)</span></h3></div>
+      <div class="jgrid" style="margin-top:12px">${items}</div></div>`;
+  }).join('');
+  return searchBar+blocks;
+}
+function umumHotelTab(){
+  const regions=[...new Set(CAT.hotels.map(h=>h.region))];
+  if(!regions.length)return '<div class="empty"><h3>Belum ada data hotel</h3></div>';
+  return regions.map(r=>{
+    const rows=CAT.hotels.filter(h=>h.region===r).map(h=>`<tr><td style="font-weight:600">${esc(h.name)}</td><td class="mono">${rp(h.wd)}</td><td class="mono">${rp(h.we)}</td></tr>`).join('');
+    return `<div class="panel fade" style="margin-bottom:18px"><div class="panel-h"><h3>${esc(r)} <span style="color:var(--muted);font-size:12px;font-weight:600">(${CAT.hotels.filter(h=>h.region===r).length} hotel)</span></h3></div>
+      <table style="margin-top:10px"><thead><tr><th>Hotel</th><th>Weekday /kamar</th><th>Weekend /kamar</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }).join('');
+}
+function umumArmadaTab(){
+  const rows=CAT.armada.map(a=>`<tr><td style="font-weight:600">${esc(a.name)}</td><td>${armSeat(a)} seat</td><td class="price mono">${rp(a.rate)}/hari</td></tr>`).join('');
+  return `<div class="panel fade"><div class="panel-h"><h3>Armada Tersedia</h3></div>
+    <table style="margin-top:12px"><thead><tr><th>Armada</th><th>Kapasitas</th><th>Harga Sewa</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function umumEstimasiTab(){
+  const regions=[...new Set(CAT.hotels.map(h=>h.region))];
+  const cities=[...new Set(CAT.dests.map(d=>d.city))];
+  return `<div class="panel fade"><div class="panel-h"><h3>Estimasi Biaya Trip</h3></div>
+    <div style="padding:16px 19px">
+      <div class="frow"><div><label class="flbl">Jumlah Peserta (pax)</label><input id="u_pax" class="finput" type="number" value="30" min="1" oninput="calcUmum()"></div><div><label class="flbl">Jumlah Malam</label><input id="u_malam" class="finput" type="number" value="1" min="0" oninput="calcUmum()"></div></div>
+      <label class="flbl">Armada</label><select id="u_armada" class="finput" style="margin-bottom:10px" onchange="calcUmum()">${CAT.armada.map(a=>`<option value="${a.rate}">${esc(a.name)} (${armSeat(a)} seat) — ${rp(a.rate)}/hari</option>`).join('')}</select>
+      <label class="flbl">Hotel (opsional)</label><select id="u_hotel" class="finput" style="margin-bottom:10px" onchange="calcUmum()"><option value="0">— Tanpa Hotel —</option>${regions.map(r=>`<optgroup label="${esc(r)}">`+CAT.hotels.filter(h=>h.region===r).map(h=>`<option value="${h.wd}">${esc(h.name)} (${rp(h.wd)}/kamar)</option>`).join('')+'</optgroup>').join('')}</select>
+      <label class="flbl" style="margin-top:6px">Destinasi Wisata <span style="color:var(--muted-2);font-weight:500">(klik kota untuk buka, pilih satu atau lebih, opsional)</span></label>
+      <div class="destwrap">${cities.map(c=>{const items=CAT.dests.filter(d=>d.city===c).map(d=>`<label class="dest-item"><input type="checkbox" class="udest" data-price="${d.price}" onchange="calcUmum()"><span>${esc(d.name)} <em>${d.price?rp(d.price):'Gratis'}</em>${d.note?'<span class="opt">'+esc(d.note)+'</span>':''}</span></label>`).join('');
+        return `<div class="citybox"><div class="cityhd" onclick="this.parentNode.classList.toggle('open')"><span>${esc(c)}</span><span class="cnt">${CAT.dests.filter(d=>d.city===c).length}</span></div><div class="citygrid">${items}</div></div>`;}).join('')}</div>
+      <div id="umumResult"></div>
+    </div>
+  </div>`;
+}
+function calcUmum(){
+  const g=id=>document.getElementById(id);
+  const pax=Math.max(1,+(g('u_pax')?g('u_pax').value:0)||1);
+  const malam=Math.max(0,+(g('u_malam')?g('u_malam').value:0)||0);
+  const hari=malam+1;
+  const armRate=+(g('u_armada')?g('u_armada').value:0)||0;
+  const hotelWd=+(g('u_hotel')?g('u_hotel').value:0)||0;
+  const kamar=hotelWd>0?Math.ceil(pax/4):0;
+  const biayaArmada=armRate*hari;
+  const biayaHotel=hotelWd*kamar*malam;
+  const destPrice=[...document.querySelectorAll('.udest:checked')].reduce((s,el)=>s+(+el.dataset.price||0),0);
+  document.querySelectorAll('.udest:checked').forEach(el=>{const box=el.closest('.citybox');if(box)box.classList.add('has');});
+  document.querySelectorAll('.destwrap .citybox').forEach(b=>{if(!b.querySelectorAll('.udest:checked').length)b.classList.remove('has');});
+  const biayaDest=destPrice*pax;
+  const subtotal=biayaArmada+biayaHotel+biayaDest;
+  const perpax=pax>0?Math.ceil((subtotal/pax)/1000)*1000:0;
+  lastUmumEst={pax,malam,hari,armRate,hotelWd,kamar,biayaArmada,biayaHotel,biayaDest,subtotal,perpax};
+  const r=document.getElementById('umumResult');if(!r)return;
+  const info=infoPerusahaan();
+  const waText=`Halo ${info.nama}, saya ingin tanya paket wisata untuk ${pax} pax, ${hari} hari ${malam} malam. Estimasi biaya sekitar ${rp(perpax)}/pax. Mohon info lebih lanjut.`;
+  r.innerHTML=`<div class="td-card" style="background:var(--bg)">
+    <div class="td-row"><span>Sewa Armada (${hari} hari)</span><b>${rp(biayaArmada)}</b></div>
+    <div class="td-row"><span>Hotel (${kamar} kamar × ${malam} malam)</span><b>${rp(biayaHotel)}</b></div>
+    <div class="td-row"><span>Tiket Destinasi</span><b>${rp(biayaDest)}</b></div>
+    <div class="td-row" style="border-top:1px solid var(--line);padding-top:8px;margin-top:4px"><span><b>Estimasi Total</b></span><b class="mono" style="font-size:16px;color:var(--blue)">${rp(subtotal)}</b></div>
+    <div class="td-row"><span>Estimasi per Pax</span><b class="mono">${rp(perpax)}</b></div>
+    </div>
+    <a class="btn-save" style="display:block;text-align:center;margin-top:12px;text-decoration:none" target="_blank" href="${waLink(info.hp,waText)}">💬 Tanya &amp; Booking via WhatsApp</a>
+    <p style="font-size:11.5px;color:var(--muted-2);margin-top:8px">Estimasi kasar, belum termasuk konsumsi, kaos, &amp; biaya lain-lain. Harga final akan dikonfirmasi tim sales kami.</p>`;
+}
+function addCrew(){
+  const nama=document.getElementById('k_nama').value.trim();const peran=document.getElementById('k_peran').value;
+  const hp=document.getElementById('k_hp').value.trim();const tarif=parseInt(document.getElementById('k_tarif').value)||0;
+  if(!nama){toast('Nama wajib diisi');return;}
+  const list=store('crew_add',[]);list.push({id:'K'+Date.now(),nama,peran,hp:hp||'-',tarif,status:'Aktif'});save('crew_add',list);
+  toast('Crew '+nama+' ditambahkan');renderCrew();
+}
+function setCrewTab(k){crewTab=k;const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.kt===k));renderCrew();}
+function renderCrew(){const b=document.getElementById('crewBody');if(!b)return;b.innerHTML=crewTab==='penugasan'?crewPenugasan():crewDaftar();}
+function vCrew(){
+  const tabs=[['daftar','Daftar Crew'],['penugasan','Penugasan Trip']];
+  const nav=tabs.map(([k,l])=>`<button class="tab ${crewTab===k?'active':''}" data-kt="${k}" onclick="setCrewTab('${k}')">${l}</button>`).join('');
+  return `<div class="hello fade"><h1>Crew</h1><p>Tour Leader, Sales & Media — daftar, penugasan trip, dan gaji per trip</p></div>
+  <div class="tabs" style="padding:0 0 16px">${nav}</div><div id="crewBody"></div>`;
+}
+const CREWBADGE={Sales:'var(--blue)','Tour Leader':'var(--teal)',Media:'var(--purple)'};
+function crewDaftar(){
+  const list=crewList();const by=p=>list.filter(k=>k.peran===p).length;
+  const rows=list.map(k=>{const st=crewStat(k.id);
+    return `<tr class="clk" onclick="openCrew('${k.id}')"><td><div class="trip"><div class="th" style="background:${CREWBADGE[k.peran]||'var(--muted)'}">${k.nama.slice(0,2).toUpperCase()}</div><div><div class="nm">${esc(k.nama)}</div><div class="loc">${esc(k.hp)}</div></div></div></td><td><span class="pill jadwal" style="background:${CREWBADGE[k.peran]}22;color:${CREWBADGE[k.peran]}">${k.peran}</span></td><td class="price mono">${k.tarif?rp(k.tarif)+' /hari':'<span style=color:var(--muted-2)>—</span>'}</td><td class="mono">${st.n?st.n+' trip':'<span style=color:var(--muted-2)>—</span>'}</td><td class="price mono">${st.gaji?rp(st.gaji):'<span style=color:var(--muted-2)>—</span>'}</td><td><span class="pill ${k.status==='Aktif'?'lunas':'dp'}">${k.status}</span></td></tr>`;}).join('');
+  return `<div class="grid fade" style="grid-template-columns:1fr 320px">
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Daftar Crew</h3><span style="font-size:12px;color:var(--muted)">${by('Tour Leader')} TL · ${by('Media')} Media · ${by('Sales')} Sales</span></div><table style="margin-top:12px"><thead><tr><th>Nama</th><th>Bagian</th><th>Tarif</th><th>Trip</th><th>Total Gaji</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="side-card" style="margin:0"><div class="panel-h" style="padding:0 0 14px"><h3 style="font-size:14.5px">Tambah Crew</h3></div>
+      <label class="flbl">Nama</label><input id="k_nama" class="finput" placeholder="Nama crew">
+      <label class="flbl">Bagian</label><select id="k_peran" class="finput"><option>Tour Leader</option><option>Media</option><option>Sales</option></select>
+      <label class="flbl">No. HP</label><input id="k_hp" class="finput" placeholder="0812-...">
+      <label class="flbl">Tarif / hari (Rp)</label><input id="k_tarif" class="finput" type="number" placeholder="150000">
+      <button class="btn-save" onclick="addCrew()">+ Tambah Crew</button>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Klik baris crew untuk melihat riwayat trip & total gajinya. Gaji per trip = tarif/hari × jumlah hari. Atur penugasan di tab "Penugasan Trip".</p>`;
+}
+function openCrew(crewId){
+  const c=crewById(crewId);if(!c)return;const st=crewStat(crewId);
+  const sorted=st.trips.slice().sort((a,b)=>(a.brk||'')<(b.brk||'')?1:-1);
+  const m=assignMap();
+  const rows=sorted.map(t=>{const role=m[t.id].tl===crewId?'Tour Leader':'Media';const hari=tripDays(t);
+    const r=tripRange(t);const bentrok=sorted.some(o=>o.id!==t.id&&overlap(r,tripRange(o)));
+    return `<div class="pp-row"><div class="pp-main"><div class="pp-nm">${esc(t.inst)}</div><div class="pp-sub">${dateID(t.brk)}${t.pul?' – '+dateID(t.pul):''} · ${hari} hari · ${role}${bentrok?' · <b style="color:var(--red)">⚠ bentrok</b>':''}</div></div>
+      <div class="pp-num"><b>${rp((c.tarif||0)*hari)}</b><span style="color:var(--muted)">${STLBL[tripStatus(t)]}</span></div></div>`;}).join('');
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='crewOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:520px"><div class="pv-bar"><b>${esc(c.nama)} — ${esc(c.peran)}</b><button class="btn-acc no" onclick="document.getElementById('crewOv').remove()">Tutup</button></div>
+    <div style="background:var(--bg);padding:16px;max-height:76vh;overflow:auto">
+      <div class="pay-sum" style="margin-bottom:14px"><div><span>Total Trip</span><b>${st.n}</b></div><div><span>Total Hari</span><b>${st.hari}</b></div><div><span>Total Gaji</span><b style="color:var(--green)">${rp(st.gaji)}</b></div></div>
+      <div class="td-card"><h5>Info</h5>
+        <div class="td-row"><span>No. HP</span><b>${esc(c.hp||'—')}</b></div>
+        <div class="td-row"><span>Tarif per hari</span><b>${c.tarif?rp(c.tarif):'—'}</b></div>
+        <div class="td-row"><span>Status</span><b>${esc(c.status)}</b></div>
+      </div>
+      <div class="td-card"><h5>Riwayat & Jadwal Trip ${st.n?`(${st.n})`:''}</h5>
+        ${rows||'<div style="font-size:12.5px;color:var(--muted);padding:6px 0">Belum pernah ditugaskan ke trip mana pun.</div>'}</div>
+      <p style="font-size:11.5px;color:var(--muted-2);padding:0 2px">Trip dengan tanda ⚠ tanggalnya tumpang tindih dengan trip lain crew ini.</p>
+    </div></div>`;
+  document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+function crewPenugasan(){
+  const up=upcoming();const tls=crewList().filter(c=>c.peran==='Tour Leader');const mds=crewList().filter(c=>c.peran==='Media');
+  const opt=(arr,sel,tid)=>'<option value="">— pilih —</option>'+arr.map(c=>{const busy=c.id!==sel&&crewSibuk(c.id,tid);return `<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.nama)}${busy?' ⚠ bentrok':''}</option>`;}).join('');
+  const rows=up.map(t=>{const a=assignMap()[t.id]||{};const hari=tripDays(t);const g=tripGaji(t);
+    return `<tr><td><div class="nm" style="font-weight:700">${esc(t.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${dateID(t.brk)} · ${hari} hari · ${t.pax} pax</div></td>
+    <td><select class="finput" style="margin:0;padding:7px 9px;font-size:12.5px" onchange="assignCrew('${t.id}','tl',this.value)">${opt(tls,a.tl,t.id)}</select></td>
+    <td><select class="finput" style="margin:0;padding:7px 9px;font-size:12.5px" onchange="assignCrew('${t.id}','media',this.value)">${opt(mds,a.media,t.id)}</select></td>
+    <td class="price mono">${g?jt(g):'—'}</td></tr>`;}).join('');
+  const tot=totalGajiCrew();const assignedN=up.filter(t=>{const a=assignMap()[t.id]||{};return a.tl||a.media;}).length;
+  return `<div class="cards fade" style="grid-template-columns:repeat(3,1fr)">
+    <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="lbl">Trip Mendatang</div><div class="val mono">${up.length}</div><div class="sub" style="color:var(--muted)">${assignedN} sudah ada crew</div></div>
+    <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/></svg></div><div class="lbl">Total Gaji Crew (ditugaskan)</div><div class="val mono">${jt(tot)}</div><div class="sub" style="color:var(--muted)">masuk pengeluaran Keuangan</div></div>
+    <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="lbl">Rata-rata / Trip</div><div class="val mono">${assignedN?jt(tot/assignedN):'Rp 0'}</div></div>
+  </div>
+  <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Penugasan Tour Leader & Media per Trip</h3><span style="font-size:12px;color:var(--muted)">gaji = tarif/hari × jumlah hari</span></div>
+  <table style="margin-top:12px"><thead><tr><th>Trip</th><th>Tour Leader</th><th>Media</th><th>Gaji Trip</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p style="font-size:12px;color:var(--muted-2);margin-top:14px">Pilih TL & Media untuk tiap trip. Gaji otomatis dilipatkan sesuai jumlah hari trip, dan totalnya ikut di Keuangan (Arus Kas) & Dashboard.</p>`;
+}
+
+function vSetting(){
+  const info=store('info',{nama:'Havist Traveller',hp:'0895 3385 99354',email:'kalabyentertainment@gmail.com',alamat:'Komplek Keluarga Besar H. Mamat, Ds. Kadu, Kec. Curug, Kab. Tangerang'});
+  const markup=store('markup',20);
+  // destinations for price editing
+  const dset={};DATA.trips.forEach(t=>{const d=t.dest.split('(')[0].trim();if(d&&d!=='-')dset[d]=(dset[d]||0)+1;});
+  const topDest=Object.entries(dset).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const prices=store('prices',{});
+  const priceRows=topDest.map(([d])=>`<tr><td style="font-weight:600">${esc(d)}</td><td style="width:180px"><div style="display:flex;align-items:center;gap:6px"><span style="color:var(--muted);font-size:13px">Rp</span><input class="finput" style="margin:0;padding:8px 10px" type="number" value="${prices[d]||''}" placeholder="Harga publish" data-dest="${esc(d)}" oninput="savePrice(this)"></div></td></tr>`).join('');
+  return `<div class="hello fade"><h1>Setting Web</h1><p>Info perusahaan, harga paket, dan konten area Umum</p></div>
+  <div class="grid fade" style="grid-template-columns:1fr 1fr">
+    <div class="panel" style="margin:0"><div class="panel-h"><h3>Info Perusahaan</h3></div><div style="padding:16px 19px">
+      <label class="flbl">Nama</label><input id="s_nama" class="finput" value="${esc(info.nama)}">
+      <label class="flbl">No. HP / WA</label><input id="s_hp" class="finput" value="${esc(info.hp)}">
+      <label class="flbl">Email</label><input id="s_email" class="finput" value="${esc(info.email)}">
+      <label class="flbl">Alamat</label><textarea id="s_alamat" class="finput" rows="2">${esc(info.alamat)}</textarea>
+      <label class="flbl">Rekening pembayaran (tampil di invoice)</label><input id="s_rek" class="finput" value="${esc(info.rek||'')}" placeholder="mis. BCA 1234567890 a/n Havist Traveller">
+      <button class="btn-save" onclick="saveInfo()">Simpan Info</button>
+    </div></div>
+    <div>
+      <div class="panel" style="margin-bottom:22px"><div class="panel-h"><h3>Margin Harga</h3></div><div style="padding:16px 19px">
+        <label class="flbl">Markup default (%) untuk estimasi paket</label>
+        <div style="display:flex;align-items:center;gap:14px"><input id="s_markup" class="finput" style="margin:0" type="range" min="0" max="50" value="${markup}" oninput="document.getElementById('mkv').textContent=this.value+'%'"><span id="mkv" style="font-weight:800;font-size:18px;color:var(--blue);width:52px">${markup}%</span></div>
+        <label class="flbl" style="margin-top:12px">Target laba per bulan (Rp)</label><input id="s_target" class="finput" type="number" value="${store('target',100000000)}">
+        <button class="btn-save" onclick="saveMarkup()">Simpan</button>
+      </div></div>
+      <div class="panel" style="margin:0"><div class="panel-h"><h3>Konten Area Umum</h3></div><div style="padding:16px 19px">
+        <label class="chk"><input type="checkbox" checked onchange="toast('Pengaturan disimpan')"> Tampilkan banner promo</label>
+        <label class="chk"><input type="checkbox" checked onchange="toast('Pengaturan disimpan')"> Tampilkan katalog destinasi</label>
+        <label class="chk"><input type="checkbox" onchange="toast('Pengaturan disimpan')"> Tampilkan harga ke pengunjung</label>
+        <label class="chk"><input type="checkbox" checked onchange="toast('Pengaturan disimpan')"> Aktifkan form pemesanan</label>
+      </div></div>
+    </div>
+  </div>
+  <div class="panel fade" style="margin-top:22px"><div class="panel-h"><h3>Harga Publish per Destinasi</h3><span style="font-size:12px;color:var(--muted)">tersimpan otomatis</span></div><table style="margin-top:12px"><thead><tr><th>Destinasi</th><th>Harga Publish (per pax)</th></tr></thead><tbody>${priceRows}</tbody></table></div>`;
+}
+function saveInfo(){const g=i=>document.getElementById(i);const info={nama:g('s_nama').value,hp:g('s_hp').value,email:g('s_email').value,alamat:g('s_alamat').value,rek:g('s_rek')?g('s_rek').value:''};save('info',info);toast('Info perusahaan disimpan');}
+function saveMarkup(){save('markup',parseInt(document.getElementById('s_markup').value)||0);const tg=document.getElementById('s_target');if(tg)save('target',parseInt(tg.value)||0);toast('Pengaturan disimpan');}
+function savePrice(el){const p=store('prices',{});p[el.dataset.dest]=parseInt(el.value)||0;save('prices',p);}
+
+function openTrip(id){openTripDetail(id);}
+
+// ===== LAPORAN PERIODIK & ARSIP TRIP =====
+let lapTab='rekap',lapPeriode='3',arsipQ='',arsipPage=1;
+function setArsipPage(p){arsipPage=p;renderLap();}
+const PERIODE={'1':'Bulan Ini','3':'3 Bulan','6':'6 Bulan','12':'1 Tahun','all':'Semua'};
+function periodeMulai(p){if(p==='all')return new Date('2000-01-01');const d=new Date(today.getFullYear(),today.getMonth(),1);d.setMonth(d.getMonth()-(+p-1));return d;}
+function tripsPeriode(p){const m=periodeMulai(p);return allTrips().filter(t=>{if(!t.brk)return false;const b=new Date(t.brk);return b>=m&&b<=new Date(today.getFullYear(),today.getMonth()+1,0,23,59,59);});}
+function rekapPeriode(p){
+  const ts=tripsPeriode(p);let pax=0,laba=0,tagih=0,bayar=0;
+  ts.forEach(t=>{pax+=t.pax||0;laba+=t.laba||0;const pi=piutMap()[t.id];if(pi){tagih+=pi.tagih||0;bayar+=clientPaid(pi);}});
+  const gaji=ts.reduce((s,t)=>s+tripGaji(t),0);
+  const vendor=ts.reduce((s,t)=>s+prepTotal(t.id),0);
+  return{n:ts.length,pax,laba,tagih,bayar,sisa:Math.max(0,tagih-bayar),gaji,vendor,bersih:laba-gaji,trips:ts};
+}
+function bulanKunci(d){const y=d.getFullYear(),mo=d.getMonth();return y+'-'+String(mo+1).padStart(2,'0');}
+const BLN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+function trenBulanan(n){
+  const out=[];
+  for(let i=n-1;i>=0;i--){const d=new Date(today.getFullYear(),today.getMonth()-i,1);const k=bulanKunci(d);
+    let trip=0,pax=0,laba=0;
+    allTrips().forEach(t=>{if(t.brk&&bulanKunci(new Date(t.brk))===k){trip++;pax+=t.pax||0;laba+=t.laba||0;}});
+    out.push({k,lbl:BLN[d.getMonth()],thn:d.getFullYear(),trip,pax,laba});}
+  return out;
+}
+function setLapTab(k){lapTab=k;const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.lt===k));renderLap();}
+function setPeriode(p){lapPeriode=p;const s=document.getElementById('lapPeriode');if(s)s.value=p;renderLap();}
+function setArsipQ(v){arsipQ=v;arsipPage=1;renderLap();}
+function renderLap(){const b=document.getElementById('lapBody');if(!b)return;b.innerHTML=lapTab==='arsip'?lapArsip():lapRekap();
+  if(lapTab==='arsip'){const q=document.getElementById('arsipSearch');if(q){q.value=arsipQ;if(arsipQ)q.focus();}}}
+function vLaporan(){
+  const tabs=[['rekap','Rekap Periodik'],['arsip','Arsip Trip']];
+  const nav=tabs.map(([k,l])=>`<button class="tab ${lapTab===k?'active':''}" data-lt="${k}" onclick="setLapTab('${k}')">${l}</button>`).join('');
+  return `<div class="hello fade"><h1>Laporan</h1><p>Rekap kinerja per periode dan arsip trip yang sudah selesai</p></div>
+    <div class="tabs fade">${nav}</div><div id="lapBody"></div>`;
+}
+function lapRekap(){
+  const r=rekapPeriode(lapPeriode);
+  const tren=trenBulanan(6);
+  const mx=Math.max(1,...tren.map(x=>x.laba))*1.1;
+  const bars=tren.map((x,i)=>{const prev=i>0?tren[i-1].laba:null;const naik=prev!==null&&x.laba>prev;const turun=prev!==null&&x.laba<prev;
+    const ini=i===tren.length-1;
+    return `<div class="bar${ini?' hl':''}" onclick="toast('${x.lbl} ${x.thn}: ${x.trip} trip, ${x.pax} pax, laba ${jt(x.laba)}')"><div class="col" style="height:${x.laba/mx*100}%"><span class="tip">${jt(x.laba)}</span></div><span>${x.lbl}${prev!==null?(naik?' ▲':turun?' ▼':''):''}</span></div>`;}).join('');
+  const rows=tren.slice().reverse().map((x,i,arr)=>{const prev=arr[i+1];
+    const d=prev&&prev.laba>0?Math.round((x.laba-prev.laba)/prev.laba*100):null;
+    return `<tr><td style="font-weight:700">${x.lbl} ${x.thn}</td><td class="mono">${x.trip}</td><td class="mono">${x.pax}</td><td class="price mono">${x.laba?jt(x.laba):'—'}</td>
+      <td>${d===null?'<span style="color:var(--muted-2)">—</span>':`<span style="color:${d>=0?'var(--green)':'var(--red)'};font-weight:700">${d>=0?'▲ +':'▼ '}${d}%</span>`}</td></tr>`;}).join('');
+  const marg=r.laba>0?Math.round(r.bersih/r.laba*100):0;
+  return `<div class="cat-bar fade" style="padding:0 0 4px">
+      <div><label class="flbl" style="display:inline;margin-right:8px">Periode</label>
+        <select id="lapPeriode" class="finput" style="width:auto;display:inline-block;margin:0;padding:8px 12px" onchange="setPeriode(this.value)">
+          ${Object.entries(PERIODE).map(([k,l])=>`<option value="${k}" ${lapPeriode===k?'selected':''}>${l}</option>`).join('')}</select></div>
+      <button class="btn-acc ok" style="margin-right:8px" onclick="genLaporanPDF()">⬇ Unduh Laporan PDF</button>
+      <button class="btn-acc ok" onclick="exportLapRekapExcel()">⬇ Export Excel</button></div>
+    <div class="cards fade" style="grid-template-columns:repeat(4,1fr)">
+      <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="lbl">Total Trip</div><div class="val mono">${r.n}</div><div class="sub" style="color:var(--muted)">${r.pax.toLocaleString('id-ID')} peserta</div></div>
+      <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="lbl">Laba Kotor</div><div class="val mono">${jt(r.laba)}</div><div class="sub" style="color:var(--muted)">${r.n?jt(Math.round(r.laba/r.n))+' / trip':'—'}</div></div>
+      <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/></svg></div><div class="lbl">Laba Bersih (− gaji crew)</div><div class="val mono">${jt(r.bersih)}</div><div class="sub ${marg>=0?'up':'down'}">margin ${marg}%</div></div>
+      <div class="scard" onclick="go('keuangan');setTimeout(()=>setKeuTab('pelunasan'),40)" style="cursor:pointer"><div class="ic r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Belum Tertagih</div><div class="val mono">${jt(r.sisa)}</div><div class="sub" style="color:var(--muted)">dari ${jt(r.tagih)} ditagihkan</div></div>
+    </div>
+    <div class="grid fade" style="grid-template-columns:1fr 1fr">
+      <div class="panel" style="margin:0"><div class="panel-h"><h3>Tren Laba 6 Bulan</h3><span style="font-size:12px;color:var(--muted)">klik batang untuk rincian</span></div><div class="chart" style="margin-top:14px">${bars}</div></div>
+      <div class="panel" style="margin:0"><div class="panel-h"><h3>Perbandingan Bulan ke Bulan</h3></div>
+        <table style="margin-top:12px"><thead><tr><th>Bulan</th><th>Trip</th><th>Pax</th><th>Laba</th><th>vs Bulan Lalu</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>
+    <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Rincian Periode — ${PERIODE[lapPeriode]}</h3></div>
+      <table style="margin-top:12px"><tbody>
+        <tr><td>Jumlah trip</td><td class="mono" style="text-align:right;font-weight:700">${r.n}</td></tr>
+        <tr><td>Total peserta</td><td class="mono" style="text-align:right;font-weight:700">${r.pax.toLocaleString('id-ID')} pax</td></tr>
+        <tr><td>Laba kotor</td><td class="price mono" style="text-align:right">${jt(r.laba)}</td></tr>
+        <tr><td>Biaya vendor tercatat</td><td class="mono" style="text-align:right">${r.vendor?jt(r.vendor):'—'}</td></tr>
+        <tr><td>Gaji crew</td><td class="mono" style="text-align:right;color:var(--red)">− ${jt(r.gaji)}</td></tr>
+        <tr style="border-top:2px solid var(--line2,#e3e6ec)"><td style="font-weight:800">Laba bersih</td><td class="price mono" style="text-align:right;font-weight:800">${jt(r.bersih)}</td></tr>
+      </tbody></table></div>`;
+}
+function arsipTrips(){
+  const q=arsipQ.trim().toLowerCase();
+  return allTrips().filter(t=>t.brk&&tripStatus(t)==='selesai')
+    .filter(t=>!q||String(t.inst||'').toLowerCase().includes(q)||String(t.dest||'').toLowerCase().includes(q)||String(t.jenis||'').toLowerCase().includes(q))
+    .sort((a,b)=>a.brk<b.brk?1:-1);
+}
+function lapArsip(){
+  const ts=arsipTrips();
+  const pax=ts.reduce((s,t)=>s+(t.pax||0),0),laba=ts.reduce((s,t)=>s+(t.laba||0),0);
+  const PER=20;const pageTs=pageSlice(ts,arsipPage,PER);
+  const rows=pageTs.map(t=>{const pi=piutMap()[t.id];const[pc,pl]=payStatus(t);const a=assignMap()[t.id]||{};const tl=crewById(a.tl);
+    return `<tr class="clk" onclick="openTripDetail('${t.id}')"><td><div class="nm" style="font-weight:700">${esc(t.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(String(t.dest||'').split('(')[0]).slice(0,38)}</div></td>
+      <td style="font-size:12.5px">${dateID(t.brk)}</td><td class="mono">${t.pax||0}</td><td class="mono">${tripDays(t)} hr</td>
+      <td style="font-size:12px">${tl?esc(tl.nama):'<span style=color:var(--muted-2)>—</span>'}</td>
+      <td class="price mono">${t.laba?jt(t.laba):'—'}</td><td><span class="pill ${pc}">${pl}</span></td>
+      <td style="text-align:right" onclick="event.stopPropagation()"><button class="btn-acc no" onclick="genRundownPDF('${t.id}')">⬇</button></td></tr>`;}).join('');
+  return `<div class="cards fade" style="grid-template-columns:repeat(3,1fr)">
+      <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg></div><div class="lbl">Trip Selesai</div><div class="val mono">${ts.length}</div><div class="sub" style="color:var(--muted)">${arsipQ?'hasil pencarian':'seluruh arsip'}</div></div>
+      <div class="scard"><div class="ic gr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/></svg></div><div class="lbl">Total Peserta Terlayani</div><div class="val mono">${pax.toLocaleString('id-ID')}</div></div>
+      <div class="scard"><div class="ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="lbl">Total Laba Arsip</div><div class="val mono">${jt(laba)}</div></div>
+    </div>
+    <div class="panel fade" style="margin:0"><div class="panel-h"><h3>Arsip Trip Selesai</h3>
+      <div style="display:flex;align-items:center;gap:8px"><input id="arsipSearch" class="finput" style="width:220px;margin:0;padding:8px 12px" placeholder="Cari instansi / daerah..." oninput="setArsipQ(this.value)"><button class="btn-acc ok" onclick="exportArsipExcel()">⬇ Export Excel</button></div></div>
+      <table style="margin-top:12px"><thead><tr><th>Instansi</th><th>Tanggal</th><th>Pax</th><th>Durasi</th><th>Tour Leader</th><th>Laba</th><th>Pembayaran</th><th style="text-align:right">Rundown</th></tr></thead>
+      <tbody>${rows||`<tr><td colspan="8" style="color:var(--muted);font-size:12.5px">${arsipQ?'Tidak ada trip yang cocok dengan "'+esc(arsipQ)+'".':'Belum ada trip yang selesai.'}</td></tr>`}</tbody></table>
+      ${pagerHTML(ts.length,arsipPage,PER,'setArsipPage')}
+      <p style="font-size:11.5px;color:var(--muted-2);margin-top:12px">Klik baris untuk melihat rekap lengkap trip (crew, pembayaran, persiapan vendor, checklist).</p></div>`;
+}
+function exportLapRekapExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const r=rekapPeriode(lapPeriode);const tren=trenBulanan(12);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsStampRow('REKAP PERIODIK — '+PERIODE[lapPeriode]).concat([
+    ['Jumlah trip',r.n],['Total peserta',r.pax],['Laba kotor (Rp)',r.laba],['Biaya vendor tercatat (Rp)',r.vendor],
+    ['Gaji crew (Rp)',r.gaji],['Laba bersih (Rp)',r.bersih],['Total ditagihkan (Rp)',r.tagih],['Belum tertagih (Rp)',r.sisa]])),'Rincian Periode');
+  const trenRows=[['Bulan','Tahun','Jumlah Trip','Pax','Laba (Rp)']];
+  tren.forEach(x=>trenRows.push([x.lbl,x.thn,x.trip,x.pax,x.laba]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(trenRows),'Tren Bulanan');
+  XLSX.writeFile(wb,'Havist_RekapPeriodik_'+xlsxStamp()+'.xlsx');
+  toast('Rekap Periodik diekspor ke Excel');
+}
+function exportArsipExcel(){
+  if(!window.XLSX){toast('Gagal memuat modul Excel, coba lagi');return;}
+  const ts=arsipTrips();
+  const pax=ts.reduce((s,t)=>s+(t.pax||0),0),laba=ts.reduce((s,t)=>s+(t.laba||0),0);
+  const rows=[['Instansi','Tanggal','Pax','Durasi (hari)','Tour Leader','Laba (Rp)','Status Pembayaran']];
+  ts.forEach(t=>{const a=assignMap()[t.id]||{};const tl=crewById(a.tl);const[,pl]=payStatus(t);
+    rows.push([t.inst,dateID(t.brk),t.pax||0,tripDays(t),tl?tl.nama:'-',t.laba||0,pl]);
+  });
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(xlsStampRow('ARSIP TRIP SELESAI').concat([['Jumlah trip selesai',ts.length],['Total peserta terlayani',pax],['Total laba arsip (Rp)',laba]])),'Ringkasan');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Arsip Trip');
+  XLSX.writeFile(wb,'Havist_ArsipTrip_'+xlsxStamp()+'.xlsx');
+  toast('Arsip Trip diekspor ke Excel');
+}
+async function genLaporanPDF(){
+  if(!window.jspdf){toast('Pustaka PDF belum siap, coba lagi');return;}
+  const r=rekapPeriode(lapPeriode);const tren=trenBulanan(6);
+  const K=pdfKit('LAPORAN KINERJA');const{doc,L,R,GREY,NAVY}=K;
+  K.txt('Periode: '+PERIODE[lapPeriode]+'   ·   Dicetak '+new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),L,{s:9,c:GREY});K.y+=3;
+  K.section('Ringkasan Periode');
+  K.kv('Jumlah Trip',r.n+' trip');K.kv('Total Peserta',r.pax.toLocaleString('id-ID')+' pax');
+  K.kv('Laba Kotor',rp(r.laba));K.kv('Biaya Vendor',r.vendor?rp(r.vendor):'belum dicatat');
+  K.kv('Gaji Crew',rp(r.gaji));K.kv('Laba Bersih',rp(r.bersih));
+  K.kv('Ditagihkan',rp(r.tagih));K.kv('Sudah Dibayar',rp(r.bayar));K.kv('Belum Tertagih',rp(r.sisa));
+  K.y+=3;K.section('Tren 6 Bulan Terakhir');
+  K.rowAmt('Bulan','Trip / Pax / Laba',{b:true,s:9.5});K.hr();
+  tren.slice().reverse().forEach(x=>K.rowAmt(x.lbl+' '+x.thn,x.trip+' trip / '+x.pax+' pax / '+rp(x.laba),{s:9.5}));
+  K.y+=3;K.section('Daftar Trip Periode Ini');
+  if(r.trips.length)r.trips.slice().sort((a,b)=>a.brk<b.brk?1:-1).forEach(t=>K.rowAmt(String(t.inst).slice(0,46)+'  ('+dateID(t.brk)+')',(t.pax||0)+' pax · '+rp(t.laba||0),{s:9}));
+  else K.txt('Tidak ada trip pada periode ini.',L+2,{s:9.5,c:GREY});
+  K.y+=5;K.txt('Dibuat otomatis dari data Management Havist Traveller.',L,{s:8.5,c:GREY});
+  await pdfSave(doc,'Laporan-'+PERIODE[lapPeriode].replace(/\s+/g,'-')+'.pdf');
+}
+const VIEWS={umum:vUmum,dashboard:vDashboard,keuangan:vKeuangan,katalog:vKatalog,acc:vACC,jadwal:vJadwal,crew:vCrew,tl:vTL,sales:vSales,laporan:vLaporan,setting:vSetting};
+function go(name){
+  if(!VIEWS[name])name='dashboard';
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===name));
+  document.querySelectorAll('#bottomnav a').forEach(a=>a.classList.toggle('active',a.dataset.view===name));
+  closeSheet();
+  document.getElementById('view').innerHTML=VIEWS[name]();
+  if(name==='dashboard'){buildCal();initChartTabs();}
+  if(name==='katalog'){renderKat();}
+  if(name==='keuangan'){renderKeu();}
+  if(name==='crew'){renderCrew();}
+  if(name==='jadwal'){renderJadwalBody();}
+  if(name==='laporan'){renderLap();}
+  if(name==='sales'){renderSales();}
+  if(name==='tl'){renderTL();}
+  if(name==='umum'){renderUmum();}
+  if(location.hash.slice(1)!==name)history.replaceState(null,'','#'+name);
+  window.scrollTo(0,0);
+}
+function initChartTabs(){
+  const tabs=document.getElementById('chartTabs');if(!tabs)return;
+  const m=monthAgg();const rec=['2026-07 Juli','2026-08 Agustus','2026-09 September','2026-10 Oktober','2026-11 November'];
+  const keys=['laba','pax','bus'];
+  tabs.querySelectorAll('.tab').forEach((b,idx)=>b.onclick=()=>{
+    tabs.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+    const key=keys[idx];const mx=Math.max(...rec.map(k=>m[k][key]))*1.08||1;
+    document.getElementById('chart').innerHTML=rec.map(k=>{const v=m[k][key],h=v/mx*100,hl=k.includes('November')?' hl':'';const lab=key==='laba'?jt(v):v.toLocaleString('id-ID')+(key==='pax'?' pax':' bus');
+      return `<div class="bar${hl}"><div class="col" style="height:${h}%"><span class="tip">${lab}</span></div><span>${MLBL[k]}</span></div>`;}).join('');
+  });
+}
+// global search -> jump to jadwal and filter
+document.getElementById('globalSearch').addEventListener('input',function(){
+  const q=this.value.toLowerCase().trim();
+  if(!q){if(document.getElementById('jadwalBody'))renderJadwalBody();return;}
+  if(!document.getElementById('jadwalBody')){jadwalFilter='semua';go('jadwal');}
+  const b=document.getElementById('jadwalBody');if(!b)return;
+  b.querySelectorAll('.jcard').forEach(c=>{c.style.display=c.textContent.toLowerCase().includes(q)?'':'none';});
+});
+document.getElementById('nav').addEventListener('click',e=>{const a=e.target.closest('a');if(a)go(a.dataset.view);});
+document.getElementById('bottomnav').addEventListener('click',e=>{const a=e.target.closest('a');if(a&&a.dataset.view)go(a.dataset.view);});
+// --- bottom-nav "Lainnya" sheet (mobile) ---
+const MORE_ITEMS=[
+  ['keuangan','Keuangan','<path d="M3 10h18M7 15h4M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'],
+  ['katalog','Harga &amp; Katalog','<path d="M20.6 8.4 12 3 3.4 8.4v7.2L12 21l8.6-5.4z"/><path d="M12 12 3.4 8.4M12 12v9M12 12l8.6-3.6"/>'],
+  ['acc','ACC Klien','<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'],
+  ['crew','Crew','<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 3.5a3.2 3.2 0 0 1 0 6M21 20a6 6 0 0 0-5-5.9"/>'],
+  ['sales','Sales','<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'],
+  ['laporan','Laporan','<path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>'],
+  ['setting','Setting Web','<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.8 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 13.6H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 7L4.5 7a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 10 3.4V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>'],
+];
+function openMoreSheet(){
+  closeSheet();
+  const items=MORE_ITEMS.map(([k,l,svg])=>`<a onclick="go('${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${svg}</svg>${l}</a>`).join('');
+  const ov=document.createElement('div');ov.className='sheet-overlay';ov.id='moreSheet';
+  ov.innerHTML=`<div class="sheet-modal"><div class="sheet-handle"></div><div class="sheet-title">Menu Lainnya</div>${items}</div>`;
+  ov.addEventListener('click',e=>{if(e.target===ov)closeSheet();});
+  document.body.appendChild(ov);
+}
+function closeSheet(){const s=document.getElementById('moreSheet');if(s)s.remove();}
+// --- reusable pagination (Prev/Next + numbered pages + "Menampilkan X-Y dari Z") ---
+function pageSlice(arr,page,per){const tp=Math.max(1,Math.ceil(arr.length/per));if(page>tp)page=tp;if(page<1)page=1;return arr.slice((page-1)*per,page*per);}
+function pagerHTML(total,page,per,setFn){
+  const tp=Math.max(1,Math.ceil(total/per));if(page>tp)page=tp;if(page<1)page=1;
+  if(tp<=1)return '';
+  const start=total===0?0:(page-1)*per+1,end=Math.min(page*per,total);
+  let nums=[];
+  if(tp<=7){for(let i=1;i<=tp;i++)nums.push(i);}
+  else{nums.push(1);if(page>4)nums.push('…');
+    for(let i=Math.max(2,page-1);i<=Math.min(tp-1,page+1);i++)nums.push(i);
+    if(page<tp-3)nums.push('…');nums.push(tp);}
+  const numHTML=nums.map(p=>p==='…'?`<span class="pg-dots">…</span>`:`<button class="pg-btn pg-num ${p===page?'active':''}" onclick="${setFn}(${p})">${p}</button>`).join('');
+  return `<div class="pager"><span class="pg-info">Menampilkan ${start}-${end} dari ${total}</span>
+    <div class="pg-nav"><button class="pg-btn" ${page<=1?'disabled':''} onclick="${setFn}(${page-1})" aria-label="Sebelumnya">‹</button>${numHTML}<button class="pg-btn" ${page>=tp?'disabled':''} onclick="${setFn}(${page+1})" aria-label="Berikutnya">›</button></div></div>`;
+}
+window.addEventListener('hashchange',()=>go(location.hash.slice(1)||'umum'));
+go(location.hash.slice(1)||'umum');
+</script>
+</body>
+</html>'''
+
+html = html.replace("__DATA__", data).replace("__CATALOG__", catalog).replace("__LOGO__", logo)
+open('index.html','w').write(html)
+print("built", len(html))
