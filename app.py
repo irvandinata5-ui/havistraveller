@@ -342,6 +342,15 @@ tbody tr:last-child td{border-bottom:none}tbody tr.clk{cursor:pointer}tbody tr.c
 .pg-info{font-size:12px;color:var(--muted)}
 .pg-nav{display:flex;align-items:center;gap:4px}
 .pg-btn{min-width:32px;height:32px;padding:0 8px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer}
+.pbar-wrap{width:100%;min-width:88px;height:6px;background:#E4E8EF;border-radius:99px;overflow:hidden;margin-top:5px}
+.pbar-fill{height:100%;border-radius:99px;transition:width .25s ease}
+.pbar-meta{font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;display:flex;justify-content:space-between}
+.cd-badge{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px;margin-left:5px;white-space:nowrap}
+.cd-over{background:#FDECEA;color:#DC2626;border:1px solid #FCA5A5}
+.cd-crit{background:#FEF3C7;color:#B45309;border:1px solid #FCD34D}
+.cd-warn{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
+.cd-ok{background:#F1F5F9;color:#475569;border:1px solid #E2E8F0}
+.cd-done{background:#E7F5EF;color:#15803D;border:1px solid #A7F3D0}
 .pg-btn:hover{background:var(--bg)}
 .pg-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .pg-btn:disabled{opacity:.4;cursor:not-allowed}
@@ -1215,6 +1224,23 @@ function keuAruskas(){
 }
 let pelFilter='semua';
 function setPelFilter(f){pelFilter=f;renderKeu();}
+function payProgressBar(paid,total){
+  const pct=total>0?Math.min(100,Math.round((paid/total)*100)):(paid>0?100:0);
+  const col=pct>=100?'var(--green)':pct>0?'var(--blue)':'#CBD5E1';
+  return `<div class="pbar-wrap"><div class="pbar-fill" style="width:${pct}%;background:${col}"></div></div><div class="pbar-meta"><span>${pct}%</span><span>${pct>=100?'Lunas':pct>0?'Berjalan':'0%'}</span></div>`;
+}
+function dueCountdownBadge(dueDate,isLunas){
+  if(isLunas)return '<span class="cd-badge cd-done">✓ Tuntas</span>';
+  if(!dueDate||isNaN(dueDate.getTime()))return '';
+  const d0=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  const d1=new Date(dueDate.getFullYear(),dueDate.getMonth(),dueDate.getDate());
+  const diff=Math.round((d1-d0)/86400000);
+  if(diff<0)return `<span class="cd-badge cd-over">Lewat ${Math.abs(diff)}h</span>`;
+  if(diff===0)return `<span class="cd-badge cd-crit">Hari Ini</span>`;
+  if(diff<=3)return `<span class="cd-badge cd-crit">H-${diff}</span>`;
+  if(diff<=7)return `<span class="cd-badge cd-warn">H-${diff}</span>`;
+  return `<span class="cd-badge cd-ok">H-${diff}</span>`;
+}
 function keuPelunasan(){
   const day=86400000;const allP=allPiutang().filter(p=>p.tagih>0||clientPaid(p)>0);
   const P=allP.filter(p=>pelFilter==='semua'||(pelFilter==='belum'?clientStatus(p)[0]!=='lunas':clientStatus(p)[0]==='lunas'))
@@ -1227,7 +1253,8 @@ function keuPelunasan(){
     const termLabels=[];if(p.dp>0)termLabels.push('DP Awal');plist.forEach(x=>termLabels.push(x.termin||'DP'));
     const termText=termLabels.length?termLabels.join(', '):'Belum ada termin';
     const btn=`<button class="btn-acc no" style="margin-right:4px" onclick="genInvoicePDF('${p.id}')" title="Unduh invoice PDF">⬇ Invoice</button>`+(sc==='lunas'?`<button class="btn-acc no" onclick="openBayar('${p.id}')">Detail</button>`:`<button class="btn-acc ok" onclick="openBayar('${p.id}')">+ Bayar</button>`);
-    return `<tr class="clk" onclick="openBayar('${p.id}')"><td><div class="nm" style="font-weight:700">${esc(p.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(p.inv)||'—'} · ${esc(termText)}</div></td><td class="mono">${jt(p.tagih)}</td><td class="mono" style="color:var(--green)">${paid?jt(paid):'—'}</td><td class="price mono">${sisa>0?jt(sisa):'<span style=color:var(--green)>Lunas</span>'}</td><td style="font-size:12.5px;${overdue?'color:var(--red);font-weight:700':'color:var(--muted)'}">${target}${overdue?' ⚠':''}</td><td><span class="pill ${sc}">${sl}</span></td><td style="text-align:right" onclick="event.stopPropagation()">${btn}</td></tr>`;}).join('');
+    const pbar=payProgressBar(paid,p.tagih);const cdb=dueCountdownBadge(due,sc==='lunas');
+    return `<tr class="clk" onclick="openBayar('${p.id}')"><td><div class="nm" style="font-weight:700">${esc(p.inst)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(p.inv)||'—'} · ${esc(termText)}</div></td><td class="mono">${jt(p.tagih)}</td><td class="mono" style="color:var(--green);min-width:110px">${paid?jt(paid):'—'}${pbar}</td><td class="price mono">${sisa>0?jt(sisa):'<span style=color:var(--green)>Lunas</span>'}</td><td style="font-size:12.5px;white-space:nowrap;${overdue?'color:var(--red);font-weight:700':'color:var(--muted)'}">${target}${cdb}</td><td><span class="pill ${sc}">${sl}</span></td><td style="text-align:right" onclick="event.stopPropagation()">${btn}</td></tr>`;}).join('');
   const lunasN=allP.filter(p=>clientStatus(p)[0]==='lunas').length;
   const jtN=allP.filter(p=>{const due=p.tgl?new Date(new Date(p.tgl)-7*day):null;return due&&today>due&&clientStatus(p)[0]!=='lunas';}).length;
   const pt=piutangTot();
@@ -1283,7 +1310,8 @@ function keuJadwalVendor(){
   const totPaid=list.reduce((a,d)=>a+d.paid,0),totSisa=list.reduce((a,d)=>a+d.sisa,0);
   const order=[...belum.sort((a,b)=>b.sisa-a.sisa),...lunas.sort((a,b)=>b.nom-a.nom)];
   const rows=order.map(d=>{const isL=d.sc==='lunas';const due=vendDue(d);const overdue=due&&today>due&&!isL;
-    return `<tr class="clk" style="${isL?'opacity:.6':''}" onclick="openBayarVendor('${d.no}')"><td><div class="nm" style="font-weight:700">${esc(d.vendor)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(d.ket).slice(0,38)}</div></td><td><span class="pill jadwal" style="background:${(VCAT[d.kat]||'#888')}1a;color:${VCAT[d.kat]||'#888'};font-size:11px">${esc(d.kat.split(' ')[0])}</span></td><td class="price mono">${jt(d.nom)}</td><td class="mono" style="color:var(--green)">${d.paid?jt(d.paid):'—'}</td><td class="price mono">${d.sisa>0?jt(d.sisa):'<span style=color:var(--green)>0</span>'}</td><td style="font-size:12px;${overdue?'color:var(--red);font-weight:700':'color:var(--muted)'}">${due?dateID(d.tgl):'—'}${overdue?' ⚠':''}</td><td><span class="pill ${d.sc}">${d.sl}</span></td><td style="text-align:right" onclick="event.stopPropagation()"><button class="btn-acc ${isL?'no':'ok'}" onclick="openBayarVendor('${d.no}')">${isL?'Detail':'+ Bayar'}</button></td></tr>`;}).join('');
+    const vpbar=payProgressBar(d.paid,d.nom);const vcdb=dueCountdownBadge(due,isL);
+    return `<tr class="clk" style="${isL?'opacity:.72':''}" onclick="openBayarVendor('${d.no}')"><td><div class="nm" style="font-weight:700">${esc(d.vendor)}</div><div class="loc" style="font-size:11px;color:var(--muted)">${esc(d.ket).slice(0,38)}</div></td><td><span class="pill jadwal" style="background:${(VCAT[d.kat]||'#888')}1a;color:${VCAT[d.kat]||'#888'};font-size:11px">${esc(d.kat.split(' ')[0])}</span></td><td class="price mono">${jt(d.nom)}</td><td class="mono" style="color:var(--green);min-width:110px">${d.paid?jt(d.paid):'—'}${vpbar}</td><td class="price mono">${d.sisa>0?jt(d.sisa):'<span style=color:var(--green)>0</span>'}</td><td style="font-size:12px;white-space:nowrap;${overdue?'color:var(--red);font-weight:700':'color:var(--muted)'}">${due?dateID(d.tgl):'—'}${vcdb}</td><td><span class="pill ${d.sc}">${d.sl}</span></td><td style="text-align:right" onclick="event.stopPropagation()"><button class="btn-acc ${isL?'no':'ok'}" onclick="openBayarVendor('${d.no}')">${isL?'Detail':'+ Bayar'}</button></td></tr>`;}).join('');
   const overdueN=belum.filter(d=>{const due=vendDue(d);return due&&today>due;}).length;
   const prepList=allTrips().filter(t=>t.id&&(t._new||prepTrip(t.id).length>0||(piutMap()[t.id]&&clientPaid(piutMap()[t.id])>0)||(t.brk&&new Date(t.brk)>=today)))
     .sort((a,b)=>((b._new?1:0)-(a._new?1:0))||((prepTrip(b.id).length?1:0)-(prepTrip(a.id).length?1:0))||(a.brk<b.brk?-1:1)).slice(0,20);
@@ -3177,6 +3205,7 @@ function tlJadwalTab(){
       <div class="jcard-top"><span class="pill ${STPILL[st]}">${STLBL[st]}</span><span class="pill jadwal" style="background:var(--navy);color:#fff">${peran}</span></div>
       <h4>${esc(t.inst)}</h4><div class="jcard-dest">${esc((t.dest||'').split('(')[0])}</div>
       <div class="jcard-meta"><span>📅 ${dateID(t.brk)}${t.pul?'–'+dateID(t.pul):''}</span><span>👥 ${t.pax} pax</span><span>🧰 ${prepTrip(t.id).length} item vendor</span></div>
+      ${st!=='selesai'?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);display:flex;justify-content:flex-end" onclick="event.stopPropagation()"><a class="btn-acc ok" style="text-decoration:none;background:#16a34a;color:#fff;border-color:#16a34a" target="_blank" href="${tlKesiapanWaHref(t.id)}">📲 Kirim Laporan Kesiapan ke WA</a></div>`:''}
     </div>`;};
   return `<div class="cards fade" style="grid-template-columns:repeat(4,1fr)">
     <div class="scard"><div class="ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="lbl">Trip Mendatang</div><div class="val mono">${up.length}</div></div>
@@ -3188,6 +3217,32 @@ function tlJadwalTab(){
   ${up.length?`<div class="jgrid" style="margin-top:12px">${up.map(cardHTML).join('')}</div>`:`<div style="padding:30px 0;text-align:center;color:var(--muted);font-size:13px">Tidak ada trip aktif.</div>`}
   </div>
   ${done.length?`<div class="panel fade" style="margin:0"><div class="panel-h"><h3>Riwayat Trip Selesai</h3></div><div class="jgrid" style="margin-top:12px">${done.map(cardHTML).join('')}</div></div>`:''}`;
+}
+function tlKesiapanWaHref(id){
+  const t=allTrips().find(x=>x.id===id);if(!t)return '#';
+  const info=infoPerusahaan();const cid=currentTL();const me=crewById(cid);
+  const cl=store('checklist',{})[id]||CHECKLIST_DEF.map(x=>({item:x,done:false}));
+  const done=cl.filter(c=>c.done).length;
+  const prep=prepTrip(id);
+  const a=tripAssign(id);
+  const tls=a.tls.map(x=>crewById(x.id)?.nama).filter(Boolean).join(', ')||'-';
+  const meds=a.medias.map(x=>crewById(x.id)?.nama).filter(Boolean).join(', ')||'-';
+  const lines=[
+    '*LAPORAN KESIAPAN TRIP — '+info.nama.toUpperCase()+'*',
+    'Pelapor: '+(me?me.nama+' ('+me.peran+')':'Tour Leader / Media'),
+    'Trip: '+t.inst,
+    'Destinasi: '+(t.dest||'-').split('(')[0].trim(),
+    'Tanggal: '+dateID(t.brk)+(t.pul?' - '+dateID(t.pul):''),
+    'Peserta: '+(t.pax||0)+' pax | Armada: '+(t.armada||(t.bus?t.bus+' unit':'-')),
+    'Crew: TL ['+tls+'] | Media ['+meds+']',
+    '',
+    '*Checklist Persiapan ('+done+'/'+cl.length+' selesai):*',
+    ...cl.map(c=>(c.done?'[✓] ':'[ ] ')+c.item),
+    '',
+    '*Vendor Terjadwal ('+prep.length+' item):*',
+    ...(prep.length?prep.map(p=>'- '+p.kat+': '+(p.vendor||'-')):['- Belum ada data vendor'])
+  ];
+  return waLink(info.hp,lines.join('\n'));
 }
 function openTLTrip(id){
   const t=allTrips().find(x=>x.id===id);if(!t)return;
@@ -3207,7 +3262,10 @@ function openTLTrip(id){
     </div>
     <div class="td-card"><h5>Checklist Persiapan</h5>${clHTML}</div>
     <div class="td-card"><h5>Persiapan Vendor</h5>${prep.length?prep.map(p=>`<div class="td-row"><span>${esc(p.kat)}</span><b>${esc(p.vendor||'-')}</b></div>`).join(''):'<div style="font-size:12.5px;color:var(--muted)">Belum ada data vendor.</div>'}</div>
-    <button class="btn-save" onclick="document.getElementById('tlOv').remove();setTLTab('reimburse');setTimeout(()=>{const s=document.getElementById('rb_trip');if(s)s.value='${id}';},50)">💸 Ajukan Reimburse untuk Trip Ini</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn-save" style="flex:1;min-width:190px;text-align:center;text-decoration:none;background:#16a34a" target="_blank" href="${tlKesiapanWaHref(id)}">📲 Kirim Laporan Kesiapan ke WA</a>
+      <button class="btn-save" style="flex:1;min-width:190px" onclick="document.getElementById('tlOv').remove();setTLTab('reimburse');setTimeout(()=>{const s=document.getElementById('rb_trip');if(s)s.value='${id}';},50)">💸 Ajukan Reimburse</button>
+    </div>
   </div></div>`;
   document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
 }
@@ -3219,7 +3277,7 @@ function tlChecklistTab(){
   const cl=store('checklist',{})[sel]||CHECKLIST_DEF.map(x=>({item:x,done:false}));
   const done=cl.filter(c=>c.done).length;
   const clHTML=cl.map((c,i)=>`<label class="chk"><input type="checkbox" ${c.done?'checked':''} onchange="toggleChecklist('${sel}',${i});renderTL()"> ${esc(c.item)}</label>`).join('');
-  return `<div class="panel fade" style="margin:0"><div class="panel-h"><h3>Checklist Persiapan</h3></div>
+  return `<div class="panel fade" style="margin:0"><div class="panel-h" style="flex-wrap:wrap;gap:8px"><h3>Checklist Persiapan</h3><a class="btn-acc ok" style="text-decoration:none;background:#16a34a;color:#fff;border-color:#16a34a" target="_blank" href="${tlKesiapanWaHref(sel)}">📲 Kirim Laporan Kesiapan ke WA</a></div>
     <div style="padding:16px 19px 0"><label class="flbl">Pilih Trip</label>
     <select class="finput" onchange="setTLChecklistTrip(this.value)">${trips.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.inst)} — ${dateID(x.brk)}</option>`).join('')}</select></div>
     <div style="padding:16px 19px"><div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">${done}/${cl.length} selesai</div>${clHTML}</div>
@@ -3671,9 +3729,8 @@ function vUmum(){
       <button type="submit">Cari →</button>
     </form>
     <div class="umhero-cta">
-      <button class="btn-um-primary" onclick="umumGo('paket','umTabsSec')">Lihat Paket Wisata →</button>
-      <button class="btn-um-ghost" onclick="umumGo('estimasi','umTabsSec')">▶ Hitung Estimasi Biaya</button>
-      <a class="btn-um-ghost" style="text-decoration:none;border-color:rgba(34,197,94,.55);background:rgba(22,163,74,.22)" target="_blank" href="${waLink(info.hp,'Halo '+info.nama+', saya ingin konsultasi paket wisata rombongan.')}">💬 Konsultasi WhatsApp</a>
+      <button class="btn-um-primary" style="display:inline-flex;align-items:center;gap:8px" onclick="umumGo('estimasi','umTabsSec')">${UM_SVG.calc} Hitung Estimasi Biaya</button>
+      <a class="btn-um-ghost" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;border-color:rgba(255,255,255,.35)" target="_blank" href="${waLink(info.hp,'Halo '+info.nama+', saya ingin konsultasi paket wisata rombongan.')}">${UM_SVG.wa} Konsultasi WhatsApp</a>
     </div>
     <div class="umstats">${stats.map(([n,l])=>`<div class="umstat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('')}</div>
   </div>
@@ -3687,16 +3744,14 @@ function vUmum(){
         const bg=photo?`background-image:url('${photo}')`:`background:${pk.grad}`;
         return `<div class="um-strip-card" onclick="applyBestPkg(${i})">
           <div class="um-strip-img" style="${bg}">
-            <span>📍 ${esc(pk.city)}</span>
+            <span style="display:inline-flex;align-items:center;gap:4px">${UM_SVG.pin} ${esc(pk.city)}</span>
             <em class="um-pkg-dur">${esc(pk.durLbl)}</em>
           </div>
           <div class="um-strip-body">
             <b>${esc(pk.title)}</b>
             <div class="um-pkg-list">
-              <div>👥 <b>${c.pax} Pax</b> · 🚌 ${c.bus} ${esc(c.armName.split('(')[0].trim())}</div>
-              <div>🏨 ${c.malam>0?esc(c.hotName)+' ('+c.malam+' mlm)':'One Day Trip (Tanpa Inap)'}</div>
-              <div>🍱 ${c.mFreq}× Makan${c.kaosName?' · 👕 Kaos':''} · 🎁 Free ${c.foc} FOC</div>
-              <div class="um-pkg-dest">🎟️ ${esc(pk.dests.join(', '))}</div>
+              <div style="display:flex;align-items:center;gap:6px;color:var(--ink)">${UM_SVG.users}<span><b>${c.pax} Pax</b> · ${c.bus} ${esc(c.armName.split('(')[0].trim())} · ${c.malam>0?esc(c.hotName)+' ('+c.malam+' mlm)':'One Day Trip'}</span></div>
+              <div style="display:flex;align-items:center;gap:6px;color:var(--muted)">${UM_SVG.check}<span>${c.mFreq}× Makan${c.kaosName?' · Kaos':''} · Free ${c.foc} FOC · ${pk.dests.length} Destinasi</span></div>
             </div>
             <div class="um-pkg-foot">
               <div><small>Mulai dari</small><div class="prc">${rp(c.perpax)}<span>/pax</span></div></div>
@@ -3745,7 +3800,16 @@ function vUmum(){
 
 let umumActiveCity='BANDUNG';
 let umumSelDests=[];
-const CITY_ICONS={'BANTEN':'🏖️','JAKARTA':'🎡','BOGOR':'🌿','SUBANG':'♨️','SUKABUMI':'🌊','BANDUNG':'🔥','JOGJA':'🏛️','DIENG':'🌋','MALANG & BROMO':'⛰️','BALI':'🏝️'};
+const UM_SVG={
+  pin:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  users:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  check:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>',
+  calc:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10.01"/><line x1="12" y1="10" x2="12" y2="10.01"/><line x1="16" y1="10" x2="16" y2="10.01"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="8" y1="18" x2="16" y2="18"/></svg>',
+  wa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
+  globe:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  spark:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.72)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'
+};
+const CITY_ICONS={};
 function destKey(d){return (d.city||'')+'::'+(d.name||'')+'::'+(d.note||'');}
 function destDisplayName(d){
   const nm=(d.name||'').trim(), nt=(d.note||'').trim();
@@ -3757,11 +3821,11 @@ function destDisplayName(d){
 }
 function destCatInfo(d){
   const s=((d.name||'')+' '+(d.note||'')).toLowerCase();
-  if(/yakult|pocari|industri|pabrik/.test(s))return {lbl:'🏭 Kunjungan Industri',cls:'cat-ind',grad:'linear-gradient(135deg,#0E244A,#275BB5)',ic:'🏭'};
-  if(/museum|iptek|sejarah|edukasi|observatorium|geologi|vredeburg|kraton|candi|monas|monumen|peternakan|perikanan|botani|tanaman|biologi|sains/.test(s))return {lbl:'🎓 Wisata Edukasi',cls:'cat-edu',grad:'linear-gradient(135deg,#1E4E9C,#1AA6B7)',ic:'🎓'};
-  if(/dufan|fantasi|jungleland|wonderland|seaworld|atlantis|samudra|safari|wahana|atv|jetski|kereta gantung|sky world|scooter|waterpark/.test(s))return {lbl:'🎢 Wahana & Rekreasi',cls:'cat-fun',grad:'linear-gradient(135deg,#5B21B6,#8E63D6)',ic:'🎢'};
-  if(/udjo|angklung|budaya|batik|barong|kecak|jimbaran|malioboro|braga|al jabbar/.test(s))return {lbl:'🎭 Budaya & Ikonik',cls:'cat-cul',grad:'linear-gradient(135deg,#9A3412,#E08A1E)',ic:'🎭'};
-  return {lbl:'🌿 Alam & Outbound',cls:'cat-nat',grad:'linear-gradient(135deg,#115E59,#2B9D6E)',ic:'🌿'};
+  if(/yakult|pocari|industri|pabrik/.test(s))return {lbl:'Kunjungan Industri',cls:'cat-ind',grad:'linear-gradient(135deg,#0E244A,#275BB5)',ic:UM_SVG.spark};
+  if(/museum|iptek|sejarah|edukasi|observatorium|geologi|vredeburg|kraton|candi|monas|monumen|peternakan|perikanan|botani|tanaman|biologi|sains/.test(s))return {lbl:'Wisata Edukasi',cls:'cat-edu',grad:'linear-gradient(135deg,#1E4E9C,#1AA6B7)',ic:UM_SVG.spark};
+  if(/dufan|fantasi|jungleland|wonderland|seaworld|atlantis|samudra|safari|wahana|atv|jetski|kereta gantung|sky world|scooter|waterpark/.test(s))return {lbl:'Wahana & Rekreasi',cls:'cat-fun',grad:'linear-gradient(135deg,#5B21B6,#8E63D6)',ic:UM_SVG.spark};
+  if(/udjo|angklung|budaya|batik|barong|kecak|jimbaran|malioboro|braga|al jabbar/.test(s))return {lbl:'Budaya & Ikonik',cls:'cat-cul',grad:'linear-gradient(135deg,#9A3412,#E08A1E)',ic:UM_SVG.spark};
+  return {lbl:'Alam & Outbound',cls:'cat-nat',grad:'linear-gradient(135deg,#115E59,#2B9D6E)',ic:UM_SVG.spark};
 }
 function getDestPhoto(d){
   const uph=umumPhotos();
@@ -3813,16 +3877,15 @@ function umumPaketTab(){
   const cityPills=`<div class="um-city-pills">
     ${allCities.map(c=>{
       const cnt=all.filter(d=>d.city===c).length;
-      const ic=CITY_ICONS[c]||'📍';
       const act=(!q&&umumActiveCity===c)?'active':'';
-      return `<button type="button" class="um-city-pill ${act}" onclick="setUmumCity('${esc(c)}')"><span>${ic} ${esc(c)}</span><em>${cnt}</em></button>`;
+      return `<button type="button" class="um-city-pill ${act}" onclick="setUmumCity('${esc(c)}')"><span style="display:inline-flex;align-items:center;gap:5px">${UM_SVG.pin} ${esc(c)}</span><em>${cnt}</em></button>`;
     }).join('')}
-    <button type="button" class="um-city-pill ${(!q&&umumActiveCity==='SEMUA')?'active':''}" onclick="setUmumCity('SEMUA')"><span>🌐 Semua Kota</span><em>${all.length}</em></button>
+    <button type="button" class="um-city-pill ${(!q&&umumActiveCity==='SEMUA')?'active':''}" onclick="setUmumCity('SEMUA')"><span style="display:inline-flex;align-items:center;gap:5px">${UM_SVG.globe} Semua Kota</span><em>${all.length}</em></button>
   </div>`;
   const searchBar=`<div class="um-searchbar">
     <div class="um-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="umDestSearch" value="${esc(umumDestQ)}" placeholder="Cari objek wisata, museum, pabrik, pantai, atau kota..." oninput="setUmumDestQ(this.value)"></div>
-    <div class="um-search-hint">💡 Klik destinasi untuk memilih &amp; langsung hitung harga paket rombongan</div>
+    <div class="um-search-hint">Klik destinasi untuk memilih &amp; langsung hitung harga paket rombongan</div>
   </div>`;
   const matched=q
     ?all.filter(d=>destDisplayName(d).toLowerCase().includes(q)||d.city.toLowerCase().includes(q)||(d.note||'').toLowerCase().includes(q))
@@ -3844,7 +3907,7 @@ function umumPaketTab(){
           <div class="um-dcard-ov"></div>
           <span class="um-dcard-cat">${cat.lbl}</span>
           ${!photo?`<div class="um-dcard-ic">${cat.ic}</div>`:''}
-          <span class="um-dcard-city">📍 ${esc(c)}</span>
+          <span class="um-dcard-city" style="display:inline-flex;align-items:center;gap:4px">${UM_SVG.pin} ${esc(c)}</span>
         </div>
         <div class="um-dcard-body">
           <h4>${esc(disp)}</h4>
@@ -3858,10 +3921,10 @@ function umumPaketTab(){
     return `<div class="panel fade" style="margin-bottom:18px;padding:18px">
       <div class="panel-h" style="padding:0 0 14px;border-bottom:1px solid var(--line)">
         <div>
-          <h3 style="font-size:17px">${CITY_ICONS[c]||'📍'} Destinasi Wisata ${esc(c)} <span style="color:var(--muted);font-size:12.5px;font-weight:600">(${cItems.length} objek wisata)</span></h3>
+          <h3 style="font-size:17px">Destinasi Wisata ${esc(c)} <span style="color:var(--muted);font-size:12.5px;font-weight:600">(${cItems.length} objek wisata)</span></h3>
           <p style="font-size:12px;color:var(--muted);margin-top:2px">Pilih satu atau beberapa objek wisata di ${esc(c)} untuk melihat simulasi harga paket per peserta</p>
         </div>
-        <button class="btn-acc ok" onclick="applyUmumSelectedToCalc()">🧮 Buka Kalkulator Paket →</button>
+        <button class="btn-acc ok" style="display:inline-flex;align-items:center;gap:6px" onclick="applyUmumSelectedToCalc()">${UM_SVG.calc} Buka Kalkulator Paket →</button>
       </div>
       <div class="um-dgrid" style="margin-top:14px">${cards}</div>
     </div>`;
