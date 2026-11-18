@@ -407,7 +407,8 @@ tbody tr:last-child td{border-bottom:none}tbody tr.clk{cursor:pointer}tbody tr.c
   .result-card{position:static!important}
   .cards{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin-bottom:16px!important}
   .kat{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
-  .bottomnav{display:flex!important;position:fixed;left:0;right:0;bottom:0;z-index:150;background:linear-gradient(185deg,var(--navy),var(--navy-2));padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgba(0,0,0,.18)}
+  .bottomnav:empty,.app.public-mode ~ .bottomnav{display:none!important}
+  .bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:150;background:linear-gradient(185deg,var(--navy),var(--navy-2));padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgba(0,0,0,.18)}
 }
 @media(max-width:680px){
   html,body{overflow-x:hidden;width:100%}
@@ -496,6 +497,101 @@ tbody tr:last-child td{border-bottom:none}tbody tr.clk{cursor:pointer}tbody tr.c
   .rc-row b{text-align:right}
   .um-wa-float{right:14px;bottom:14px;padding:10px 15px;font-size:12.5px}
 }
+
+.um-strip-img{justify-content:space-between;align-items:flex-end}
+.um-pkg-dur{position:relative;z-index:1;background:rgba(14,36,74,.78);color:var(--gold);font-style:normal;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:99px;border:1px solid rgba(255,255,255,.2)}
+.um-pkg-list{margin-top:7px;display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--ink);line-height:1.4}
+.um-pkg-dest{color:var(--muted);font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:30px}
+.um-pkg-foot{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items: flex-end;justify-content:space-between;gap:6px}
+.um-pkg-foot small{display:block;font-size:10px;color:var(--muted);font-weight:600}
+.um-pkg-foot .prc{margin-top:1px!important;font-size:15px;font-weight:800;color:var(--blue)}
+.um-pkg-foot .prc span{font-size:11px;font-weight:600;color:var(--muted)}
+.um-pkg-btn{background:rgba(39,91,181,.1);color:var(--blue);font-size:11px;font-weight:800;padding:5px 10px;border-radius:99px;white-space:nowrap}
+@media(max-width:680px){
+  .um-pkg-list{font-size:10.5px;gap:2px}
+  .um-pkg-dest{font-size:10px;min-height:26px}
+  .um-pkg-foot .prc{font-size:13px}
+  .um-pkg-btn{padding:4px 8px;font-size:10px}
+}
+
+.umsteps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+.umstep-card{background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:16px;padding:18px;position:relative;box-shadow:0 8px 24px rgba(15,23,42,.04)}
+.umstep-no{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--navy),var(--blue));color:var(--gold);font-weight:800;font-size:13px;display:grid;place-items:center;margin-bottom:10px}
+.umstep-card h4{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:5px}
+.umstep-card p{font-size:12px;color:var(--muted);line-height:1.55}
+.um-preset-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.um-preset-btn{background:#F4F7FB;border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:12px;font-weight:700;padding:8px 13px;border-radius:99px;cursor:pointer;transition:.15s}
+.um-preset-btn:hover{border-color:var(--blue);color:var(--blue)}
+.um-preset-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 4px 12px rgba(39,91,181,.22)}
+.um-calc-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.umfoot{margin-top:34px;background:linear-gradient(160deg,var(--navy),#091730);color:#fff;border-radius:22px;padding:34px 32px 22px;box-shadow:0 18px 42px rgba(14,36,74,.18)}
+.umfoot-grid{display:grid;grid-template-columns:1.3fr .8fr 1.1fr;gap:28px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.12)}
+.umfoot-brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:800;margin-bottom:10px}
+.umfoot-brand img{height:38px;width:auto;border-radius:6px}
+.umfoot-desc{font-size:12.5px;color:rgba(255,255,255,.74);line-height:1.6;margin-bottom:12px}
+.umfoot-badges{display:flex;flex-wrap:wrap;gap:6px}
+.umfoot-badges span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:99px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--gold)}
+.umfoot h5{font-size:13.5px;font-weight:800;color:var(--gold);margin-bottom:11px;letter-spacing:.02em}
+.umfoot-links{list-style:none;display:flex;flex-direction:column;gap:7px}
+.umfoot-links a{font-size:12.5px;color:rgba(255,255,255,.78);text-decoration:none;cursor:pointer;transition:.15s}
+.umfoot-links a:hover{color:#fff;padding-left:3px}
+.umfoot-contact{display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:rgba(255,255,255,.82);line-height:1.5}
+.umfoot-copy{padding-top:16px;text-align:center;font-size:11.5px;color:rgba(255,255,255,.55)}
+@media(max-width:960px){
+  .umsteps{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+  .umfoot-grid{grid-template-columns:1fr!important;gap:20px}
+}
+@media(max-width:680px){
+  .umsteps{grid-template-columns:1fr!important}
+  .um-calc-actions{grid-template-columns:1fr!important}
+  .um-preset-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+  .um-preset-row::-webkit-scrollbar{display:none}
+  .um-preset-btn{white-space:nowrap;flex-shrink:0}
+  .umfoot{padding:24px 18px 18px;border-radius:16px}
+}
+
+.um-city-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.um-city-pill{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;transition:.16s;box-shadow:0 2px 6px rgba(15,23,42,.03)}
+.um-city-pill:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px)}
+.um-city-pill em{font-style:normal;background:#EEF1F6;color:var(--muted);font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px}
+.um-city-pill.active{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 6px 16px rgba(14,36,74,.2)}
+.um-city-pill.active em{background:var(--gold);color:var(--navy)}
+.um-search-hint{font-size:12px;color:var(--blue);font-weight:700;background:rgba(39,91,181,.08);padding:7px 12px;border-radius:99px}
+.um-dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:14px}
+.um-dcard{background:#fff;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .16s,box-shadow .16s,border-color .16s;display:flex;flex-direction:column}
+.um-dcard:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(15,23,42,.1);border-color:var(--blue)}
+.um-dcard.selected{border-color:var(--blue);box-shadow:0 0 0 3px rgba(39,91,181,.18),0 12px 26px rgba(39,91,181,.14)}
+.um-dcard-visual{height:108px;position:relative;background-size:cover;background-position:center;display:flex;align-items:flex-end;justify-content:space-between;padding:10px 12px}
+.um-dcard-ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,36,74,.18),rgba(14,36,74,.68))}
+.um-dcard-cat{position:relative;z-index:1;background:rgba(255,255,255,.92);color:var(--navy);font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.um-dcard-city{position:relative;z-index:1;color:rgba(255,255,255,.92);font-size:10.5px;font-weight:700}
+.um-dcard-ic{position:absolute;right:12px;top:10px;z-index:1;font-size:24px;opacity:.85;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
+.um-dcard-body{padding:13px 14px;display:flex;flex-direction:column;flex:1}
+.um-dcard-body h4{font-size:14px;font-weight:800;color:var(--navy);line-height:1.3;margin-bottom:4px}
+.um-dcard-body p{font-size:11.5px;color:var(--muted);line-height:1.45;margin-bottom:11px;flex:1}
+.um-dcard-foot{border-top:1px solid #F0F3F7;padding-top:9px;display:flex;justify-content:space-between;align-items:center}
+.um-dcard-pick{font-size:11.5px;font-weight:800;color:var(--blue);background:rgba(39,91,181,.08);padding:5px 11px;border-radius:99px;transition:.15s;width:100%;text-align:center}
+.um-dcard-pick.on{background:var(--blue);color:#fff}
+.um-cart-bar{position:sticky;bottom:16px;z-index:40;background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;border-radius:16px;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:0 16px 38px rgba(14,36,74,.35);border:1px solid rgba(255,255,255,.16);margin-top:12px}
+.um-cart-info{flex:1;min-width:200px;font-size:12.5px;line-height:1.45}
+.um-cart-info b{color:var(--gold);margin-right:6px}
+.um-cart-info span{color:rgba(255,255,255,.9)}
+.um-cart-act{display:flex;align-items:center;gap:8px}
+@media(max-width:680px){
+  .um-city-pills{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;scrollbar-width:none}
+  .um-city-pills::-webkit-scrollbar{display:none}
+  .um-city-pill{white-space:nowrap;flex-shrink:0;padding:7px 12px;font-size:12px}
+  .um-dgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+  .um-dcard-visual{height:88px;padding:8px}
+  .um-dcard-cat{font-size:9.5px;padding:2px 7px}
+  .um-dcard-city{display:none}
+  .um-dcard-body{padding:10px}
+  .um-dcard-body h4{font-size:12.5px}
+  .um-dcard-body p{font-size:10.5px;margin-bottom:8px}
+  .um-dcard-pick{font-size:10.5px;padding:4px 8px}
+  .um-cart-bar{padding:12px 14px;bottom:10px}
+  .um-cart-act{width:100%;justify-content:space-between}
+}
 </style>
 </head>
 <body>
@@ -531,13 +627,7 @@ tbody tr:last-child td{border-bottom:none}tbody tr.clk{cursor:pointer}tbody tr.c
     <div id="view"></div>
   </main>
 </div>
-<nav class="bottomnav" id="bottomnav">
-  <a data-view="umum"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9z"/></svg>Umum</a>
-  <a data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</a>
-  <a data-view="jadwal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Jadwal</a>
-  <a data-view="tl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 2h6v4H9z"/><path d="m8 13 2 2 4-4"/></svg>TL &amp; Media</a>
-  <a class="more" onclick="openMoreSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Lainnya</a>
-</nav>
+<nav class="bottomnav" id="bottomnav"></nav>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -870,11 +960,15 @@ function applyRoleUI(){
   const bnav=document.getElementById('bottomnav');
   if(bnav){
     const allowed=cfg.views.filter(v=>NAV_META[v]);
-    const direct=allowed.length<=5?allowed:allowed.slice(0,4);
-    const hasMore=allowed.length>5;
-    const cur=(location.hash||'#umum').slice(1)||'umum';
-    bnav.innerHTML=direct.map(v=>`<a data-view="${v}" class="${v===cur?'active':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${NAV_META[v][1]}</svg>${NAV_META[v][0]}</a>`).join('')
-      +(hasMore?`<a class="more" onclick="openMoreSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Lainnya</a>`:'');
+    if(u.role==='publik'||allowed.length<=1){
+      bnav.innerHTML='';
+    }else{
+      const direct=allowed.length<=5?allowed:allowed.slice(0,4);
+      const hasMore=allowed.length>5;
+      const cur=(location.hash||'#umum').slice(1)||'umum';
+      bnav.innerHTML=direct.map(v=>`<a data-view="${v}" class="${v===cur?'active':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${NAV_META[v][1]}</svg>${NAV_META[v][0]}</a>`).join('')
+        +(hasMore?`<a class="more" onclick="openMoreSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Lainnya</a>`:'');
+    }
   }
 }
 function openLoginModal(){
@@ -3178,6 +3272,119 @@ function renderUmum(){
 }
 const DESTPHOTO={}; // isi {'Nama Destinasi':'data:image/...;base64,...'} di sini begitu foto asli Havist sudah ada — otomatis dipakai menggantikan gradasi warna.
 const UMGRAD=['linear-gradient(135deg,#275BB5,#1AA6B7)','linear-gradient(135deg,#163A6B,#8E63D6)','linear-gradient(135deg,#0E244A,#275BB5)','linear-gradient(135deg,#1AA6B7,#2B9D6E)','linear-gradient(135deg,#8E63D6,#275BB5)','linear-gradient(135deg,#2B9D6E,#1AA6B7)','linear-gradient(135deg,#275BB5,#163A6B)','linear-gradient(135deg,#1AA6B7,#275BB5)'];
+const UMUM_BEST_PKGS=[
+  {
+    id:'pkg_bdg',
+    title:'Paket Edukasi & Budaya Bandung',
+    city:'BANDUNG',
+    durLbl:'One Day Trip (1 Hari)',
+    pax:50, malam:0, share:4,
+    armada:'BIG BUS (50 Seat)',
+    hotel:'',
+    mFreq:2,
+    kaos:'Kaos Cotton Combed 30s Pendek',
+    dests:['Museum Geologi','Saung Udjo','Masjid Al Jabbar'],
+    grad:'linear-gradient(135deg,#1E4E9C,#1AA6B7)'
+  },
+  {
+    id:'pkg_jog',
+    title:'Paket Study Tour Yogyakarta',
+    city:'JOGJA',
+    durLbl:'3 Hari 2 Malam',
+    pax:50, malam:2, share:4,
+    armada:'BIG BUS (50 Seat)',
+    hotel:'The Cube',
+    mFreq:6,
+    kaos:'Kaos Cotton Combed 30s Pendek',
+    dests:['Kraton Yogyakarta','Museum Vredeburg','Hutan Pinus Pengger','Goa Pindul','Malioboro'],
+    grad:'linear-gradient(135deg,#163A6B,#8E63D6)'
+  },
+  {
+    id:'pkg_dng',
+    title:'Paket Eksotika Dieng Plateau',
+    city:'DIENG',
+    durLbl:'2 Hari 1 Malam',
+    pax:33, malam:1, share:4,
+    armada:'MEDIUM BUS (31-35 Seat)',
+    hotel:'QUEEN VILLA SIKUNIR',
+    mFreq:4,
+    kaos:'Kaos Cotton Combed 30s Pendek',
+    dests:['Sunrise Sikunir','Kawah Sikidang','Candi Arjuna','Bukit Ratapan Angin'],
+    grad:'linear-gradient(135deg,#1AA6B7,#2B9D6E)'
+  },
+  {
+    id:'pkg_mlg',
+    title:'Paket Petualangan Malang & Bromo',
+    city:'MALANG & BROMO',
+    durLbl:'3 Hari 2 Malam',
+    pax:50, malam:2, share:4,
+    armada:'BIG BUS (50 Seat)',
+    hotel:'LAVA VIEW LODGE HOTEL',
+    mFreq:6,
+    kaos:'Kaos Cotton Combed 30s Pendek',
+    dests:['Bromo Sunrise','Petik Apel'],
+    grad:'linear-gradient(135deg,#0E244A,#275BB5)'
+  }
+];
+function calcBestPkg(pk){
+  const pax=pk.pax||50, malam=pk.malam||0, hari=malam+1, share=pk.share||4;
+  const arm=CAT.armada.find(a=>a.name===pk.armada)||CAT.armada[3]||CAT.armada[0]||{name:'Big Bus',rate:6000000};
+  const cap=armSeat(arm);
+  const bus=Math.max(1,Math.ceil(pax/cap));
+  const hot=pk.hotel?CAT.hotels.find(h=>h.name===pk.hotel):null;
+  const hotelRate=hot?(hot.wd||0):0;
+  const kamar=(malam>0&&hotelRate>0)?Math.ceil(pax/share):0;
+  const kaosObj=pk.kaos?CAT.kaos.find(k=>k.name===pk.kaos):null;
+  const kaosRate=kaosObj?(kaosObj.price||0):0;
+  const destObjs=(pk.dests||[]).map(nm=>CAT.dests.find(d=>d.name===nm&&d.city===pk.city)||CAT.dests.find(d=>d.name===nm)).filter(Boolean);
+  const destPrice=destObjs.reduce((s,d)=>s+(d.price||0),0);
+  const cT=(arm.rate||0)*bus*hari;
+  const cH=malam>0?hotelRate*kamar*malam:0;
+  const cM=(pk.mFreq||0)*35000*pax;
+  const cK=kaosRate*pax;
+  const cW=destPrice*pax;
+  const modal=cT+cH+cM+cK+cW;
+  const markup=1+(store('markup',20)/100);
+  const mk=modal*markup;
+  const foc=Math.min(Math.floor(pax/10),25);
+  const subsidi=foc*(pax>0?mk/pax:0);
+  const jualGrup=Math.max(0,mk-subsidi);
+  const perpax=pax>0?Math.ceil((jualGrup/pax)/1000)*1000:0;
+  return {pax,malam,hari,bus,armName:arm.name,hotName:hot?hot.name:'Tanpa Menginap',kamar,mFreq:pk.mFreq||0,kaosName:kaosObj?kaosObj.name:'',destNames:destObjs.map(d=>d.name),foc,perpax,totalPaket:perpax*pax};
+}
+function applyBestPkg(idx){
+  const pk=UMUM_BEST_PKGS[idx];if(!pk)return;
+  setUmumTab('estimasi');
+  setTimeout(()=>{
+    const g=id=>document.getElementById(id);
+    if(g('u_pax'))g('u_pax').value=pk.pax;
+    if(g('u_malam'))g('u_malam').value=pk.malam;
+    if(g('u_share'))g('u_share').value=pk.share||4;
+    if(g('u_mfreq'))g('u_mfreq').value=pk.mFreq||0;
+    if(g('u_armada')){
+      const o=[...g('u_armada').options].find(x=>x.dataset.name===pk.armada);
+      if(o)g('u_armada').value=o.value;
+    }
+    if(g('u_hotel')){
+      if(!pk.hotel)g('u_hotel').value='0|0';
+      else{const o=[...g('u_hotel').options].find(x=>x.dataset.name===pk.hotel);if(o)g('u_hotel').value=o.value;}
+    }
+    if(g('u_kaos')){
+      const o=[...g('u_kaos').options].find(x=>x.dataset.name===pk.kaos);
+      if(o)g('u_kaos').value=o.value;
+    }
+    document.querySelectorAll('.udest').forEach(cb=>{
+      cb.checked=(pk.dests||[]).includes(cb.dataset.name);
+      const box=cb.closest('.citybox');
+      if(cb.checked&&box)box.classList.add('open');
+    });
+    calcUmum();
+    const resEl=document.getElementById('umTabsSec');
+    if(resEl)resEl.scrollIntoView({behavior:'smooth',block:'start'});
+    toast('Paket '+pk.city+' dimuat ke kalkulator ✓');
+  },40);
+}
+
 function umumFeatured(){
   const cities=[...new Set(CAT.dests.map(d=>d.city))];
   return cities.map(c=>CAT.dests.find(d=>d.city===c)).filter(Boolean).slice(0,8);
@@ -3208,6 +3415,161 @@ const UMUM_FAQ=[
   ['Bisakah request destinasi, hotel, atau armada tertentu?','Bisa. Kami terbuka untuk request destinasi, hotel, dan armada sesuai kebutuhan — tim Sales akan menghitungkan estimasi biayanya lewat Kalkulator di halaman ini.'],
   ['Apakah ada tour leader & dokumentasi selama perjalanan?','Ya, setiap trip didampingi tour leader berpengalaman, dan untuk sebagian trip disertai tim media untuk dokumentasi perjalanan.'],
 ];
+
+function umumStepsSection(){
+  const steps=[
+    ['01','Pilih Paket & Hitung Estimasi','Pilih salah satu paket terbaik atau atur sendiri jumlah peserta, bus, hotel, dan objek wisata di kalkulator halaman ini.'],
+    ['02','Unduh Proposal & Konsultasi','Unduh draf Estimasi Proposal PDF untuk bahan rapat panitia/sekolah, lalu konsultasikan detail jadwal dengan tim Sales kami.'],
+    ['03','Konfirmasi Booking & DP 30%','Setelah tanggal & fasilitas disepakati, amankan kursi armada dan kamar hotel dengan pembayaran DP 30% ke rekening resmi.'],
+    ['04','Pelunasan H-7 & Berangkat!','Pelunasan dilakukan H-7 keberangkatan. Tim Tour Leader & Media kami siap mendampingi perjalanan rombongan Anda dari awal hingga pulang.']
+  ];
+  return `<div class="umsec-head" style="margin-top:6px"><div><span class="tag">Alur Pemesanan Mudah</span><h2>4 Langkah Merencanakan Trip Rombongan</h2></div></div>
+  <div class="umsteps fade">${steps.map(([no,t,d])=>`<div class="umstep-card"><div class="umstep-no">${no}</div><h4>${t}</h4><p>${d}</p></div>`).join('')}</div>`;
+}
+function umumFooterSection(){
+  const info=infoPerusahaan();
+  return `<footer id="umFootSec" class="umfoot fade">
+    <div class="umfoot-grid">
+      <div>
+        <div class="umfoot-brand"><img src="__LOGO__" alt="${esc(info.nama)}"><span>${esc(info.nama)}</span></div>
+        <p class="umfoot-desc">Mitra perjalanan wisata, study tour sekolah, outing class, dan gathering instansi dengan layanan All-In: Armada Pariwisata, Hotel, Konsumsi, Tour Leader &amp; Dokumentasi Media.</p>
+        <div class="umfoot-badges">
+          <span>✓ Harga Transparan All-In</span>
+          <span>✓ Free Kuota Guru/Pendamping (FOC)</span>
+          <span>✓ Tim TL &amp; Media Berpengalaman</span>
+        </div>
+      </div>
+      <div>
+        <h5>Navigasi Cepat</h5>
+        <ul class="umfoot-links">
+          <li><a onclick="window.scrollTo({top:0,behavior:'smooth'})">Beranda &amp; Paket Unggulan</a></li>
+          <li><a onclick="umumGo('paket','umTabsSec')">Katalog Destinasi Wisata</a></li>
+          <li><a onclick="umumGo('hotel','umTabsSec')">Daftar Mitra Hotel</a></li>
+          <li><a onclick="umumGo('armada','umTabsSec')">Pilihan Armada Bus</a></li>
+          <li><a onclick="umumGo('estimasi','umTabsSec')">Kalkulator Estimasi Biaya</a></li>
+          <li><a onclick="umumGo(null,'umFaqSec')">Pertanyaan Umum (FAQ)</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Kantor &amp; Kontak Resmi</h5>
+        <div class="umfoot-contact">
+          <div>📍 <b>Alamat:</b> ${esc(info.alamat)}</div>
+          <div>📞 <b>WhatsApp / Telp:</b> ${esc(info.hp)}</div>
+          <div>✉️ <b>Email:</b> ${esc(info.email)}</div>
+          ${info.rek?`<div>🏦 <b>Rekening Resmi:</b> ${esc(info.rek)}</div>`:'<div>🏦 <b>Pembayaran:</b> DP 30% saat konfirmasi · Pelunasan H-7</div>'}
+        </div>
+        <a class="btn-um-primary" style="margin-top:14px;text-decoration:none;display:inline-flex" target="_blank" href="${waLink(info.hp,'Halo '+info.nama+', saya ingin konsultasi rencana perjalanan rombongan kami.')}">💬 Hubungi Tim Kami via WhatsApp</a>
+      </div>
+    </div>
+    <div class="umfoot-copy">© ${new Date().getFullYear()} ${esc(info.nama)} · Your Travel Dream Makers. Hak cipta dilindungi.</div>
+  </footer>`;
+}
+function setUmumPreset(pax,armName){
+  const g=id=>document.getElementById(id);
+  if(g('u_pax'))g('u_pax').value=pax;
+  if(g('u_armada')&&armName){
+    const o=[...g('u_armada').options].find(x=>x.dataset.name===armName);
+    if(o)g('u_armada').value=o.value;
+  }
+  document.querySelectorAll('.um-preset-btn').forEach(b=>b.classList.toggle('active',+b.dataset.pax===pax));
+  calcUmum();
+}
+function openUmumProposalModal(){
+  if(!lastUmumEst||!lastUmumEst.pax){calcUmum();}
+  const e=lastUmumEst;if(!e)return;
+  const old=document.getElementById('umPropOv');if(old)old.remove();
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='umPropOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:450px">
+    <div class="pv-bar"><b>📄 Unduh Estimasi Proposal (PDF)</b><button class="btn-acc no" onclick="document.getElementById('umPropOv').remove()">Tutup</button></div>
+    <div style="background:#fff;margin:16px;border-radius:12px;padding:18px">
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.5">Isi nama sekolah/instansi Anda agar tertera resmi di lembar <b>Surat Estimasi Proposal</b> yang siap dibawa ke rapat panitia:</p>
+      <label class="flbl">Nama Sekolah / Instansi / Rombongan *</label>
+      <input id="up_inst" class="finput" placeholder="mis. SMPN 1 Curug / PT Maju Jaya">
+      <label class="flbl">Nama Bapak / Ibu Panitia (PIC)</label>
+      <input id="up_pic" class="finput" placeholder="mis. Bpk. Hendra (Ketua Panitia)">
+      <label class="flbl">No. WhatsApp Aktif *</label>
+      <input id="up_hp" class="finput" placeholder="mis. 0812-3456-7890" onkeydown="if(event.key==='Enter')submitUmumProposal()">
+      <div style="background:var(--bg);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--ink);margin-bottom:12px">
+        <b>Ringkasan Paket:</b> ${e.pax} Pax · ${e.hari}H${e.malam}M · ${e.bus} unit ${esc(e.armName)} · <b>${rp(e.perpax)}/pax</b>
+      </div>
+      <button class="btn-save" onclick="submitUmumProposal()">⬇ Lihat &amp; Unduh Proposal PDF</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);ov.addEventListener('click',ev=>{if(ev.target===ov)ov.remove();});
+}
+function submitUmumProposal(){
+  const g=id=>document.getElementById(id);
+  const inst=(g('up_inst')?g('up_inst').value:'').trim();
+  const pic=(g('up_pic')?g('up_pic').value:'').trim();
+  const hp=(g('up_hp')?g('up_hp').value:'').trim();
+  if(!inst||!hp){toast('Mohon isi Nama Sekolah/Instansi dan No. WhatsApp');return;}
+  const ov=document.getElementById('umPropOv');if(ov)ov.remove();
+  const e=lastUmumEst;
+  const klienLabel=pic?`${inst} (PIC: ${pic})`:inst;
+  // Save automatically into Data Klien for Sales follow-up
+  const list=klienList();
+  const catNote=`Estimasi Web: ${e.pax} pax (${e.hari}H${e.malam}M), ${e.bus}x ${e.armName}, ${e.destNames.length?e.destNames.join(', '):'Custom'} — ${rp(e.perpax)}/pax`;
+  const ex=list.find(k=>k.nama.toLowerCase()===inst.toLowerCase());
+  if(ex){ex.hp=hp;if(pic)ex.instansi=pic;ex.catatan=catNote;}
+  else list.push({id:'KL'+Date.now().toString(36),nama:inst,instansi:pic||'Prospek Web Publik',hp,catatan:catNote,sales:'Web Publik (Proposal)',created:Date.now()});
+  save('klien',list);
+  // Build official proposal preview & trigger PDF download
+  const info=infoPerusahaan();
+  const dNow=new Date();
+  const rom=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][dNow.getMonth()];
+  const no=`EST-${String(dNow.getDate()).padStart(2,'0')}${String(dNow.getMonth()+1).padStart(2,'0')}/HVST-WEB/${rom}/${dNow.getFullYear()}`;
+  const tglSurat=dNow.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  const tglInput=document.getElementById('u_tgl')?document.getElementById('u_tgl').value:'';
+  const tglTrip=tglInput?new Date(tglInput).toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):'Menyesuaikan jadwal sekolah/instansi';
+  const destObjs=(e.destNames||[]).map(nm=>CAT.dests.find(d=>d.name===nm)).filter(Boolean);
+  const cities=[...new Set(destObjs.map(d=>d.city))];
+  const destLabel=cities.length?cities.join(' · ')+(e.destNames.length?' ('+e.destNames.join(', ')+')':''):(e.destNames.length?e.destNames.join(', '):'Paket Wisata Rombongan');
+  const fasil=[
+    `Transportasi ${e.armName} (${e.bus} unit, AC, Audio/Karaoke, Reclining Seat) selama ${e.hari} hari`,
+    e.kamar>0?`Akomodasi Hotel ${e.hotName} (${e.kamar} kamar × ${e.malam} malam)`:'Perjalanan One Day Trip (Tanpa Menginap)',
+    e.mFreq>0?`Konsumsi ${e.mFreq}× makan selama perjalanan (${e.pax} pax)`:'Konsumsi menyesuaikan kebutuhan rombongan',
+  ];
+  if(e.kaosName&&!e.kaosName.includes('Tanpa'))fasil.push(`Merchandise ${e.kaosName} (${e.pax} pcs)`);
+  if(e.destNames.length)fasil.push(`Tiket masuk objek wisata: ${e.destNames.join(', ')}`);
+  fasil.push(`Gratis kuota pendamping/guru (FOC) ${e.foc} orang + Pendampingan Tour Leader & Dokumentasi`);
+  const itin=buildItinerary(destObjs.map(d=>({name:d.name,city:d.city,note:d.note||''})),e.hari,e.malam,e.mFreq,e.hotName);
+  pvActive={
+    no,tglSurat,klien:klienLabel,hp,dest:destLabel,tglTrip,info,fasil,itin,
+    q:{pax:e.pax,hari:e.hari,malam:e.malam,bus:e.bus,armName:e.armName,hotelName:e.hotName,perpax:e.perpax,total:e.totalPaket}
+  };
+  const fasilHTML=fasil.map(f=>`<li>${esc(f)}</li>`).join('');
+  const itinHTML=itin.map(d=>`<div class="pv-day"><div class="pv-day-h">Hari ${d.hari}</div><ul>${d.acts.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`).join('');
+  const pov=document.createElement('div');pov.className='pv-overlay';pov.id='pvOverlay';
+  pov.innerHTML=`<div class="pv-modal">
+    <div class="pv-bar"><b>Estimasi Proposal — ${esc(inst)}</b><div><button class="btn-acc ok" onclick="genPenawaranPDF()">⬇ Unduh PDF</button><button class="btn-acc no" onclick="document.getElementById('pvOverlay').remove()">Tutup</button></div></div>
+    <div class="pv-paper" id="pvPaper">
+      <div class="pv-letterhead"><div class="pv-brand">HAVIST TRAVELLER</div><div class="pv-tag">Your Travel Dream Makers</div><div class="pv-contact">${esc(info.alamat)}<br>${esc(info.hp)} · ${esc(info.email)}</div></div>
+      <h2 class="pv-title">SURAT ESTIMASI PENAWARAN PAKET WISATA</h2>
+      <table class="pv-meta"><tr><td>Nomor</td><td>: ${esc(no)}</td><td>Tanggal</td><td>: ${esc(tglSurat)}</td></tr></table>
+      <p class="pv-to">Kepada Yth.<br><b>${esc(klienLabel)}</b><br>${esc(hp)}</p>
+      <p>Dengan hormat, berikut kami sampaikan estimasi penawaran paket perjalanan wisata rombongan:</p>
+      <table class="pv-sum">
+        <tr><td>Tujuan Wisata</td><td>: <b>${esc(destLabel)}</b></td></tr>
+        <tr><td>Rencana Berangkat</td><td>: ${esc(tglTrip)}</td></tr>
+        <tr><td>Durasi Perjalanan</td><td>: ${e.hari} Hari ${e.malam} Malam</td></tr>
+        <tr><td>Jumlah Peserta</td><td>: ${e.pax} pax (+ Free ${e.foc} FOC Pendamping)</td></tr>
+        <tr><td>Armada Bus</td><td>: ${esc(e.armName)} (${e.bus} unit)</td></tr>
+        <tr><td>Akomodasi Hotel</td><td>: ${esc(e.kamar>0?e.hotName:'One Day Trip (Tanpa Menginap)')}</td></tr>
+      </table>
+      <div class="pv-price"><span>Estimasi Harga Paket per Pax (All-In)</span><b>${rp(e.perpax)}</b></div>
+      <div class="pv-price sub"><span>Estimasi Total Rombongan (${e.pax} pax)</span><b>${rp(e.totalPaket)}</b></div>
+      <h3 class="pv-h3">Fasilitas Paket Termasuk</h3><ul class="pv-fasil">${fasilHTML}</ul>
+      <h3 class="pv-h3">Rencana Itinerary Perjalanan</h3><div class="pv-itin">${itinHTML}</div>
+      <h3 class="pv-h3">Syarat &amp; Ketentuan Pemesanan</h3><ul class="pv-fasil"><li>DP 30% saat konfirmasi pemesanan untuk penguncian jadwal armada &amp; hotel.</li><li>Pelunasan maksimal 7 hari (H-7) sebelum tanggal keberangkatan.</li><li>Estimasi ini bersifat fleksibel dan dapat disesuaikan kembali bersama tim Sales Havist Traveller.</li></ul>
+      <p class="pv-close">Demikian surat estimasi penawaran ini kami sampaikan untuk dapat dijadikan bahan pertimbangan rapat panitia. Atas perhatian dan kerja samanya kami ucapkan terima kasih.</p>
+      <div class="pv-sign">Hormat kami,<br><br><b>Manajemen Havist Traveller</b></div>
+    </div>
+  </div>`;
+  document.body.appendChild(pov);
+  pov.addEventListener('click',ev=>{if(ev.target===pov)pov.remove();});
+  setTimeout(()=>genPenawaranPDF(),150);
+}
+
 function umumFaqSection(){
   const items=UMUM_FAQ.map(([q,a])=>`<div class="umfaq-item"><button class="umfaq-q" onclick="this.parentNode.classList.toggle('open')"><span>${esc(q)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></button><div class="umfaq-a"><p>${esc(a)}</p></div></div>`).join('');
   return `<div class="umsec-head"><div><span class="tag">Pertanyaan Umum</span><h2>Yang Sering Ditanyakan</h2></div></div>
@@ -3318,7 +3680,31 @@ function vUmum(){
 
   <div class="um-strip-wrap fade">
     <div class="um-strip">
-      ${feat.slice(0,4).map((d,i)=>{const photo=(uph.dest&&uph.dest[d.name])||DESTPHOTO[d.name];const bg=photo?`background-image:url('${photo}')`:`background:${UMGRAD[i%UMGRAD.length]}`;return `<div class="um-strip-card" onclick="umumGo('estimasi','umTabsSec')"><div class="um-strip-img" style="${bg}"><span>📍 ${esc(d.city)}</span></div><div class="um-strip-body"><b>${esc(d.name)}</b><div class="sub">Outing &amp; Study Tour</div><div class="prc">Cek Estimasi Paket →</div></div></div>`;}).join('')}
+      ${UMUM_BEST_PKGS.map((pk,i)=>{
+        const c=calcBestPkg(pk);
+        const firstDest=pk.dests[0]||'';
+        const photo=(uph.dest&&uph.dest[firstDest])||DESTPHOTO[firstDest];
+        const bg=photo?`background-image:url('${photo}')`:`background:${pk.grad}`;
+        return `<div class="um-strip-card" onclick="applyBestPkg(${i})">
+          <div class="um-strip-img" style="${bg}">
+            <span>📍 ${esc(pk.city)}</span>
+            <em class="um-pkg-dur">${esc(pk.durLbl)}</em>
+          </div>
+          <div class="um-strip-body">
+            <b>${esc(pk.title)}</b>
+            <div class="um-pkg-list">
+              <div>👥 <b>${c.pax} Pax</b> · 🚌 ${c.bus} ${esc(c.armName.split('(')[0].trim())}</div>
+              <div>🏨 ${c.malam>0?esc(c.hotName)+' ('+c.malam+' mlm)':'One Day Trip (Tanpa Inap)'}</div>
+              <div>🍱 ${c.mFreq}× Makan${c.kaosName?' · 👕 Kaos':''} · 🎁 Free ${c.foc} FOC</div>
+              <div class="um-pkg-dest">🎟️ ${esc(pk.dests.join(', '))}</div>
+            </div>
+            <div class="um-pkg-foot">
+              <div><small>Mulai dari</small><div class="prc">${rp(c.perpax)}<span>/pax</span></div></div>
+              <span class="um-pkg-btn">Pilih →</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
     </div>
   </div>
 
@@ -3331,6 +3717,11 @@ function vUmum(){
   </div>
 
   ${umumTrustBand()}
+
+  ${umumStepsSection()}
+
+  <div id="umTabsSec" class="umsec-head" style="margin-top:10px"><div><span class="tag">Katalog &amp; Kalkulator Paket</span><h2>Simulasi Harga Paket, Destinasi, Hotel &amp; Armada</h2></div></div>
+  <div class="tabs fade" style="padding:0 0 16px">${nav}</div><div id="umumBody" style="margin-bottom:34px"></div>
 
   <div class="umsec-head"><div><span class="tag">Destinasi Populer</span><h2>Jelajahi ${nCity} Kota/Wilayah Tujuan</h2></div></div>
   <div class="umfeat-grid fade">${featHTML}</div>
@@ -3347,33 +3738,146 @@ function vUmum(){
     </div>
   </div>
 
-  <div id="umTabsSec" class="umsec-head" style="margin-top:34px"><div><span class="tag">Katalog Lengkap</span><h2>Cari Paket, Hotel &amp; Armada</h2></div></div>
-  <div class="tabs fade" style="padding:0 0 16px">${nav}</div><div id="umumBody"></div>
+  ${umumFooterSection()}
   </div>
   <a class="um-wa-float" target="_blank" href="${waLink(info.hp,'Halo '+info.nama+', saya ingin tanya paket wisata.')}">💬 Chat WhatsApp</a>`;
 }
+
+let umumActiveCity='BANDUNG';
+let umumSelDests=[];
+const CITY_ICONS={'BANTEN':'🏖️','JAKARTA':'🎡','BOGOR':'🌿','SUBANG':'♨️','SUKABUMI':'🌊','BANDUNG':'🔥','JOGJA':'🏛️','DIENG':'🌋','MALANG & BROMO':'⛰️','BALI':'🏝️'};
+function destKey(d){return (d.city||'')+'::'+(d.name||'')+'::'+(d.note||'');}
+function destDisplayName(d){
+  const nm=(d.name||'').trim(), nt=(d.note||'').trim();
+  if(!nt)return nm;
+  if(/^(TMII|Ancol|Ragunan\/Monas)$/i.test(nm)&&nm.toLowerCase()!==nt.toLowerCase()){
+    return nm+' — '+nt;
+  }
+  return nm;
+}
+function destCatInfo(d){
+  const s=((d.name||'')+' '+(d.note||'')).toLowerCase();
+  if(/yakult|pocari|industri|pabrik/.test(s))return {lbl:'🏭 Kunjungan Industri',cls:'cat-ind',grad:'linear-gradient(135deg,#0E244A,#275BB5)',ic:'🏭'};
+  if(/museum|iptek|sejarah|edukasi|observatorium|geologi|vredeburg|kraton|candi|monas|monumen|peternakan|perikanan|botani|tanaman|biologi|sains/.test(s))return {lbl:'🎓 Wisata Edukasi',cls:'cat-edu',grad:'linear-gradient(135deg,#1E4E9C,#1AA6B7)',ic:'🎓'};
+  if(/dufan|fantasi|jungleland|wonderland|seaworld|atlantis|samudra|safari|wahana|atv|jetski|kereta gantung|sky world|scooter|waterpark/.test(s))return {lbl:'🎢 Wahana & Rekreasi',cls:'cat-fun',grad:'linear-gradient(135deg,#5B21B6,#8E63D6)',ic:'🎢'};
+  if(/udjo|angklung|budaya|batik|barong|kecak|jimbaran|malioboro|braga|al jabbar/.test(s))return {lbl:'🎭 Budaya & Ikonik',cls:'cat-cul',grad:'linear-gradient(135deg,#9A3412,#E08A1E)',ic:'🎭'};
+  return {lbl:'🌿 Alam & Outbound',cls:'cat-nat',grad:'linear-gradient(135deg,#115E59,#2B9D6E)',ic:'🌿'};
+}
+function getDestPhoto(d){
+  const uph=umumPhotos();
+  const map=uph.dest||{};
+  const disp=destDisplayName(d);
+  return map[disp]||map[d.name]||DESTPHOTO[disp]||DESTPHOTO[d.name]||'';
+}
+function setUmumCity(c){
+  umumActiveCity=c;
+  umumDestQ='';
+  const inp=document.getElementById('umDestSearch');if(inp)inp.value='';
+  renderUmum();
+}
+function toggleUmumDestSelect(key){
+  const idx=umumSelDests.indexOf(key);
+  if(idx>=0)umumSelDests.splice(idx,1);
+  else umumSelDests.push(key);
+  renderUmum();
+}
+function clearUmumDestSelect(){
+  umumSelDests=[];
+  renderUmum();
+}
+function applyUmumSelectedToCalc(){
+  if(!umumSelDests.length){umumGo('estimasi','umTabsSec');return;}
+  const chosen=CAT.dests.filter(d=>umumSelDests.includes(destKey(d)));
+  setUmumTab('estimasi');
+  setTimeout(()=>{
+    const chosenKeys=new Set(umumSelDests);
+    document.querySelectorAll('.udest').forEach(cb=>{
+      const k=cb.dataset.key||'';
+      cb.checked=chosenKeys.has(k);
+      const box=cb.closest('.citybox');
+      if(cb.checked&&box)box.classList.add('open');
+    });
+    calcUmum();
+    const el=document.getElementById('umumResult')||document.getElementById('umTabsSec');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+    toast(chosen.length+' destinasi dimasukkan ke simulasi paket ✓');
+  },40);
+}
+
 function umumPaketTab(){
   const all=CAT.dests;
   if(!all.length)return '<div class="empty"><h3>Belum ada destinasi</h3></div>';
+  const allCities=[...new Set(all.map(d=>d.city))];
+  if(umumActiveCity!=='SEMUA'&&!allCities.includes(umumActiveCity))umumActiveCity=allCities.includes('BANDUNG')?'BANDUNG':allCities[0];
   const q=umumDestQ.trim().toLowerCase();
-  const matched=q?all.filter(d=>d.name.toLowerCase().includes(q)||d.city.toLowerCase().includes(q)||(d.note||'').toLowerCase().includes(q)):all;
-  const cities=[...new Set(matched.map(d=>d.city))];
+  const cityPills=`<div class="um-city-pills">
+    ${allCities.map(c=>{
+      const cnt=all.filter(d=>d.city===c).length;
+      const ic=CITY_ICONS[c]||'📍';
+      const act=(!q&&umumActiveCity===c)?'active':'';
+      return `<button type="button" class="um-city-pill ${act}" onclick="setUmumCity('${esc(c)}')"><span>${ic} ${esc(c)}</span><em>${cnt}</em></button>`;
+    }).join('')}
+    <button type="button" class="um-city-pill ${(!q&&umumActiveCity==='SEMUA')?'active':''}" onclick="setUmumCity('SEMUA')"><span>🌐 Semua Kota</span><em>${all.length}</em></button>
+  </div>`;
   const searchBar=`<div class="um-searchbar">
     <div class="um-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="umDestSearch" placeholder="Cari destinasi atau kota (mis. Jogja, Pantai, Candi)..." oninput="setUmumDestQ(this.value)"></div>
-    <div class="um-search-count">${matched.length} destinasi${q?' ditemukan':''}${cities.length?' di '+cities.length+' kota':''}</div>
+      <input id="umDestSearch" value="${esc(umumDestQ)}" placeholder="Cari objek wisata, museum, pabrik, pantai, atau kota..." oninput="setUmumDestQ(this.value)"></div>
+    <div class="um-search-hint">💡 Klik destinasi untuk memilih &amp; langsung hitung harga paket rombongan</div>
   </div>`;
-  if(q&&!matched.length)return searchBar+`<div class="empty"><h3>Tidak ditemukan</h3><p>Tidak ada destinasi yang cocok dengan "${esc(umumDestQ)}".</p></div>`;
-  const blocks=cities.map(c=>{
-    const items=matched.filter(d=>d.city===c).map(d=>`<div class="jcard" onclick="umumGo('estimasi','umTabsSec')">
-      <h4>${esc(d.name)}</h4><div class="jcard-dest">📍 ${esc(c)}</div>
-      <div class="jcard-meta"><span>✨ Tersedia Paket Rombongan</span></div>
-      ${d.note?`<div style="font-size:11.5px;color:var(--muted);margin-top:6px">${esc(d.note)}</div>`:''}
-    </div>`).join('');
-    return `<div class="panel fade" style="margin-bottom:18px"><div class="panel-h"><h3>${esc(c)} <span style="color:var(--muted);font-size:12px;font-weight:600">(${matched.filter(d=>d.city===c).length} destinasi)</span></h3><button class="lnk" onclick="umumGo('estimasi','umTabsSec')">Hitung Paket →</button></div>
-      <div class="jgrid" style="margin-top:12px">${items}</div></div>`;
+  const matched=q
+    ?all.filter(d=>destDisplayName(d).toLowerCase().includes(q)||d.city.toLowerCase().includes(q)||(d.note||'').toLowerCase().includes(q))
+    :(umumActiveCity==='SEMUA'?all:all.filter(d=>d.city===umumActiveCity));
+  if(!matched.length)return cityPills+searchBar+`<div class="empty"><h3>Tidak ditemukan</h3><p>Tidak ada destinasi yang cocok dengan "${esc(umumDestQ)}".</p></div>`;
+  const showCities=[...new Set(matched.map(d=>d.city))];
+  const blocks=showCities.map(c=>{
+    const cItems=matched.filter(d=>d.city===c);
+    const cards=cItems.map(d=>{
+      const key=destKey(d);
+      const sel=umumSelDests.includes(key);
+      const disp=destDisplayName(d);
+      const cat=destCatInfo(d);
+      const photo=getDestPhoto(d);
+      const bgStyle=photo?`background-image:url('${esc(photo)}')`:`background:${cat.grad}`;
+      const subNote=(d.note&&!disp.includes(d.note))?d.note:'Cocok untuk Study Tour & Outing Rombongan';
+      return `<div class="um-dcard ${sel?'selected':''}" onclick="toggleUmumDestSelect('${esc(key).replace(/'/g,"\'")}')">
+        <div class="um-dcard-visual" style="${bgStyle}">
+          <div class="um-dcard-ov"></div>
+          <span class="um-dcard-cat">${cat.lbl}</span>
+          ${!photo?`<div class="um-dcard-ic">${cat.ic}</div>`:''}
+          <span class="um-dcard-city">📍 ${esc(c)}</span>
+        </div>
+        <div class="um-dcard-body">
+          <h4>${esc(disp)}</h4>
+          <p>${esc(subNote)}</p>
+          <div class="um-dcard-foot">
+            <span class="um-dcard-pick ${sel?'on':''}">${sel?'✓ Masuk Paket':'+ Pilih ke Paket'}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="panel fade" style="margin-bottom:18px;padding:18px">
+      <div class="panel-h" style="padding:0 0 14px;border-bottom:1px solid var(--line)">
+        <div>
+          <h3 style="font-size:17px">${CITY_ICONS[c]||'📍'} Destinasi Wisata ${esc(c)} <span style="color:var(--muted);font-size:12.5px;font-weight:600">(${cItems.length} objek wisata)</span></h3>
+          <p style="font-size:12px;color:var(--muted);margin-top:2px">Pilih satu atau beberapa objek wisata di ${esc(c)} untuk melihat simulasi harga paket per peserta</p>
+        </div>
+        <button class="btn-acc ok" onclick="applyUmumSelectedToCalc()">🧮 Buka Kalkulator Paket →</button>
+      </div>
+      <div class="um-dgrid" style="margin-top:14px">${cards}</div>
+    </div>`;
   }).join('');
-  return searchBar+blocks;
+  const selObjs=all.filter(d=>umumSelDests.includes(destKey(d)));
+  const cartBar=selObjs.length?`<div class="um-cart-bar fade">
+    <div class="um-cart-info">
+      <b>🎒 ${selObjs.length} Destinasi Dipilih:</b>
+      <span>${esc(selObjs.map(d=>destDisplayName(d)).join(', '))}</span>
+    </div>
+    <div class="um-cart-act">
+      <button type="button" class="btn-acc no" onclick="clearUmumDestSelect()">Reset</button>
+      <button type="button" class="btn-um-primary" style="padding:9px 16px;font-size:12.5px" onclick="applyUmumSelectedToCalc()">Hitung Harga Paket (${selObjs.length} Wisata) →</button>
+    </div>
+  </div>`:'';
+  return cityPills+searchBar+blocks+cartBar;
 }
 function umumHotelTab(){
   const regions=[...new Set(CAT.hotels.map(h=>h.region))];
@@ -3393,8 +3897,11 @@ function umumEstimasiTab(){
   const regions=[...new Set(CAT.hotels.map(h=>h.region))];
   const cities=[...new Set(CAT.dests.map(d=>d.city))];
   const kaosOpt=CAT.kaos.map(k=>`<option value="${k.price}" data-name="${esc(k.name)}">${esc(k.name)}</option>`).join('');
-  return `<div class="panel fade"><div class="panel-h"><h3>Simulasi Harga Paket Wisata (All-In per Pax)</h3><span style="font-size:12px;color:var(--muted)">Pilih fasilitas &amp; destinasi untuk melihat estimasi paket per peserta</span></div>
+  const presets=[[33,'MEDIUM BUS (31-35 Seat)','1 Medium Bus (33 Pax)'],[50,'BIG BUS (50 Seat)','1 Big Bus (50 Pax)'],[100,'BIG BUS (50 Seat)','2 Big Bus (100 Pax)'],[150,'BIG BUS (50 Seat)','3 Big Bus (150 Pax)'],[300,'BIG BUS (50 Seat)','6 Big Bus (300 Pax)']];
+  return `<div class="panel fade"><div class="panel-h"><h3>Simulasi Harga Paket Wisata (All-In per Pax)</h3><span style="font-size:12px;color:var(--muted)">Pilih kapasitas cepat atau sesuaikan fasilitas rombongan</span></div>
     <div style="padding:16px 19px">
+      <label class="flbl" style="margin-bottom:6px">Pilih Cepat Kapasitas Rombongan:</label>
+      <div class="um-preset-row">${presets.map(([px,arm,lbl])=>`<button type="button" class="um-preset-btn ${px===50?'active':''}" data-pax="${px}" onclick="setUmumPreset(${px},'${arm}')">🚌 ${lbl}</button>`).join('')}</div>
       <div class="frow">
         <div><label class="flbl">Jumlah Peserta (pax)</label><input id="u_pax" class="finput" type="number" value="50" min="1" oninput="calcUmum()"></div>
         <div><label class="flbl">Durasi Menginap (malam)</label><input id="u_malam" class="finput" type="number" value="1" min="0" oninput="calcUmum()"></div>
@@ -3410,7 +3917,7 @@ function umumEstimasiTab(){
         <div><label class="flbl">Merchandise / Kaos Rombongan</label><select id="u_kaos" class="finput" onchange="calcUmum()">${kaosOpt}</select></div>
       </div>
       <label class="flbl" style="margin-top:6px">Pilih Destinasi Wisata <span style="color:var(--muted-2);font-weight:500">(klik kota untuk membuka daftar objek wisata)</span></label>
-      <div class="destwrap">${cities.map(c=>{const items=CAT.dests.filter(d=>d.city===c).map(d=>`<label class="dest-item"><input type="checkbox" class="udest" data-price="${d.price}" data-name="${esc(d.name)}" onchange="calcUmum()"><span>${esc(d.name)}${d.note?'<span class="opt">'+esc(d.note)+'</span>':''}</span></label>`).join('');
+      <div class="destwrap">${cities.map(c=>{const items=CAT.dests.filter(d=>d.city===c).map(d=>{const disp=destDisplayName(d);const sub=(d.note&&!disp.includes(d.note))?d.note:'';return `<label class="dest-item"><input type="checkbox" class="udest" data-key="${esc(destKey(d))}" data-price="${d.price}" data-name="${esc(disp)}" onchange="calcUmum()"><span>${esc(disp)}${sub?'<span class="opt">'+esc(sub)+'</span>':''}</span></label>`;}).join('');
         return `<div class="citybox"><div class="cityhd" onclick="this.parentNode.classList.toggle('open')"><span>${esc(c)}</span><span class="cnt">${CAT.dests.filter(d=>d.city===c).length} destinasi</span></div><div class="citygrid">${items}</div></div>`;}).join('')}</div>
       <div id="umumResult" style="margin-top:16px"></div>
     </div>
@@ -3472,7 +3979,10 @@ function calcUmum(){
       <div class="rc-row"><span>🎟️ Tiket Objek Wisata</span><b>${destNames.length?esc(destNames.join(', ')):'Belum ada objek wisata dipilih'}</b></div>
       <div class="rc-row"><span>🎁 Bonus Pendamping (FOC)</span><b>Gratis ${foc} kuota guru/pendamping + Tour Leader</b></div>
     </div>
-    <a class="btn-save" style="display:block;text-align:center;margin-top:14px;text-decoration:none;background:var(--gold);color:var(--navy)" target="_blank" href="${waLink(info.hp,waText)}">💬 Minta Surat Penawaran Resmi via WhatsApp</a>
+    <div class="um-calc-actions">
+      <button type="button" class="btn-save" style="margin:0;background:var(--gold);color:var(--navy)" onclick="openUmumProposalModal()">📄 Unduh Estimasi Proposal (PDF)</button>
+      <a class="btn-save" style="margin:0;display:inline-flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#16a34a;color:#fff" target="_blank" href="${waLink(info.hp,waText)}">💬 Konsultasi &amp; Nego via WhatsApp</a>
+    </div>
   </div>`;
 }
 function addCrew(){
@@ -3652,7 +4162,24 @@ async function pullFromHosting(silent){
   return false;
 }
 function saveUmumHero(val){const p=umumPhotos();p.hero=(val||'').trim();save('umumPhotos',p);toast('Foto hero disimpan ✓');}
-function saveUmumDestPhoto(name,val){const p=umumPhotos();p.dest=p.dest||{};p.dest[name]=(val||'').trim();save('umumPhotos',p);toast('Thumbnail '+name+' disimpan ✓');}
+function saveUmumDestPhoto(name,val){
+  const p=umumPhotos();p.dest=p.dest||{};
+  if((val||'').trim())p.dest[name]=(val||'').trim();
+  else delete p.dest[name];
+  save('umumPhotos',p);toast('Foto '+name+' diperbarui ✓');
+}
+function savePickedDestPhoto(){
+  const k=document.getElementById('sp_dest_key')?document.getElementById('sp_dest_key').value:'';
+  const u=document.getElementById('sp_dest_url')?document.getElementById('sp_dest_url').value:'';
+  if(!k||!u.trim()){toast('Pilih destinasi dan isi URL foto terlebih dahulu');return;}
+  saveUmumDestPhoto(k,u.trim());
+  go('setting');
+}
+function uploadPickedDestPhoto(inp){
+  const k=document.getElementById('sp_dest_key')?document.getElementById('sp_dest_key').value:'';
+  if(!k){toast('Pilih destinasi terlebih dahulu');return;}
+  uploadUmumFile(inp,'dest',k);
+}
 async function uploadUmumFile(input,target,name){
   const f=input.files&&input.files[0];if(!f)return;
   try{
@@ -3813,10 +4340,28 @@ function vSetting(){
         <input id="up_hero" class="finput" style="margin:0;flex:1" value="${esc(umumPhotos().hero||'')}" placeholder="assets/hero.jpg atau https://..." onchange="saveUmumHero(this.value)">
         <label class="btn-acc ok" style="cursor:pointer;white-space:nowrap">Upload Foto<input type="file" accept="image/*" style="display:none" onchange="uploadUmumFile(this,'hero')"></label>
       </div>
-      <label class="flbl">Thumbnail Destinasi Populer</label>
-      <div class="tbl-scroll"><table style="margin-bottom:14px"><thead><tr><th>Destinasi</th><th>URL / Path GitHub / Upload</th></tr></thead><tbody>
-        ${umumFeatured().map(d=>{const val=(umumPhotos().dest||{})[d.name]||'';return `<tr><td style="font-weight:600">${esc(d.name)} <span style="font-size:11px;color:var(--muted)">(${esc(d.city)})</span></td><td><div style="display:flex;gap:6px;align-items:center"><input class="finput" style="margin:0;padding:6px 9px;font-size:12px;flex:1" value="${esc(val)}" placeholder="assets/${esc(d.name.toLowerCase().replace(/[^a-z0-9]+/g,'-'))}.jpg" onchange="saveUmumDestPhoto('${esc(d.name)}',this.value)"><label class="btn-acc no" style="cursor:pointer;font-size:11px;padding:5px 9px;white-space:nowrap">Upload<input type="file" accept="image/*" style="display:none" onchange="uploadUmumFile(this,'dest','${esc(d.name)}')"></label></div></td></tr>`;}).join('')}
+      <label class="flbl">Foto 4 Paket Unggulan di Beranda</label>
+      <div class="tbl-scroll"><table style="margin-bottom:16px"><thead><tr><th>Paket Beranda</th><th>Daerah</th><th>URL / Path GitHub / Upload Foto</th></tr></thead><tbody>
+        ${UMUM_BEST_PKGS.map(pk=>{const key=pk.dests[0]||pk.title;const val=(umumPhotos().dest||{})[key]||'';return `<tr><td style="font-weight:700">${esc(pk.title)}</td><td><span class="pill jadwal">${esc(pk.city)}</span></td><td><div style="display:flex;gap:6px;align-items:center">${val?`<img src="${esc(val)}" style="width:42px;height:28px;object-fit:cover;border-radius:6px;border:1px solid var(--line)">`:''}<input class="finput" style="margin:0;padding:6px 9px;font-size:12px;flex:1" value="${esc(val)}" placeholder="https://... atau upload foto" onchange="saveUmumDestPhoto('${esc(key)}',this.value)"><label class="btn-acc ok" style="cursor:pointer;font-size:11px;padding:6px 10px;white-space:nowrap">Upload<input type="file" accept="image/*" style="display:none" onchange="uploadUmumFile(this,'dest','${esc(key)}')"></label></div></td></tr>`;}).join('')}
       </tbody></table></div>
+      <label class="flbl">Tambah / Ganti Foto Objek Wisata (Semua 122 Destinasi Katalog)</label>
+      <div class="frow" style="grid-template-columns:1.2fr 1.4fr auto auto;gap:8px;align-items:end;margin-top:6px;margin-bottom:12px">
+        <div>
+          <label class="flbl" style="font-size:11px">Pilih Objek Wisata</label>
+          <select id="sp_dest_key" class="finput" style="margin:0">
+            ${[...new Set(CAT.dests.map(d=>d.city))].map(c=>`<optgroup label="${esc(c)}">${CAT.dests.filter(d=>d.city===c).map(d=>{const disp=destDisplayName(d);return `<option value="${esc(disp)}">${esc(disp)}</option>`;}).join('')}</optgroup>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="flbl" style="font-size:11px">Link URL Foto / Path GitHub</label>
+          <input id="sp_dest_url" class="finput" style="margin:0" placeholder="https://... atau klik Upload Foto">
+        </div>
+        <button class="btn-save" style="margin:0;white-space:nowrap;width:auto" onclick="savePickedDestPhoto()">Simpan URL</button>
+        <label class="btn-acc ok" style="cursor:pointer;padding:10px 14px;white-space:nowrap;display:inline-flex;align-items:center">📷 Upload Foto<input type="file" accept="image/*" style="display:none" onchange="uploadPickedDestPhoto(this)"></label>
+      </div>
+      ${Object.keys(umumPhotos().dest||{}).filter(k=>(umumPhotos().dest||{})[k]).length?`<div class="tbl-scroll"><table style="margin-bottom:14px"><thead><tr><th>Destinasi yang Sudah Ada Fotonya</th><th>Pratinjau</th><th style="text-align:right">Aksi</th></tr></thead><tbody>
+        ${Object.entries(umumPhotos().dest||{}).filter(([,v])=>v).map(([k,v])=>`<tr><td style="font-weight:600">${esc(k)}</td><td><img src="${esc(v)}" style="width:56px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--line)"></td><td style="text-align:right"><button class="pay-del" onclick="saveUmumDestPhoto('${esc(k).replace(/'/g,"\'")}','');go('setting')">✕ Hapus Foto</button></td></tr>`).join('')}
+      </tbody></table></div>`:'<div style="font-size:12px;color:var(--muted);margin-bottom:14px">Belum ada foto destinasi kustom yang diunggah. Pilih objek wisata di atas lalu klik <b>📷 Upload Foto</b>.</div>'}
       <label class="flbl">Tambah Testimoni Asli (Instagram / WhatsApp / Sekolah)</label>
       <div class="frow" style="grid-template-columns:1fr 1fr 1.6fr 1fr auto;gap:8px;align-items:end">
         <div><input id="ut_name" class="finput" style="margin:0" placeholder="Nama / Instansi"></div>
