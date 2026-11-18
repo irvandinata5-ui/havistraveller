@@ -392,6 +392,31 @@ tbody tr:last-child td{border-bottom:none}tbody tr.clk{cursor:pointer}tbody tr.c
 .app.public-mode .umfeat-card .cnt{background:linear-gradient(180deg,transparent,rgba(14,36,74,.52));-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-top:1px solid rgba(255,255,255,.2)}
 .umfeat-card{cursor:pointer;transition:transform .18s,box-shadow .18s}.umfeat-card:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(15,23,42,.15)}
 .umfeat-badge{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.92);color:var(--navy);font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px}
+.um-reels-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:28px 0 6px}
+.um-reels-hint{font-size:12px;color:var(--muted);font-weight:600}
+.um-reels-track{display:flex;align-items:center;overflow-x:auto;scroll-snap-type:none;padding:26px calc(50% - 115px) 34px;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;user-select:none}
+.um-reels-track.dragging{cursor:grabbing}
+.um-reels-track::-webkit-scrollbar{display:none}
+.um-reel-card{position:relative;flex:0 0 226px;height:384px;border-radius:22px;overflow:hidden;border:3px solid #fff;box-shadow:0 18px 38px rgba(14,36,74,.20);cursor:pointer;background-size:cover;background-position:center;margin-left:-34px;transition:transform .32s cubic-bezier(.22,1,.36,1),box-shadow .32s,z-index .1s;z-index:2}
+.um-reel-card:first-child{margin-left:0}
+.um-reel-card:nth-child(even){transform:translateY(8px) scale(.96);z-index:1}
+.um-reel-card.is-focus{transform:translateY(-10px) scale(1.08)!important;z-index:20!important;box-shadow:0 28px 56px rgba(14,36,74,.34)}
+.um-reel-media{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.um-reel-media video,.um-reel-media iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}
+.um-reel-card.is-playing .um-reel-play{opacity:0;pointer-events:none}
+.um-reel-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(14,36,74,.22) 0%,transparent 38%,rgba(14,36,74,.88) 100%);pointer-events:none}
+.um-reel-top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;z-index:3;pointer-events:none}
+.um-reel-pill{background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.35);color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;padding:4px 9px;border-radius:99px;text-transform:uppercase}
+.um-reel-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;width:54px;height:54px;border-radius:99px;background:rgba(255,255,255,.92);color:var(--navy);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 28px rgba(0,0,0,.28);transition:transform .2s,background .2s,opacity .25s;pointer-events:none}
+.um-reel-card:hover .um-reel-play,.um-reel-card.is-focus .um-reel-play{transform:translate(-50%,-50%) scale(1.08);background:var(--gold)}
+.um-reel-foot{position:absolute;left:14px;right:14px;bottom:14px;z-index:3;color:#fff;pointer-events:none}
+.um-reel-foot small{display:block;font-size:10.5px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.um-reel-foot b{display:block;font-size:14px;line-height:1.3;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+@media(max-width:680px){
+  .um-reels-track{padding:20px calc(50% - 91px) 28px}
+  .um-reel-card{flex:0 0 182px;height:310px;margin-left:-24px;border-radius:18px}
+  .um-reel-play{width:44px;height:44px}
+}
 .um-wa-float{position:fixed;right:24px;bottom:24px;z-index:45;background:#16a34a;color:#fff;padding:12px 20px;border-radius:99px;font-weight:800;font-size:13.5px;text-decoration:none;box-shadow:0 12px 28px rgba(22,163,74,.38);display:none;align-items:center;gap:8px;transition:transform .15s}
 .um-wa-float:hover{transform:translateY(-2px)}
 .app.public-mode .um-wa-float{display:inline-flex}
@@ -3323,6 +3348,7 @@ let umumDestQ='';
 function setUmumTab(k){umumTab=k;umumDestQ='';const nav=document.querySelector('#view .tabs');if(nav)nav.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.ut===k));renderUmum();}
 function setUmumDestQ(v){umumDestQ=v;renderUmum();}
 function renderUmum(){
+  setTimeout(initReelsCarousel,60);
   const b=document.getElementById('umumBody');if(!b)return;
   b.innerHTML=umumTab==='hotel'?umumHotelTab():umumTab==='armada'?umumArmadaTab():umumTab==='estimasi'?umumEstimasiTab():umumPaketTab();
   if(umumTab==='estimasi')calcUmum();
@@ -3460,6 +3486,164 @@ function umumHeroSearch(e){
   const b=document.getElementById('umumBody');if(b)b.scrollIntoView({behavior:'smooth'});
 }
 // Band kepercayaan — dihitung dari jumlah nama klien/rombongan berbeda di data trip asli (bukan logo/nama karangan).
+const DEFAULT_REELS=[
+  {title:'Keseruan Study Tour Bandung',city:'Bandung',url:'https://www.instagram.com/reel/',thumb:'',grad:'linear-gradient(155deg,#0E244A,#275BB5 55%,#1AA6B7)'},
+  {title:'Outing Class & Heritage Jogja',city:'Yogyakarta',url:'https://www.instagram.com/reel/',thumb:'',grad:'linear-gradient(155deg,#1E4E9C,#0E244A 60%,#F8C000)'},
+  {title:'Golden Sunrise Dieng Plateau',city:'Dieng',url:'https://www.instagram.com/reel/',thumb:'',grad:'linear-gradient(155deg,#115E59,#0E244A 65%,#2B9D6E)'},
+  {title:'Jelajah Kawah Bromo & Malang',city:'Malang & Bromo',url:'https://www.instagram.com/reel/',thumb:'',grad:'linear-gradient(155deg,#5B21B6,#0E244A 65%,#E08A1E)'},
+  {title:'Dokumentasi Tim Media Havist',city:'Banten & Baduy',url:'https://www.instagram.com/reel/',thumb:'',grad:'linear-gradient(155deg,#0A2647,#1E4E9C 65%,#00A8E8)'}
+];
+function getUmumReels(){
+  const list=(umumPhotos().reels||[]).filter(r=>r&&r.title);
+  return list.length?list:DEFAULT_REELS;
+}
+function igReelEmbedUrl(url){
+  const u=(url||'').trim();
+  if(!u)return {type:'none',src:''};
+  if(/\.(mp4|webm|mov)(\?.*)?$/i.test(u))return {type:'video',src:u};
+  const m=u.match(/instagram\.com\/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/i);
+  if(m&&m[1])return {type:'ig',src:'https://www.instagram.com/reel/'+m[1]+'/embed/captioned/',orig:u};
+  return {type:'link',src:u};
+}
+let _reelsRaf=null,_reelsDragged=false;
+function initReelsCarousel(){
+  const track=document.getElementById('umReelsTrack');
+  if(!track||track.dataset.init==='1')return;
+  track.dataset.init='1';
+  if(_reelsRaf){cancelAnimationFrame(_reelsRaf);_reelsRaf=null;}
+  let paused=false,isDown=false,startX=0,startScroll=0,activeIdx=-1;
+  const updateCenter=()=>{
+    const cards=[...track.querySelectorAll('.um-reel-card')];
+    if(!cards.length)return;
+    const mid=track.scrollLeft+track.clientWidth/2;
+    let bestI=0,bestD=Infinity;
+    cards.forEach((c,i)=>{
+      const cm=c.offsetLeft+c.offsetWidth/2;
+      const d=Math.abs(cm-mid);
+      if(d<bestD){bestD=d;bestI=i;}
+    });
+    if(bestI!==activeIdx){
+      activeIdx=bestI;
+      cards.forEach((c,i)=>{
+        const isF=i===bestI;
+        c.classList.toggle('is-focus',isF);
+        const media=c.querySelector('.um-reel-media');
+        if(!media)return;
+        const vt=c.dataset.vtype,vs=c.dataset.vsrc;
+        if(isF&&vt==='video'&&vs){
+          if(!media.querySelector('video')){
+            media.innerHTML=`<video src="${vs}" muted autoplay loop playsinline></video>`;
+          }else{const v=media.querySelector('video');if(v.paused)v.play().catch(()=>{});}
+          c.classList.add('is-playing');
+        }else if(isF&&vt==='ig'&&vs){
+          if(!media.querySelector('iframe')){
+            media.innerHTML=`<iframe src="${vs}" allow="autoplay; encrypted-media" allowfullscreen scrolling="no"></iframe>`;
+          }
+          c.classList.add('is-playing');
+        }else{
+          if(media.innerHTML)media.innerHTML='';
+          c.classList.remove('is-playing');
+        }
+      });
+    }
+  };
+  let scrollTick=false;
+  track.addEventListener('scroll',()=>{
+    if(!scrollTick){scrollTick=true;requestAnimationFrame(()=>{updateCenter();scrollTick=false;});}
+  },{passive:true});
+  track.addEventListener('mouseenter',()=>{paused=true;});
+  track.addEventListener('mouseleave',()=>{paused=false;isDown=false;track.classList.remove('dragging');});
+  track.addEventListener('touchstart',()=>{paused=true;},{passive:true});
+  track.addEventListener('touchend',()=>{setTimeout(()=>{paused=false;},1200);},{passive:true});
+  track.addEventListener('mousedown',e=>{
+    isDown=true;_reelsDragged=false;paused=true;
+    startX=e.pageX;startScroll=track.scrollLeft;
+    track.classList.add('dragging');
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!isDown)return;
+    const dx=e.pageX-startX;
+    if(Math.abs(dx)>6)_reelsDragged=true;
+    track.scrollLeft=startScroll-dx;
+  });
+  window.addEventListener('mouseup',()=>{
+    if(!isDown)return;
+    isDown=false;track.classList.remove('dragging');
+    setTimeout(()=>{paused=false;},900);
+  });
+  // Start slightly offset so first card is centered, then smoothly auto-scroll left
+  updateCenter();
+  const step=()=>{
+    if(!document.body.contains(track)){_reelsRaf=null;return;}
+    if(!paused&&!isDown){
+      const maxS=track.scrollWidth-track.clientWidth;
+      if(maxS>10){
+        if(track.scrollLeft>=maxS-2)track.scrollLeft=0;
+        else track.scrollLeft+=0.65;
+      }
+    }
+    _reelsRaf=requestAnimationFrame(step);
+  };
+  _reelsRaf=requestAnimationFrame(step);
+}
+function openReelModal(idx){
+  const list=getUmumReels();
+  const r=list[idx];if(!r)return;
+  const info=infoPerusahaan();
+  const em=igReelEmbedUrl(r.url);
+  let bodyHTML='';
+  if(em.type==='video'){
+    bodyHTML=`<video src="${esc(em.src)}" controls autoplay playsinline style="width:100%;height:100%;object-fit:cover;background:#000"></video>`;
+  }else if(em.type==='ig'){
+    bodyHTML=`<iframe src="${esc(em.src)}" style="width:100%;height:100%;border:0;background:#fff" allowtransparency="true" allowfullscreen="true" scrolling="no"></iframe>`;
+  }else{
+    bodyHTML=`<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;color:#fff;background:${r.grad||'linear-gradient(155deg,#0E244A,#275BB5)'}">
+      <div style="width:58px;height:58px;border-radius:99px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;margin-bottom:14px">${UM_SVG.pin}</div>
+      <h3 style="margin-bottom:8px;font-size:18px">${esc(r.title)}</h3>
+      <p style="font-size:13px;color:rgba(255,255,255,.8);line-height:1.5;margin-bottom:18px">Tempel link Instagram Reel asli pada menu <b>Setting Web → Galeri Video Reels</b> untuk memutar video dokumentasi trip Anda di sini.</p>
+      <a class="btn-um-primary" style="text-decoration:none" target="_blank" href="${waLink(info.hp,'Halo '+info.nama+', saya tertarik dengan trip '+r.title)}">Tanya Paket Ini via WA</a>
+    </div>`;
+  }
+  const ov=document.createElement('div');ov.className='pv-overlay';ov.id='reelOv';
+  ov.innerHTML=`<div class="pv-modal" style="max-width:400px;background:#0B1324;border:1px solid rgba(255,255,255,.14)">
+    <div class="pv-bar" style="background:#0E244A;color:#fff;border-bottom:1px solid rgba(255,255,255,.12)">
+      <div><b style="font-size:13.5px">${esc(r.title)}</b><div style="font-size:11px;color:var(--gold)">${esc(r.city||'Havist Traveller')}</div></div>
+      <button class="btn-acc no" onclick="document.getElementById('reelOv').remove()">Tutup</button>
+    </div>
+    <div style="width:100%;height:520px;background:#000;position:relative">${bodyHTML}</div>
+    <div style="padding:10px 14px;background:#0E244A;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <div style="display:flex;gap:6px">
+        <button class="btn-acc no" onclick="document.getElementById('reelOv').remove();openReelModal(${(idx-1+list.length)%list.length})">← Prev</button>
+        <button class="btn-acc no" onclick="document.getElementById('reelOv').remove();openReelModal(${(idx+1)%list.length})">Next →</button>
+      </div>
+      ${em.type==='ig'?`<a class="btn-acc ok" style="text-decoration:none" target="_blank" href="${esc(r.url)}">Buka di Instagram →</a>`:''}
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+function umumReelsSection(){
+  const list=getUmumReels();
+  const uph=umumPhotos();
+  const playSvg='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+  const cards=list.map((r,i)=>{
+    const fallbackThumb=(uph.dest&&Object.values(uph.dest)[i])||'';
+    const bg=(r.thumb||fallbackThumb)?`background-image:url('${esc(r.thumb||fallbackThumb)}')`:`background:${r.grad||'linear-gradient(155deg,#0E244A,#275BB5)'}`;
+    const em=igReelEmbedUrl(r.url);
+    return `<div class="um-reel-card" data-vtype="${esc(em.type)}" data-vsrc="${esc(em.src)}" style="${bg}" onclick="if(!_reelsDragged)openReelModal(${i})">
+      <div class="um-reel-media"></div>
+      <div class="um-reel-ov"></div>
+      <div class="um-reel-top"><span class="um-reel-pill">Reels</span></div>
+      <div class="um-reel-play">${playSvg}</div>
+      <div class="um-reel-foot"><small>${esc(r.city||'Indonesia')}</small><b>${esc(r.title)}</b></div>
+    </div>`;
+  }).join('');
+  return `<div class="um-reels-head fade">
+    <div class="umsec-head" style="margin:0"><div><span class="tag">Abadikan Perjalanan Kamu</span><h2>Ciptakan Kenangan</h2></div></div>
+    <span class="um-reels-hint">Geser untuk melihat momen</span>
+  </div>
+  <div id="umReelsTrack" class="um-reels-track fade">${cards}</div>`;
+}
 function umumTrustBand(){
   const n=new Set(allTrips().map(t=>t.inst).filter(Boolean)).size;
   return `<div class="umtrust fade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg>
@@ -3772,6 +3956,8 @@ function vUmum(){
   </div>
 
   ${umumTrustBand()}
+
+  ${umumReelsSection()}
 
   ${umumStepsSection()}
 
@@ -4197,7 +4383,7 @@ const SYNC_KEYS=['acc','accounts','assign','checklist','crew_add','crew_list','c
 let _hostSyncTimer=null,_hostOnline=false;
 function collectStateObj(){
   const dump={_exportedAt:new Date().toISOString(),_app:'Havist Traveller'};
-  SYNC_KEYS.forEach(k=>{const v=localStorage.getItem('havist_'+k);if(v!==null)try{dump[k]=JSON.parse(v);}catch(e){dump[k]=v;}});
+  SYNC_KEYS.forEach(k=>{let v=_memStore['havist_'+k];if(v===undefined)try{v=localStorage.getItem('havist_'+k);}catch(e){v=null;}if(v!==null&&v!==undefined)try{dump[k]=JSON.parse(v);}catch(e){dump[k]=v;}});
   return dump;
 }
 function applyStateObj(obj){
@@ -4220,7 +4406,7 @@ async function pullFromHosting(silent){
     if(!ct.includes('json'))return false;
     const obj=await res.json();
     _hostOnline=true;
-    if(obj&&!obj._empty){applyStateObj(obj);applyRoleUI();go(location.hash.slice(1)||'umum');pullFromHosting(true);if(!silent)toast('Data dimuat dari Server Hosting ✓');return true;}
+    if(obj&&!obj._empty){applyStateObj(obj);applyRoleUI();go(location.hash.slice(1)||'umum');if(!silent)toast('Data dimuat dari Server Hosting ✓');return true;}
   }catch(e){if(!silent)toast('api.php belum terdeteksi di server ini');}
   return false;
 }
@@ -4259,6 +4445,26 @@ async function uploadUmumFile(input,target,name){
     if(target==='hero'){saveUmumHero(r.result);const el=document.getElementById('up_hero');if(el)el.value=r.result;}
     else if(target==='dest'){saveUmumDestPhoto(name,r.result);go('setting');}
   };
+  r.readAsDataURL(f);
+}
+function addUmumReel(){
+  const url=(document.getElementById('ur_url').value||'').trim();
+  const title=(document.getElementById('ur_title').value||'').trim();
+  const city=(document.getElementById('ur_city').value||'').trim();
+  const thumb=(document.getElementById('ur_thumb').value||'').trim();
+  if(!title||!url){toast('Isi Judul dan Link Instagram Reel / MP4');return;}
+  const p=umumPhotos();p.reels=p.reels||[];
+  p.reels.push({title,city:city||'Indonesia',url,thumb,grad:'linear-gradient(155deg,#0E244A,#275BB5 60%,#1AA6B7)'});
+  save('umumPhotos',p);toast('Video Reel ditambahkan ✓');go('setting');
+}
+function delUmumReel(idx){
+  const p=umumPhotos();p.reels=(p.reels||[]).filter((_,i)=>i!==idx);
+  save('umumPhotos',p);toast('Video Reel dihapus');go('setting');
+}
+function uploadReelThumb(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{const el=document.getElementById('ur_thumb');if(el)el.value=r.result;toast('Cover Reel siap ditambahkan ✓');};
   r.readAsDataURL(f);
 }
 function addUmumTesti(){
@@ -4434,6 +4640,19 @@ function vSetting(){
         <button class="btn-save" style="margin:0;white-space:nowrap" onclick="addUmumTesti()">+ Tambah</button>
       </div>
       ${(umumPhotos().testi||[]).length?`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${(umumPhotos().testi||[]).map((t,i)=>`<span class="pill lunas" style="gap:6px">${esc(t.name)}: “${esc(t.quote.slice(0,28))}…” <button class="pay-del" onclick="delUmumTesti(${i})">✕</button></span>`).join('')}</div>`:''}
+    </div>
+  </div>
+  <div class="panel fade" style="margin-top:22px"><div class="panel-h"><h3>Galeri Video Reels Instagram (Beranda)</h3><span style="font-size:12px;color:var(--muted)">Tempel link IG Reel (https://www.instagram.com/reel/...) atau file MP4</span></div>
+    <div style="padding:16px 19px">
+      <div class="frow" style="grid-template-columns:1.2fr .8fr 1.4fr 1fr auto auto;gap:8px;align-items:end">
+        <div><label class="flbl">Judul Trip</label><input id="ur_title" class="finput" style="margin:0" placeholder="mis. Study Tour SMPN 2"></div>
+        <div><label class="flbl">Kota</label><input id="ur_city" class="finput" style="margin:0" placeholder="Bandung"></div>
+        <div><label class="flbl">Link IG Reel / Video MP4</label><input id="ur_url" class="finput" style="margin:0" placeholder="https://www.instagram.com/reel/..."></div>
+        <div><label class="flbl">Cover Foto (Opsional)</label><input id="ur_thumb" class="finput" style="margin:0" placeholder="URL / Upload"></div>
+        <label class="btn-acc no" style="cursor:pointer;padding:9px 11px;white-space:nowrap">📁 Cover<input type="file" accept="image/*" style="display:none" onchange="uploadReelThumb(this)"></label>
+        <button class="btn-save" style="margin:0;white-space:nowrap" onclick="addUmumReel()">+ Tambah Reel</button>
+      </div>
+      ${(umumPhotos().reels||[]).length?`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">${(umumPhotos().reels||[]).map((r,i)=>`<span class="pill lunas" style="gap:6px">${esc(r.title)} (${esc(r.city)}) <button class="pay-del" onclick="delUmumReel(${i})">✕</button></span>`).join('')}</div>`:'<p style="font-size:12px;color:var(--muted);margin-top:10px">Saat ini menampilkan 5 kartu contoh. Begitu Anda menambah minimal 1 Reel, galeri Beranda otomatis menampilkan video Anda.</p>'}
     </div>
   </div>
   <div class="panel fade" style="margin-top:22px"><div class="panel-h"><h3>Backup JSON &amp; Sinkronisasi Cloud (Firebase)</h3><span style="font-size:12px;color:var(--muted)">Untuk sinkron antar perangkat &amp; cadangan data</span></div>
@@ -4723,6 +4942,7 @@ function pagerHTML(total,page,per,setFn){
 }
 window.addEventListener('hashchange',()=>go(location.hash.slice(1)||'umum'));
 go(location.hash.slice(1)||'umum');
+pullFromHosting(true);
 </script>
 </body>
 </html>'''
